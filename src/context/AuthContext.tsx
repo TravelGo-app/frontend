@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { authService } from '../services/api'
 
 interface User {
   id: number
@@ -12,6 +13,7 @@ interface AuthContextType {
   login: (user: User, token: string) => void
   logout: () => void
   isAuthenticated: boolean
+  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -19,6 +21,23 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem('token')
+    if (savedToken) {
+      setToken(savedToken)
+      authService.me()
+        .then((data) => setUser(data.user))
+        .catch(() => {
+          localStorage.removeItem('token')
+          setToken(null)
+        })
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
+  }, [])
 
   const login = (user: User, token: string) => {
     setUser(user)
@@ -38,9 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       login,
       logout,
-      isAuthenticated: !!token
+      isAuthenticated: !!token,
+      loading
     }}>
-      {children}
+      {loading ? null : children}
     </AuthContext.Provider>
   )
 }

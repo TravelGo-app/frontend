@@ -3,26 +3,65 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
 
+interface LoginErrors {
+  email?: string
+  password?: string
+}
+
+interface RegisterErrors {
+  name?: string
+  email?: string
+  password?: string
+  confirmPassword?: string
+}
+
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false)
   const [loginData, setLoginData] = useState({ email: '', password: '' })
-  const [registerData, setRegisterData] = useState({ name: '', email: '', password: '' })
-  const [error, setError] = useState('')
+  const [registerData, setRegisterData] = useState({ name: '', email: '', password: '', confirmPassword: '' })
+  const [loginErrors, setLoginErrors] = useState<LoginErrors>({})
+  const [registerErrors, setRegisterErrors] = useState<RegisterErrors>({})
+  const [serverError, setServerError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const { login } = useAuth()
   const navigate = useNavigate()
 
+  const validateLogin = () => {
+    const errors: LoginErrors = {}
+    if (!loginData.email) errors.email = 'El email es obligatorio'
+    else if (!/\S+@\S+\.\S+/.test(loginData.email)) errors.email = 'Email inválido'
+    if (!loginData.password) errors.password = 'La contraseña es obligatoria'
+    else if (loginData.password.length < 6) errors.password = 'Mínimo 6 caracteres'
+    return errors
+  }
+
+  const validateRegister = () => {
+    const errors: RegisterErrors = {}
+    if (!registerData.name) errors.name = 'El nombre es obligatorio'
+    else if (registerData.name.length < 3) errors.name = 'Mínimo 3 caracteres'
+    if (!registerData.email) errors.email = 'El email es obligatorio'
+    else if (!/\S+@\S+\.\S+/.test(registerData.email)) errors.email = 'Email inválido'
+    if (!registerData.password) errors.password = 'La contraseña es obligatoria'
+    else if (registerData.password.length < 6) errors.password = 'Mínimo 6 caracteres'
+    if (!registerData.confirmPassword) errors.confirmPassword = 'Confirmá tu contraseña'
+    else if (registerData.password !== registerData.confirmPassword) errors.confirmPassword = 'Las contraseñas no coinciden'
+    return errors
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+    const errors = validateLogin()
+    if (Object.keys(errors).length > 0) { setLoginErrors(errors); return }
+    setLoginErrors({})
+    setServerError('')
     setLoading(true)
     try {
       const data = await authService.login(loginData.email, loginData.password)
       login(data.user, data.token)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión')
+      setServerError(err.response?.data?.message || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }
@@ -30,14 +69,17 @@ export default function Login() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+    const errors = validateRegister()
+    if (Object.keys(errors).length > 0) { setRegisterErrors(errors); return }
+    setRegisterErrors({})
+    setServerError('')
     setLoading(true)
     try {
       const data = await authService.register(registerData.name, registerData.email, registerData.password)
       login(data.user, data.token)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al registrarse')
+      setServerError(err.response?.data?.message || 'Error al registrarse')
     } finally {
       setLoading(false)
     }
@@ -45,31 +87,35 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="relative w-[800px] h-[500px] bg-white rounded-2xl shadow-2xl overflow-hidden flex">
+      <div className="relative w-[800px] h-[540px] bg-white rounded-2xl shadow-2xl overflow-hidden flex">
 
         {/* FORMULARIO LOGIN */}
         <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-0 pointer-events-none translate-x-[-100%]' : 'opacity-100 translate-x-0'}`}>
-          <h1 className="text-3xl font-bold text-gray-700 mb-6 italic">
-            Iniciar Sesión
-          </h1>
-          {error && !isRegister && (
-            <p className="text-red-500 text-sm mb-2">{error}</p>
+          <h1 className="text-3xl font-bold text-gray-700 mb-6 italic">Iniciar Sesión</h1>
+          {serverError && !isRegister && (
+            <p className="text-red-500 text-sm mb-2">{serverError}</p>
           )}
-          <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
-            <input
-              type="email"
-              placeholder="Email"
-              value={loginData.email}
-              onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-              className="border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
-            />
-            <input
-              type="password"
-              placeholder="Contraseña"
-              value={loginData.password}
-              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-              className="border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
-            />
+          <form onSubmit={handleLogin} className="w-full flex flex-col gap-3">
+            <div>
+              <input
+                type="text"
+                placeholder="Email"
+                value={loginData.email}
+                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
+              />
+              {loginErrors.email && <p className="text-red-500 text-xs mt-1">{loginErrors.email}</p>}
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={loginData.password}
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
+              />
+              {loginErrors.password && <p className="text-red-500 text-xs mt-1">{loginErrors.password}</p>}
+            </div>
             <p className="text-sm text-[#2A9BB5] cursor-pointer hover:underline text-right">
               ¿Olvidaste tu contraseña?
             </p>
@@ -85,34 +131,51 @@ export default function Login() {
 
         {/* FORMULARIO REGISTER */}
         <div className={`absolute top-0 right-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-100 translate-x-0' : 'opacity-0 pointer-events-none translate-x-[100%]'}`}>
-          <h1 className="text-3xl font-bold text-gray-700 mb-6 italic">
-            Crea tu Cuenta
-          </h1>
-          {error && isRegister && (
-            <p className="text-red-500 text-sm mb-2">{error}</p>
+          <h1 className="text-3xl font-bold text-gray-700 mb-6 italic">Crea tu Cuenta</h1>
+          {serverError && isRegister && (
+            <p className="text-red-500 text-sm mb-2">{serverError}</p>
           )}
-          <form onSubmit={handleRegister} className="w-full flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={registerData.name}
-              onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-              className="border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={registerData.email}
-              onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-              className="border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
-            />
-            <input
-              type="password"
-              placeholder="Contraseña"
-              value={registerData.password}
-              onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-              className="border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
-            />
+          <form onSubmit={handleRegister} className="w-full flex flex-col gap-3">
+            <div>
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={registerData.name}
+                onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
+              />
+              {registerErrors.name && <p className="text-red-500 text-xs mt-1">{registerErrors.name}</p>}
+            </div>
+            <div>
+              <input
+                type="text"
+                placeholder="Email"
+                value={registerData.email}
+                onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
+              />
+              {registerErrors.email && <p className="text-red-500 text-xs mt-1">{registerErrors.email}</p>}
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={registerData.password}
+                onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
+              />
+              {registerErrors.password && <p className="text-red-500 text-xs mt-1">{registerErrors.password}</p>}
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Confirmar contraseña"
+                value={registerData.confirmPassword}
+                onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
+              />
+              {registerErrors.confirmPassword && <p className="text-red-500 text-xs mt-1">{registerErrors.confirmPassword}</p>}
+            </div>
             <button
               type="submit"
               disabled={loading}
@@ -130,7 +193,7 @@ export default function Login() {
               <h2 className="text-4xl font-bold italic mb-4">¡Hola!</h2>
               <p className="text-center mb-8 text-white/80">¿Primera vez en TravelGo?</p>
               <button
-                onClick={() => { setIsRegister(true); setError('') }}
+                onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}) }}
                 className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition"
               >
                 REGISTRARSE
@@ -141,7 +204,7 @@ export default function Login() {
               <h2 className="text-4xl font-bold italic mb-4">¡Bienvenido!</h2>
               <p className="text-center mb-8 text-white/80">¿Ya tenés cuenta?</p>
               <button
-                onClick={() => { setIsRegister(false); setError('') }}
+                onClick={() => { setIsRegister(false); setServerError(''); setRegisterErrors({}) }}
                 className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition"
               >
                 INICIAR SESIÓN
