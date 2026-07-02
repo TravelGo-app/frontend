@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import logo from '../assets/PosibleLogo.png'
 
 const navItems = [
   { label: 'Home', path: '/' },
@@ -15,7 +16,7 @@ export default function Navbar() {
     <nav style={{ width: '90%', margin: '20px auto', border: '1px solid #ccc', padding: '12px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <Link to="/" style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <img src="/PosibleLogo.png" alt="Posible logo" style={{ height: '40px', width: 'auto' }} />
+          <img src={logo} alt="Posible logo" style={{ height: '40px', width: 'auto' }} />
         </Link>
 
         {navItems.map((item) => (
