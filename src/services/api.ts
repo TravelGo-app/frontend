@@ -15,17 +15,25 @@ api.interceptors.request.use((config) => {
 export const authService = {
   login: async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password })
-    return response.data
+    return {
+      user: response.data.user,
+      token: response.data.token
+    }
   },
 
   register: async (name: string, email: string, password: string) => {
     const response = await api.post('/auth/register', { name, email, password })
-    return response.data
+    return {
+      user: response.data.user,
+      token: response.data.token
+    }
   },
 
   me: async () => {
     const response = await api.get('/auth/me')
-    return response.data
+    return {
+      user: response.data.user
+    }
   }
 }
 

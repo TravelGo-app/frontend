@@ -22,7 +22,7 @@ function App() {
 
   return (
     <>
-      <Navbar />
+      {location.pathname !== '/' && <Navbar />}
       {isLoading ? (
         <div
           style={{
