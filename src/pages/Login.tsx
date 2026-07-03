@@ -23,6 +23,8 @@ export default function Login() {
   const [registerErrors, setRegisterErrors] = useState<RegisterErrors>({})
   const [serverError, setServerError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [welcomeName, setWelcomeName] = useState('')
 
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -61,7 +63,7 @@ export default function Login() {
       login(data.user, data.token)
       navigate('/dashboard')
     } catch (err: any) {
-      setServerError(err.response?.data?.message || 'Error al iniciar sesión')
+      setServerError(err.response?.data?.message || err.response?.data?.error || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }
@@ -77,12 +79,34 @@ export default function Login() {
     try {
       const data = await authService.register(registerData.name, registerData.email, registerData.password)
       login(data.user, data.token)
-      navigate('/dashboard')
+      setWelcomeName(data.user.name)
+      setShowWelcome(true)
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 2500)
     } catch (err: any) {
-      setServerError(err.response?.data?.message || 'Error al registrarse')
+      setServerError(err.response?.data?.message || err.response?.data?.error || 'Error al registrarse')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (showWelcome) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md w-full">
+          <div className="text-6xl mb-4">🎉</div>
+          <h2 className="text-2xl font-bold text-[#233446] mb-2">
+            ¡Bienvenido a TravelGo, {welcomeName}!
+          </h2>
+          <p className="text-gray-400 mb-6">Tu cuenta fue creada exitosamente.</p>
+          <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
+            <div className="w-4 h-4 border-2 border-[#2A9BB5] border-t-transparent rounded-full animate-spin"></div>
+            Redirigiendo...
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
