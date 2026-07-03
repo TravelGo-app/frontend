@@ -100,6 +100,7 @@ export default function Login() {
               <input
                 type="text"
                 placeholder="Email"
+                autoComplete="email"
                 value={loginData.email}
                 onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                 className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
@@ -110,6 +111,7 @@ export default function Login() {
               <input
                 type="password"
                 placeholder="Contraseña"
+                autoComplete="current-password"
                 value={loginData.password}
                 onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                 className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
@@ -140,6 +142,7 @@ export default function Login() {
               <input
                 type="text"
                 placeholder="Nombre"
+                autoComplete="name"
                 value={registerData.name}
                 onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
                 className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
@@ -150,6 +153,7 @@ export default function Login() {
               <input
                 type="text"
                 placeholder="Email"
+                autoComplete="email"
                 value={registerData.email}
                 onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                 className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
@@ -160,6 +164,7 @@ export default function Login() {
               <input
                 type="password"
                 placeholder="Contraseña"
+                autoComplete="new-password"
                 value={registerData.password}
                 onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                 className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
@@ -170,6 +175,7 @@ export default function Login() {
               <input
                 type="password"
                 placeholder="Confirmar contraseña"
+                autoComplete="new-password"
                 value={registerData.confirmPassword}
                 onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
                 className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
