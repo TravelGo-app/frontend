@@ -71,9 +71,17 @@ export default function Dashboard() {
   const nonBaseBalances = balances.filter((b) => b.currencyCode !== "ARS");
 
   return (
-    <div className="min-h-screen bg-grafito p-8">
+    <div
+      className="min-h-screen p-8"
+      style={{
+        backgroundImage: `url(${beachBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
       <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-center mb-6 bg-grafito border border-terracota rounded-2xl p-5 shadow-lg">
           <div>
             <h1 className="text-3xl font-bold text-white">
               ¡Hola, {user?.name}! 👋
@@ -92,7 +100,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 items-start">
           <div>
-            <div className="bg-gradient-to-br from-terracota to-arena rounded-3xl p-8 text-white shadow-lg mb-5">
+            <div className="bg-gradient-to-br from-terracota to-arena rounded-3xl p-8 text-white shadow-lg mb-5 border border-[#155a70]">
               <p className="text-sm font-semibold opacity-90">Balance total</p>
               <p className="text-4xl font-bold mt-1 mb-4">
                 {calculateTotalInARS().toLocaleString("es-AR", {
@@ -116,19 +124,19 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="bg-[#16293a] border border-[#24425a] rounded-2xl p-4 text-center shadow-lg">
+              <div className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg">
                 <div className="w-10 h-10 rounded-full bg-coral text-white flex items-center justify-center mx-auto mb-2 text-lg">
                   ↔
                 </div>
                 <p className="text-sm font-bold text-white">Intercambio</p>
               </div>
-              <div className="bg-[#16293a] border border-[#24425a] rounded-2xl p-4 text-center shadow-lg">
+              <div className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg">
                 <div className="w-10 h-10 rounded-full bg-oceano text-white flex items-center justify-center mx-auto mb-2 text-lg">
                   +
                 </div>
                 <p className="text-sm font-bold text-white">Depositar</p>
               </div>
-              <div className="bg-[#16293a] border border-[#24425a] rounded-2xl p-4 text-center shadow-lg">
+              <div className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg">
                 <div className="w-10 h-10 rounded-full bg-terracota text-white flex items-center justify-center mx-auto mb-2 text-lg">
                   ↑
                 </div>
@@ -141,7 +149,7 @@ export default function Dashboard() {
               {nonBaseBalances.map((balance) => (
                 <div
                   key={balance.currencyCode}
-                  className="bg-[#16293a] border border-[#24425a] rounded-xl p-3 text-center shadow-lg"
+                  className="bg-[#16293a] border-2 border-terracota rounded-xl p-3 text-center shadow-lg"
                 >
                   <span
                     className={`fi fi-${currencyToCountry[balance.currencyCode]} block mx-auto mb-1 rounded`}
@@ -159,14 +167,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div
-              className="rounded-2xl p-4 flex items-center gap-3 border-l-4 border-terracota shadow-lg"
-              style={{
-                backgroundImage: `linear-gradient(rgba(255,247,237,0.55), rgba(255,247,237,0.55)), url(${beachBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
+            <div className="rounded-2xl p-4 flex items-center gap-3 border border-[#155a70] shadow-lg bg-orange-50">
               <div className="w-8 h-8 rounded-full bg-terracota text-white flex items-center justify-center font-bold flex-shrink-0">
                 !
               </div>
@@ -181,14 +182,7 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <div
-              className="rounded-2xl p-4 shadow-lg"
-              style={{
-                backgroundImage: `linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url(${beachBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
+            <div className="rounded-2xl p-4 shadow-lg bg-white border border-[#155a70]">
               <h2 className="text-base font-bold text-grafito mb-3">
                 Actividad reciente
               </h2>
@@ -214,14 +208,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div
-              className="rounded-2xl p-4 shadow-lg"
-              style={{
-                backgroundImage: `linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url(${beachBg})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
+            <div className="rounded-2xl p-4 shadow-lg bg-white border border-[#155a70]">
               <h2 className="text-base font-bold text-grafito mb-3">
                 Tasas de cambio{" "}
                 <span className="text-xs font-normal text-gray-500">
