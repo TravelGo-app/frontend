@@ -24,7 +24,7 @@ export async function loginWithGoogle(
   }
 
   const response = await fetch(
-    `${apiUrl}/api/auth/google`,
+    `${apiUrl}/auth/google`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
