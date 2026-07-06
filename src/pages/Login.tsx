@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
+import { GoogleLoginButton } from '../components/GoogleLoginButton'
+import playaImg from '../assets/playa.jpg'
 
 interface LoginErrors {
   email?: string
@@ -13,7 +15,23 @@ interface RegisterErrors {
   email?: string
   password?: string
   confirmPassword?: string
+  terms?: string
 }
+
+const EyeIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+)
+
+const EyeOffIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+)
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false)
@@ -25,6 +43,10 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [showWelcome, setShowWelcome] = useState(false)
   const [welcomeName, setWelcomeName] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -48,6 +70,7 @@ export default function Login() {
     else if (registerData.password.length < 6) errors.password = 'Mínimo 6 caracteres'
     if (!registerData.confirmPassword) errors.confirmPassword = 'Confirmá tu contraseña'
     else if (registerData.password !== registerData.confirmPassword) errors.confirmPassword = 'Las contraseñas no coinciden'
+    if (!acceptedTerms) errors.terms = 'Debés aceptar los términos y condiciones'
     return errors
   }
 
@@ -93,8 +116,11 @@ export default function Login() {
 
   if (showWelcome) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center max-w-md w-full">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundImage: `url(${playaImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-12 text-center max-w-md w-full">
           <div className="text-6xl mb-4">🎉</div>
           <h2 className="text-2xl font-bold text-[#233446] mb-2">
             ¡Bienvenido a TravelGo, {welcomeName}!
@@ -110,12 +136,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="relative w-[800px] h-[540px] bg-white rounded-2xl shadow-2xl overflow-hidden flex">
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ backgroundImage: `url(${playaImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
+      <div className="relative w-[800px] h-[580px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex">
 
         {/* FORMULARIO LOGIN */}
         <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-0 pointer-events-none translate-x-[-100%]' : 'opacity-100 translate-x-0'}`}>
-          <h1 className="text-3xl font-bold text-gray-700 mb-6 italic">Iniciar Sesión</h1>
+          <h1 className="text-3xl font-bold text-gray-700 mb-4 italic">Iniciar Sesión</h1>
           {serverError && !isRegister && (
             <p className="text-red-500 text-sm mb-2">{serverError}</p>
           )}
@@ -131,20 +160,36 @@ export default function Login() {
               />
               {loginErrors.email && <p className="text-red-500 text-xs mt-1">{loginErrors.email}</p>}
             </div>
-            <div>
+            <div className="relative">
               <input
-                type="password"
+                type={showLoginPassword ? 'text' : 'password'}
                 placeholder="Contraseña"
                 autoComplete="current-password"
                 value={loginData.password}
                 onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent pr-8"
               />
+              <button
+                type="button"
+                onClick={() => setShowLoginPassword(!showLoginPassword)}
+                className="absolute right-1 top-2 text-gray-400 hover:text-gray-600"
+              >
+                {showLoginPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
               {loginErrors.password && <p className="text-red-500 text-xs mt-1">{loginErrors.password}</p>}
             </div>
             <p className="text-sm text-[#2A9BB5] cursor-pointer hover:underline text-right">
               ¿Olvidaste tu contraseña?
             </p>
+            <div className="flex flex-col items-center gap-2 my-1">
+              <span className="text-gray-400 text-xs">o continuá con</span>
+              <GoogleLoginButton
+                onAuthenticated={(result) => {
+                  login(result.user, result.token)
+                  navigate('/dashboard')
+                }}
+              />
+            </div>
             <button
               type="submit"
               disabled={loading}
@@ -157,7 +202,7 @@ export default function Login() {
 
         {/* FORMULARIO REGISTER */}
         <div className={`absolute top-0 right-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-100 translate-x-0' : 'opacity-0 pointer-events-none translate-x-[100%]'}`}>
-          <h1 className="text-3xl font-bold text-gray-700 mb-6 italic">Crea tu Cuenta</h1>
+          <h1 className="text-3xl font-bold text-gray-700 mb-4 italic">Crea tu Cuenta</h1>
           {serverError && isRegister && (
             <p className="text-red-500 text-sm mb-2">{serverError}</p>
           )}
@@ -184,27 +229,56 @@ export default function Login() {
               />
               {registerErrors.email && <p className="text-red-500 text-xs mt-1">{registerErrors.email}</p>}
             </div>
-            <div>
+            <div className="relative">
               <input
-                type="password"
+                type={showRegisterPassword ? 'text' : 'password'}
                 placeholder="Contraseña"
                 autoComplete="new-password"
                 value={registerData.password}
                 onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent pr-8"
               />
+              <button
+                type="button"
+                onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                className="absolute right-1 top-2 text-gray-400 hover:text-gray-600"
+              >
+                {showRegisterPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
               {registerErrors.password && <p className="text-red-500 text-xs mt-1">{registerErrors.password}</p>}
             </div>
-            <div>
+            <div className="relative">
               <input
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirmar contraseña"
                 autoComplete="new-password"
                 value={registerData.confirmPassword}
                 onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
-                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#2A9BB5] bg-transparent pr-8"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-1 top-2 text-gray-400 hover:text-gray-600"
+              >
+                {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
               {registerErrors.confirmPassword && <p className="text-red-500 text-xs mt-1">{registerErrors.confirmPassword}</p>}
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="w-4 h-4 accent-[#2A9BB5]"
+                />
+                Acepto los{' '}
+                <span className="text-[#2A9BB5] hover:underline">
+                  términos y condiciones
+                </span>
+              </label>
+              {registerErrors.terms && <p className="text-red-500 text-xs mt-1">{registerErrors.terms}</p>}
             </div>
             <button
               type="submit"

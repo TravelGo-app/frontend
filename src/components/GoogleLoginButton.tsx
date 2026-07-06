@@ -1,0 +1,115 @@
+import { useEffect, useRef, useState } from "react";
+import { loginWithGoogle, type GoogleAuthResponse } from "../services/auth.service";
+
+type CredentialResponse = {
+  credential?: string;
+};
+
+type GoogleLoginButtonProps = {
+  onAuthenticated: (result: GoogleAuthResponse) => void;
+};
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: CredentialResponse) => void;
+            ux_mode?: "popup" | "redirect";
+          }) => void;
+          renderButton: (
+            element: HTMLElement,
+            options: {
+              theme?: string;
+              size?: string;
+              text?: string;
+              shape?: string;
+              width?: number;
+            }
+          ) => void;
+        };
+      };
+    };
+  }
+}
+
+export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    if (!clientId) {
+      setError("VITE_GOOGLE_CLIENT_ID no está configurada")
+      return;
+    }
+
+    const renderGoogleButton = () => {
+      if (!window.google || !buttonRef.current) {
+        setError("No se pudo cargar Google Identity")
+        return;
+      }
+
+      buttonRef.current.innerHTML = "";
+
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        ux_mode: "popup",
+        callback: async (response: CredentialResponse) => {
+          try {
+            setError(null);
+            if (!response.credential) {
+              throw new Error("Google no devolvió una credencial")
+            }
+            const result = await loginWithGoogle(response.credential);
+            onAuthenticated(result);
+          } catch (loginError) {
+            setError(loginError instanceof Error ? loginError.message : "Error iniciando sesión")
+          }
+        },
+      });
+
+      window.google.accounts.id.renderButton(buttonRef.current, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+        width: 320,
+      });
+    };
+
+    if (window.google) {
+      renderGoogleButton();
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      if (window.google) {
+        window.clearInterval(intervalId);
+        renderGoogleButton();
+      }
+    }, 100);
+
+    const timeoutId = window.setTimeout(() => {
+      window.clearInterval(intervalId);
+      if (!window.google) {
+        setError("No se pudo cargar Google Identity")
+      }
+    }, 10000);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [onAuthenticated]);
+
+  return (
+    <div>
+      <div ref={buttonRef} />
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  );
+}

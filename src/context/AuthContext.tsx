@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { authService } from '../services/api'
 
 interface User {
-  id: number
+  id: string | number
   name: string
   email: string
 }
