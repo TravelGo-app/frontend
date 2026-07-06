@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
-import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import ProtectedRoute from './components/ProtectedRoute'
 import Placeholder from './pages/Placeholder'
+import NotFound from './pages/NotFound'
 
 const loadingVideo = new URL('./assets/video loading.mp4', import.meta.url).toString()
 
@@ -14,18 +15,15 @@ function App() {
 
   useEffect(() => {
     setIsLoading(true)
-
     const timer = window.setTimeout(() => {
       setIsLoading(false)
     }, 700)
-
     return () => window.clearTimeout(timer)
   }, [location.key])
 
   return (
     <>
-      <Navbar />
-
+      {location.pathname !== '/' && <Navbar />}
       {isLoading ? (
         <div
           style={{
@@ -53,13 +51,17 @@ function App() {
       ) : (
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/wallet" element={<Placeholder title="Wallet" />} />
           <Route path="/exchange" element={<Placeholder title="Exchange" />} />
           <Route path="/history" element={<Placeholder title="History" />} />
           <Route path="/coming-soon" element={<Placeholder title="Coming Soon" />} />
           <Route path="/about-us" element={<Placeholder title="About Us" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       )}
     </>
