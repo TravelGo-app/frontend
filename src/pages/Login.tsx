@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
 import { GoogleLoginButton } from '../components/GoogleLoginButton'
@@ -43,7 +43,10 @@ const GoogleButtonMemo = ({ onAuthenticated }: { onAuthenticated: (result: any) 
 )
 
 export default function Login() {
-  const [isRegister, setIsRegister] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const initialRegisterMode = location.pathname === '/register'
+  const [isRegister, setIsRegister] = useState(initialRegisterMode)
   const [loginData, setLoginData] = useState({ email: '', password: '' })
   const [registerData, setRegisterData] = useState({ name: '', email: '', password: '', confirmPassword: '' })
   const [loginErrors, setLoginErrors] = useState<LoginErrors>({})
@@ -58,7 +61,14 @@ export default function Login() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const { login } = useAuth()
-  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (location.pathname === '/register') {
+      setIsRegister(true)
+    } else if (location.pathname === '/login' || location.pathname === '/') {
+      setIsRegister(false)
+    }
+  }, [location.pathname])
 
   const handleGoogleAuth = (result: any) => {
     login(result.user, result.token)
@@ -278,7 +288,7 @@ export default function Login() {
             <>
               <h2 className="text-4xl font-bold italic mb-4">¡Hola!</h2>
               <p className="text-center mb-8 text-white/80">¿Primera vez en TravelGo?</p>
-              <button onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}) }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
+              <button onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}); navigate('/register') }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
                 REGISTRARSE
               </button>
             </>
@@ -286,7 +296,7 @@ export default function Login() {
             <>
               <h2 className="text-4xl font-bold italic mb-4">¡Bienvenido!</h2>
               <p className="text-center mb-8 text-white/80">¿Ya tenés cuenta?</p>
-              <button onClick={() => { setIsRegister(false); setServerError(''); setRegisterErrors({}) }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
+              <button onClick={() => { setIsRegister(false); setServerError(''); setRegisterErrors({}); navigate('/login') }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
                 INICIAR SESIÓN
               </button>
             </>
