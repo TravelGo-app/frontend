@@ -59,7 +59,6 @@ function App() {
           <Route path="/wallet" element={<Placeholder title="Wallet" />} />
           <Route path="/exchange" element={<Placeholder title="Exchange" />} />
           <Route path="/history" element={<Placeholder title="History" />} />
-          <Route path="/coming-soon" element={<Placeholder title="Coming Soon" />} />
           <Route path="/about-us" element={<Placeholder title="About Us" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
