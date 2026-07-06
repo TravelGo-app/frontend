@@ -27,6 +27,7 @@ declare global {
               text?: string;
               shape?: string;
               width?: number;
+              logo_alignment?: string;
             }
           ) => void;
         };
@@ -41,37 +42,25 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
 
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-    if (!clientId) {
-      setError("VITE_GOOGLE_CLIENT_ID no está configurada")
-      return;
-    }
+    if (!clientId) { setError("VITE_GOOGLE_CLIENT_ID no está configurada"); return }
 
     const renderGoogleButton = () => {
-      if (!window.google || !buttonRef.current) {
-        setError("No se pudo cargar Google Identity")
-        return;
-      }
-
+      if (!window.google || !buttonRef.current) { setError("No se pudo cargar Google Identity"); return }
       buttonRef.current.innerHTML = "";
-
       window.google.accounts.id.initialize({
         client_id: clientId,
         ux_mode: "popup",
         callback: async (response: CredentialResponse) => {
           try {
-            setError(null);
-            if (!response.credential) {
-              throw new Error("Google no devolvió una credencial")
-            }
-            const result = await loginWithGoogle(response.credential);
-            onAuthenticated(result);
-          } catch (loginError) {
-            setError(loginError instanceof Error ? loginError.message : "Error iniciando sesión")
+            setError(null)
+            if (!response.credential) throw new Error("Google no devolvió una credencial")
+            const result = await loginWithGoogle(response.credential)
+            onAuthenticated(result)
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "Error iniciando sesión")
           }
         },
       });
-
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: "outline",
         size: "large",
@@ -81,35 +70,21 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
       });
     };
 
-    if (window.google) {
-      renderGoogleButton();
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      if (window.google) {
-        window.clearInterval(intervalId);
-        renderGoogleButton();
-      }
+    if (window.google) { renderGoogleButton(); return }
+    const interval = window.setInterval(() => {
+      if (window.google) { window.clearInterval(interval); renderGoogleButton() }
     }, 100);
-
-    const timeoutId = window.setTimeout(() => {
-      window.clearInterval(intervalId);
-      if (!window.google) {
-        setError("No se pudo cargar Google Identity")
-      }
+    const timeout = window.setTimeout(() => {
+      window.clearInterval(interval)
+      if (!window.google) setError("No se pudo cargar Google Identity")
     }, 10000);
-
-    return () => {
-      window.clearInterval(intervalId);
-      window.clearTimeout(timeoutId);
-    };
-  }, [onAuthenticated]);
+    return () => { window.clearInterval(interval); window.clearTimeout(timeout) }
+  }, [onAuthenticated])
 
   return (
     <div>
       <div ref={buttonRef} />
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{error}</p>}
     </div>
-  );
+  )
 }
