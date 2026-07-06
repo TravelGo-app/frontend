@@ -137,7 +137,7 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-[#233446] mb-2">¡Bienvenido a TravelGo, {welcomeName}!</h2>
           <p className="text-gray-400 mb-6">Tu cuenta fue creada exitosamente.</p>
           <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
-            <div className="w-4 h-4 border-2 border-[#2A9BB5] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-4 h-4 border-2 border-[#F26A2E] border-t-transparent rounded-full animate-spin"></div>
             Redirigiendo...
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function Login() {
                 autoComplete="email"
                 value={loginData.email}
                 onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent"
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#F26A2E] bg-transparent"
               />
               <p className="text-red-500 text-xs mt-1 h-4">{loginErrors.email || ''}</p>
             </div>
@@ -175,14 +175,14 @@ export default function Login() {
                 autoComplete="current-password"
                 value={loginData.password}
                 onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-orange-400 bg-transparent pr-8"
+                className="w-full border-b border-gray-300 px-2 py-2 focus:outline-none focus:border-[#F26A2E] bg-transparent pr-8"
               />
               <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="absolute right-1 top-2 text-gray-400 hover:text-gray-600">
                 {showLoginPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
               <p className="text-red-500 text-xs mt-1 h-4">{loginErrors.password || ''}</p>
             </div>
-            <p className="text-sm text-[#2A9BB5] cursor-pointer hover:underline text-right">¿Olvidaste tu contraseña?</p>
+            <p className="text-sm text-[#F26A2E] cursor-pointer hover:underline text-right">¿Olvidaste tu contraseña?</p>
             <button
               type="submit"
               disabled={loading}
@@ -273,12 +273,12 @@ export default function Login() {
         </div>
 
         {/* PANEL DESLIZANTE */}
-        <div className={`absolute top-0 w-1/2 h-full bg-[#2A9BB5] flex flex-col items-center justify-center text-white px-10 transition-all duration-500 rounded-2xl ${isRegister ? 'left-0' : 'left-1/2'}`}>
+        <div className={`absolute top-0 w-1/2 h-full flex flex-col items-center justify-center text-white px-10 transition-all duration-500 rounded-2xl ${isRegister ? 'left-0 bg-[#2A9BB5]' : 'left-1/2 bg-[#F26A2E]'}`}>
           {!isRegister ? (
             <>
               <h2 className="text-4xl font-bold italic mb-4">¡Hola!</h2>
               <p className="text-center mb-8 text-white/80">¿Primera vez en TravelGo?</p>
-              <button onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}) }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
+              <button onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}) }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#F26A2E] transition">
                 REGISTRARSE
               </button>
             </>
