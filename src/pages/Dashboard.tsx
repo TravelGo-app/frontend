@@ -26,6 +26,12 @@ export default function Dashboard() {
   const [rates, setRates] = useState<ExchangeRates>({});
   const [loading, setLoading] = useState(true);
 
+  const handleLogout = () => {
+    setTimeout(() => {
+      logout();
+    }, 500);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,11 +93,11 @@ export default function Dashboard() {
               ¡Hola, {user?.name}! 👋
             </h1>
             <p className="text-gray-300 mt-1">
-              Bienvenido a tu billetera ViajePass
+              Bienvenido a tu billetera TravelGo
             </p>
           </div>
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="bg-coral text-white px-6 py-2 rounded-full font-bold hover:bg-red-600 transition"
           >
             Cerrar sesión
@@ -100,7 +106,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 items-start">
           <div>
-            <div className="bg-gradient-to-br from-terracota to-arena rounded-3xl p-8 text-white shadow-lg mb-5 border border-[#155a70]">
+            <div className="bg-linear-to-br from-terracota to-arena rounded-3xl p-8 text-white shadow-lg mb-5 border border-[#155a70]">
               <p className="text-sm font-semibold opacity-90">Balance total</p>
               <p className="text-4xl font-bold mt-1 mb-4">
                 {calculateTotalInARS().toLocaleString("es-AR", {
@@ -168,7 +174,7 @@ export default function Dashboard() {
             </div>
 
             <div className="rounded-2xl p-4 flex items-center gap-3 border border-[#155a70] shadow-lg bg-orange-50">
-              <div className="w-8 h-8 rounded-full bg-terracota text-white flex items-center justify-center font-bold flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-terracota text-white flex items-center justify-center font-bold shrink-0">
                 !
               </div>
               <div>
