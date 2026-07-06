@@ -18,7 +18,7 @@ function App() {
     setIsLoading(true)
     const timer = window.setTimeout(() => {
       setIsLoading(false)
-    }, 700)
+    }, 950)
     return () => window.clearTimeout(timer)
   }, [location.key])
 
