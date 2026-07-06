@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import logo from '../assets/PosibleLogo.png'
 
 const navItems = [
-  { label: 'Home', path: '/' },
+  { label: 'Home', path: '/home' },
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Wallet', path: '/wallet' },
   { label: 'Exchange', path: '/exchange' },
