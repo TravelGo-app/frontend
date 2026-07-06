@@ -198,7 +198,7 @@ export default function Login() {
               disabled={loading}
               className="bg-[#F26A2E] text-white py-2 rounded-full font-bold hover:bg-orange-600 transition mt-2 disabled:opacity-50"
             >
-              {loading ? 'Cargando...' : 'INICIAR SESIÓN'}
+              INICIAR SESIÓN
             </button>
           </form>
           <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />
@@ -277,7 +277,7 @@ export default function Login() {
               disabled={loading}
               className="bg-[#2A9BB5] text-white py-2 rounded-full font-bold hover:bg-teal-600 transition mt-2 disabled:opacity-50"
             >
-              {loading ? 'Cargando...' : 'REGISTRARSE'}
+              REGISTRARSE
             </button>
           </form>
         </div>

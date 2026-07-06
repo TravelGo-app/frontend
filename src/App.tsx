@@ -30,13 +30,14 @@ function App() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(15, 23, 42, 0.95)',
+            background: '#0f172a',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: '16px',
+            justifyContent: 'flex-end',
+            flexDirection: 'column',
             zIndex: 1000,
+            overflow: 'hidden',
+            paddingBottom: '100px',
           }}
         >
           <video
@@ -45,9 +46,19 @@ function App() {
             loop
             muted
             playsInline
-            style={{ width: '220px', maxWidth: '80vw', borderRadius: '16px' }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: -1,
+            }}
           />
-          <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>Cargando...</span>
+          <span style={{ color: '#000', fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.08em', background: 'rgba(255,255,255,0.75)', padding: '10px 18px', borderRadius: '16px' }}>
+            loading...
+          </span>
         </div>
       ) : (
         <Routes>
