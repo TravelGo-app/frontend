@@ -288,13 +288,17 @@ export default function Login() {
             <>
               <h2 className="text-4xl font-bold italic mb-4">¡Hola!</h2>
               <p className="text-center mb-8 text-white/80">¿Primera vez en TravelGo?</p>
-<<<<<<< HEAD
-              <button onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}) }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#F26A2E] transition">
-=======
-              <button onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}); navigate('/register') }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
->>>>>>> feature/navbar
-                REGISTRARSE
-              </button>
+<button
+  onClick={() => {
+    setIsRegister(true)
+    setServerError('')
+    setLoginErrors({})
+    navigate('/register')
+  }}
+  className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#F26A2E] transition"
+>
+  REGISTRARSE
+</button>
             </>
           ) : (
             <>
