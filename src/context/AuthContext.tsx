@@ -28,7 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedToken = localStorage.getItem('token')
     if (savedToken) {
       setToken(savedToken)
-      authService.me()
+      authService
+        .me()
         .then((data) => setUser(data.user))
         .catch(() => {
           localStorage.removeItem('token')
@@ -53,14 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      token,
-      login,
-      logout,
-      isAuthenticated: !!token,
-      loading
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        isAuthenticated: !!token,
+        loading,
+      }}
+    >
       {loading ? null : children}
     </AuthContext.Provider>
   )

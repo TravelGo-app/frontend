@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+@theme {
+  --color-terracota: #ff7d60;
+  --color-coral: #ff4242;
+  --color-arena: #e4c2a2;
+  --color-oceano: #2391ae;
+  --color-grafito: #233446;
+}
+
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: draw-line 1.6s ease-out forwards;
+}
