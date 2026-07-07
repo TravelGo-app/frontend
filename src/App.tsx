@@ -16,6 +16,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    if (['/', '/login', '/register'].includes(location.pathname)) return
     setIsLoading(true)
     const timer = window.setTimeout(() => {
       setIsLoading(false)
