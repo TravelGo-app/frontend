@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 import logo from '../assets/PosibleLogo.png'
 
 const navItems = [
-  { label: 'Home', path: '/home' },
-  { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Wallet', path: '/wallet' },
-  { label: 'Exchange', path: '/exchange' },
-  { label: 'History', path: '/history' },
-  { label: 'About Us', path: '/about-us' },
+  { label: 'Inicio', path: '/' },
+  { label: 'Panel', path: '/dashboard' },
+  { label: 'Billetera', path: '/wallet' },
+  { label: 'Intercambio', path: '/exchange' },
+  { label: 'Historial', path: '/history' },
+  { label: 'Nosotros', path: '/about-us' },
 ]
 
 export default function Navbar() {

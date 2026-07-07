@@ -54,7 +54,7 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
         client_id: clientId,
         ux_mode: "popup",
         callback: async (response: CredentialResponse) => {
-          try {
+            try {
             setError(null)
             if (!response.credential) throw new Error("Google no devolvió una credencial")
             const result = await loginWithGoogle(response.credential)
