@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Landing from './pages/Landing'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
+import SetPassword from './pages/SetPassword'
 import ProtectedRoute from './components/ProtectedRoute'
 import Placeholder from './pages/Placeholder'
 import NotFound from './pages/NotFound'
@@ -16,7 +17,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (['/', '/login', '/register'].includes(location.pathname)) return
+    if (['/', '/login', '/register', '/configurar-password'].includes(location.pathname)) return
     setIsLoading(true)
     const timer = window.setTimeout(() => {
       setIsLoading(false)
@@ -26,7 +27,7 @@ function App() {
 
   return (
     <>
-      {location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && <Navbar />}
+      {location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/configurar-password' && <Navbar />}
       {isLoading ? (
         <div
           style={{
@@ -67,6 +68,11 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Login />} />
+          <Route path="/configurar-password" element={
+            <ProtectedRoute>
+              <SetPassword />
+            </ProtectedRoute>
+          } />
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />

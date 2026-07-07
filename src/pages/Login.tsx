@@ -59,6 +59,7 @@ export default function Login() {
   const [showLoginPassword, setShowLoginPassword] = useState(false)
   const [showRegisterPassword, setShowRegisterPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showGoogleFallback, setShowGoogleFallback] = useState(false)
 
   const { login } = useAuth()
 
@@ -72,7 +73,11 @@ export default function Login() {
 
   const handleGoogleAuth = (result: any) => {
     login(result.user, result.token)
-    navigate('/dashboard')
+    if (result.requiresPasswordSetup) {
+      navigate('/configurar-password')
+    } else {
+      navigate('/dashboard')
+    }
   }
 
   const validateLogin = () => {
@@ -104,13 +109,20 @@ export default function Login() {
     if (Object.keys(errors).length > 0) { setLoginErrors(errors); return }
     setLoginErrors({})
     setServerError('')
+    setShowGoogleFallback(false)
     setLoading(true)
     try {
       const data = await authService.login(loginData.email, loginData.password)
       login(data.user, data.token)
       navigate('/dashboard')
     } catch (err: any) {
-      setServerError(err.response?.data?.message || err.response?.data?.error || 'Error al iniciar sesión')
+      const status = err.response?.status
+      if (status === 409) {
+        setShowGoogleFallback(true)
+        setServerError('Esta cuenta fue creada con Google. Iniciá sesión con Google y configurá una contraseña para poder ingresar también con email.')
+      } else {
+        setServerError(err.response?.data?.message || err.response?.data?.error || 'Error al iniciar sesión')
+      }
     } finally {
       setLoading(false)
     }
@@ -164,13 +176,18 @@ export default function Login() {
 
         {/* FORMULARIO LOGIN */}
         <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-0 pointer-events-none translate-x-[-100%]' : 'opacity-100 translate-x-0'}`}>
-          <h1 className="text-3xl font-bold text-gray-700 mb-4 italic">Iniciar sesión</h1>
+          <h1 className="text-3xl font-bold text-gray-700 mb-4 italic">Iniciar Sesión</h1>
           <p className="text-red-500 text-sm mb-2 h-5">{serverError && !isRegister ? serverError : ''}</p>
+          {showGoogleFallback && !isRegister && (
+            <div className="w-full mb-2">
+              <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />
+            </div>
+          )}
           <form onSubmit={handleLogin} className="w-full flex flex-col gap-2">
             <div>
               <input
                 type="text"
-                placeholder="Correo electrónico"
+                placeholder="Email"
                 autoComplete="email"
                 value={loginData.email}
                 onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
@@ -198,10 +215,10 @@ export default function Login() {
               disabled={loading}
               className="bg-[#F26A2E] text-white py-2 rounded-full font-bold hover:bg-orange-600 transition mt-2 disabled:opacity-50"
             >
-              Iniciar sesión
+              {loading ? 'Cargando...' : 'INICIAR SESIÓN'}
             </button>
           </form>
-          <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />
+          {!showGoogleFallback && <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />}
         </div>
 
         {/* FORMULARIO REGISTER */}
@@ -277,7 +294,7 @@ export default function Login() {
               disabled={loading}
               className="bg-[#2A9BB5] text-white py-2 rounded-full font-bold hover:bg-teal-600 transition mt-2 disabled:opacity-50"
             >
-              REGISTRARSE
+              {loading ? 'Cargando...' : 'REGISTRARSE'}
             </button>
           </form>
         </div>
@@ -288,23 +305,15 @@ export default function Login() {
             <>
               <h2 className="text-4xl font-bold italic mb-4">¡Hola!</h2>
               <p className="text-center mb-8 text-white/80">¿Primera vez en TravelGo?</p>
-<button
-  onClick={() => {
-    setIsRegister(true)
-    setServerError('')
-    setLoginErrors({})
-    navigate('/register')
-  }}
-  className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#F26A2E] transition"
->
-  REGISTRARSE
-</button>
+              <button onClick={() => { setIsRegister(true); setServerError(''); setLoginErrors({}); setShowGoogleFallback(false) }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#F26A2E] transition">
+                REGISTRARSE
+              </button>
             </>
           ) : (
             <>
               <h2 className="text-4xl font-bold italic mb-4">¡Bienvenido!</h2>
               <p className="text-center mb-8 text-white/80">¿Ya tenés cuenta?</p>
-              <button onClick={() => { setIsRegister(false); setServerError(''); setRegisterErrors({}); navigate('/login') }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
+              <button onClick={() => { setIsRegister(false); setServerError(''); setRegisterErrors({}) }} className="border-2 border-white text-white px-8 py-2 rounded-full font-bold hover:bg-white hover:text-[#2A9BB5] transition">
                 INICIAR SESIÓN
               </button>
             </>
