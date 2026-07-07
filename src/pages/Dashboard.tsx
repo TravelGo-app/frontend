@@ -24,7 +24,6 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const [balances, setBalances] = useState<Balance[]>([]);
   const [rates, setRates] = useState<ExchangeRates>({});
-  const [loading, setLoading] = useState(true);
 
   const handleLogout = () => {
     setTimeout(() => {
@@ -47,8 +46,6 @@ export default function Dashboard() {
         setRates(ratesData.rates);
       } catch (err) {
         console.error("Error cargando tasas:", err);
-      } finally {
-        setLoading(false);
       }
     };
     fetchData();
@@ -65,14 +62,6 @@ export default function Dashboard() {
       return total + amount / rate;
     }, 0);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-grafito">
-        <p className="text-white text-lg">Cargando...</p>
-      </div>
-    );
-  }
 
   const nonBaseBalances = balances.filter((b) => b.currencyCode !== "ARS");
 
