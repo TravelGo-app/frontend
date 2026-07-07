@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import logo from '../assets/PosibleLogo.png'
 
 const navItems = [
-  { label: 'Inicio', path: '/home' },
+  { label: 'Inicio', path: '/' },
   { label: 'Panel', path: '/dashboard' },
   { label: 'Billetera', path: '/wallet' },
   { label: 'Intercambio', path: '/exchange' },
