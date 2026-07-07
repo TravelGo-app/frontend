@@ -164,13 +164,13 @@ export default function Login() {
 
         {/* FORMULARIO LOGIN */}
         <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-0 pointer-events-none translate-x-[-100%]' : 'opacity-100 translate-x-0'}`}>
-          <h1 className="text-3xl font-bold text-gray-700 mb-4 italic">Iniciar Sesión</h1>
+          <h1 className="text-3xl font-bold text-gray-700 mb-4 italic">Iniciar sesión</h1>
           <p className="text-red-500 text-sm mb-2 h-5">{serverError && !isRegister ? serverError : ''}</p>
           <form onSubmit={handleLogin} className="w-full flex flex-col gap-2">
             <div>
               <input
                 type="text"
-                placeholder="Email"
+                placeholder="Correo electrónico"
                 autoComplete="email"
                 value={loginData.email}
                 onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
@@ -198,7 +198,7 @@ export default function Login() {
               disabled={loading}
               className="bg-[#F26A2E] text-white py-2 rounded-full font-bold hover:bg-orange-600 transition mt-2 disabled:opacity-50"
             >
-              INICIAR SESIÓN
+              Iniciar sesión
             </button>
           </form>
           <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />
