@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import beachBg from '../assets/PlayaPrincipal.png'
 import creditCard from '../assets/credicard.png'
+import possibleLogo from '../assets/PosibleLogo.png'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -21,53 +22,72 @@ export default function Landing() {
     >
       <div className="mx-auto flex max-w-7xl flex-col gap-12 px-6 py-12 lg:px-8 lg:py-16 xl:flex-row xl:items-center">
         <div className="space-y-8 xl:max-w-xl">
-          <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-200/80 backdrop-blur-sm">
-            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-orange-400" />
-            TravelGo · Tu wallet de viaje
+          <div className="mt-4 flex items-center gap-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl xl:text-6xl">
+            <img src={possibleLogo} alt="Logo TravelGo" className="h-20 w-auto sm:h-24 xl:h-28" />
+            <span>
+              <span className="text-slate-950">Travel</span>
+              <span className="text-orange-500">Go</span>
+            </span>
           </div>
 
           <div className="space-y-6">
             <h1 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
-              Your money,
-              <span className="block text-orange-500">anywhere you go</span>
+              Tu dinero,
+              <span className="block text-orange-500">dondequiera que vayas</span>
             </h1>
-            <p className="max-w-lg text-lg leading-8 text-slate-600">
+            <p className="max-w-lg text-lg leading-8 text-ocean-animated">
               La billetera inteligente para viajeros. Enviá, cambiá y administrá tu dinero en varias monedas sin fronteras, con seguridad y sin comisiones ocultas.
             </p>
           </div>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex">
             <button
               type="button"
               onClick={() => navigate('/register')}
-              className="inline-flex items-center justify-center rounded-full bg-orange-500 px-10 py-3 text-base font-semibold text-white shadow-lg shadow-orange-200/50 transition hover:bg-orange-600"
+              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-orange-600 px-12 py-4 text-lg font-extrabold text-white shadow-2xl hover:from-orange-500 hover:to-orange-700 transform hover:scale-105 transition"
             >
               Empezar
             </button>
-            <button
-              type="button"
-              onClick={() => navigate('/about-us')}
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-10 py-3 text-base font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              Conocé más
-            </button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-[2rem] border border-slate-200 bg-white/95 p-5 shadow-xl shadow-slate-200/70">
-              <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">Multi-currency wallet</h2>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="feature-card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="feature-accent bg-orange-400 shadow-sm" />
+                  <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Billetera multimoneda</h2>
+                </div>
+              </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">Administrá todas tus divisas desde un mismo lugar, sin cambiar de app.</p>
             </div>
-            <div className="rounded-[2rem] border border-slate-200 bg-white/95 p-5 shadow-xl shadow-slate-200/70">
-              <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">Best exchange rates</h2>
+
+            <div className="feature-card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="feature-accent bg-emerald-400 shadow-sm" />
+                  <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Mejores tasas de cambio</h2>
+                </div>
+              </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">Aprovechá las mejores tasas en cada transferencia y evitá sorpresas.</p>
             </div>
-            <div className="rounded-[2rem] border border-slate-200 bg-white/95 p-5 shadow-xl shadow-slate-200/70">
-              <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">Secure & reliable</h2>
+
+            <div className="feature-card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="feature-accent bg-cyan-400 shadow-sm" />
+                  <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Segura y confiable</h2>
+                </div>
+              </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">Tu dinero protegido con tecnologías de seguridad modernas.</p>
             </div>
-            <div className="rounded-[2rem] border border-slate-200 bg-white/95 p-5 shadow-xl shadow-slate-200/70">
-              <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">24/7 support</h2>
+
+            <div className="feature-card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="feature-accent bg-violet-400 shadow-sm" />
+                  <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Soporte 24/7</h2>
+                </div>
+              </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">Soporte disponible siempre que lo necesites, en cualquier momento.</p>
             </div>
           </div>
