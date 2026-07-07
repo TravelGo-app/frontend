@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import beachBg from "../assets/Shell.jpg";
@@ -22,9 +23,13 @@ const currencyToCountry: { [key: string]: string } = {
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [balances, setBalances] = useState<Balance[]>([]);
   const [rates, setRates] = useState<ExchangeRates>({});
   const [loading, setLoading] = useState(true);
+  const [selectedCurrency, setSelectedCurrency] = useState<Balance | null>(
+    null,
+  );
 
   const handleLogout = () => {
     setTimeout(() => {
@@ -130,24 +135,33 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg">
+              <button
+                onClick={() => navigate("/exchange")}
+                className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg hover:brightness-110 transition cursor-pointer"
+              >
                 <div className="w-10 h-10 rounded-full bg-coral text-white flex items-center justify-center mx-auto mb-2 text-lg">
                   ↔
                 </div>
                 <p className="text-sm font-bold text-white">Intercambio</p>
-              </div>
-              <div className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg">
+              </button>
+              <button
+                onClick={() => navigate("/deposit")}
+                className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg hover:brightness-110 transition cursor-pointer"
+              >
                 <div className="w-10 h-10 rounded-full bg-oceano text-white flex items-center justify-center mx-auto mb-2 text-lg">
                   +
                 </div>
                 <p className="text-sm font-bold text-white">Depositar</p>
-              </div>
-              <div className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg">
+              </button>
+              <button
+                onClick={() => navigate("/transfer")}
+                className="bg-[#16293a] border-2 border-terracota rounded-2xl p-4 text-center shadow-lg hover:brightness-110 transition cursor-pointer"
+              >
                 <div className="w-10 h-10 rounded-full bg-terracota text-white flex items-center justify-center mx-auto mb-2 text-lg">
                   ↑
                 </div>
                 <p className="text-sm font-bold text-white">Transferir</p>
-              </div>
+              </button>
             </div>
 
             <h2 className="text-lg font-bold text-white mb-3">Tus monedas</h2>
@@ -155,7 +169,8 @@ export default function Dashboard() {
               {nonBaseBalances.map((balance) => (
                 <div
                   key={balance.currencyCode}
-                  className="bg-[#16293a] border-2 border-terracota rounded-xl p-3 text-center shadow-lg"
+                  onClick={() => setSelectedCurrency(balance)}
+                  className="bg-[#16293a] border-2 border-terracota rounded-xl p-3 text-center shadow-lg cursor-pointer hover:brightness-110 transition"
                 >
                   <span
                     className={`fi fi-${currencyToCountry[balance.currencyCode]} block mx-auto mb-1 rounded`}
@@ -236,6 +251,75 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {selectedCurrency && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedCurrency(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl border border-[#155a70]"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-3">
+                <span
+                  className={`fi fi-${currencyToCountry[selectedCurrency.currencyCode]} rounded`}
+                  style={{ width: "32px", height: "22px" }}
+                ></span>
+                <h3 className="text-lg font-bold text-grafito">
+                  {selectedCurrency.currencyCode}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedCurrency(null)}
+                className="text-grafito/50 hover:text-grafito text-xl font-bold leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="text-sm text-grafito/70 mb-1">Balance disponible</p>
+            <p className="text-3xl font-bold text-grafito mb-4">
+              {parseFloat(selectedCurrency.amount).toLocaleString("es-AR", {
+                minimumFractionDigits: 2,
+              })}{" "}
+              <span className="text-lg">{selectedCurrency.currencyCode}</span>
+            </p>
+
+            {rates[selectedCurrency.currencyCode] && (
+              <p className="text-sm text-grafito/70 mb-4">
+                Equivalente aprox.:{" "}
+                <span className="font-bold text-oceano">
+                  {(
+                    parseFloat(selectedCurrency.amount) /
+                    rates[selectedCurrency.currencyCode]
+                  ).toLocaleString("es-AR", { minimumFractionDigits: 2 })}{" "}
+                  ARS
+                </span>
+              </p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setSelectedCurrency(null);
+                  navigate("/exchange");
+                }}
+                className="flex-1 bg-coral text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
+              >
+                Intercambiar
+              </button>
+              <button
+                onClick={() => setSelectedCurrency(null)}
+                className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
