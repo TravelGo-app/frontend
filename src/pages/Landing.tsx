@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import beachBg from '../assets/PlayaPrincipal.png'
+import creditCard from '../assets/credicard.png'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -72,47 +73,12 @@ export default function Landing() {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-2xl xl:max-w-[42rem]">
-          <div className="absolute -left-10 top-10 h-52 w-52 rounded-full bg-orange-200/60 blur-3xl" />
-          <div className="absolute -right-12 bottom-12 h-44 w-44 rounded-full bg-sky-200/60 blur-3xl" />
-
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white/90 p-8 shadow-[0_45px_120px_-40px_rgba(15,23,42,0.35)]">
-            <div className="relative rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-600 p-8 text-white shadow-inner shadow-slate-900/20">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-slate-300">Total balance</p>
-                  <p className="mt-3 text-4xl font-semibold">$8,420.35</p>
-                </div>
-                <div className="rounded-3xl bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-100">USD</div>
-              </div>
-              <div className="grid gap-4 text-sm text-slate-200">
-                <div className="flex items-center justify-between rounded-3xl bg-white/10 p-4">
-                  <span>USD</span>
-                  <span>$2,450.35</span>
-                </div>
-                <div className="flex items-center justify-between rounded-3xl bg-white/10 p-4">
-                  <span>EUR</span>
-                  <span>€1,250.00</span>
-                </div>
-                <div className="flex items-center justify-between rounded-3xl bg-white/10 p-4">
-                  <span>COP</span>
-                  <span>$4,720,000</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-[1.75rem] bg-slate-100 p-5 shadow-lg shadow-slate-200/60">
-              <div className="flex items-center justify-between text-sm text-slate-500">
-                <span>Quick Actions</span>
-                <span className="text-slate-400">View all</span>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <button className="rounded-3xl bg-white px-3 py-3 text-xs font-semibold text-slate-700 shadow-sm">Exchange</button>
-                <button className="rounded-3xl bg-white px-3 py-3 text-xs font-semibold text-slate-700 shadow-sm">Send</button>
-                <button className="rounded-3xl bg-white px-3 py-3 text-xs font-semibold text-slate-700 shadow-sm">Receive</button>
-              </div>
-            </div>
-          </div>
+        <div className="mx-auto w-full max-w-2xl xl:max-w-[42rem]">
+          <img
+            src={creditCard}
+            alt="Tarjeta TravelGo"
+            className="mx-auto h-[620px] w-auto max-w-full rounded-[2rem] object-cover"
+          />
         </div>
       </div>
     </div>
