@@ -11,7 +11,7 @@ export default function Landing() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/home', { replace: true })
+      navigate('/dashboard', { replace: true })
     }
   }, [isAuthenticated, navigate])
 
