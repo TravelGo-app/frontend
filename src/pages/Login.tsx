@@ -177,12 +177,7 @@ export default function Login() {
         {/* FORMULARIO LOGIN */}
         <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-0 pointer-events-none translate-x-[-100%]' : 'opacity-100 translate-x-0'}`}>
           <h1 className="text-3xl font-bold text-gray-700 mb-4 italic">Iniciar Sesión</h1>
-          <p className="text-red-500 text-sm mb-2 h-5">{serverError && !isRegister ? serverError : ''}</p>
-          {showGoogleFallback && !isRegister && (
-            <div className="w-full mb-2">
-              <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />
-            </div>
-          )}
+          <p className="text-red-500 text-sm mb-2 h-10 text-center">{serverError && !isRegister ? serverError : ''}</p>
           <form onSubmit={handleLogin} className="w-full flex flex-col gap-2">
             <div>
               <input
@@ -210,15 +205,21 @@ export default function Login() {
               <p className="text-red-500 text-xs mt-1 h-4">{loginErrors.password || ''}</p>
             </div>
             <p className="text-sm text-[#F26A2E] cursor-pointer hover:underline text-right">¿Olvidaste tu contraseña?</p>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-[#F26A2E] text-white py-2 rounded-full font-bold hover:bg-orange-600 transition mt-2 disabled:opacity-50"
-            >
-              {loading ? 'Cargando...' : 'INICIAR SESIÓN'}
-            </button>
+            {showGoogleFallback ? (
+              <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />
+            ) : (
+              <>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-[#F26A2E] text-white py-2 rounded-full font-bold hover:bg-orange-600 transition mt-2 disabled:opacity-50"
+                >
+                  {loading ? 'Cargando...' : 'INICIAR SESIÓN'}
+                </button>
+                <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />
+              </>
+            )}
           </form>
-          {!showGoogleFallback && <GoogleButtonMemo onAuthenticated={handleGoogleAuth} />}
         </div>
 
         {/* FORMULARIO REGISTER */}
