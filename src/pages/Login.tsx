@@ -161,6 +161,27 @@ export default function Login() {
       style={{ backgroundImage: `url(${playaImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="relative w-[800px] h-[620px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex">
+        {/* BOTÓN VOLVER A INICIO */}
+        <button
+          onClick={() => navigate('/')}
+          aria-label="Volver a página principal"
+          className="absolute top-4 right-4 z-10 w-12 h-12 rounded-full flex items-center justify-center transition hover:shadow-lg hover:scale-110"
+          style={{
+            backgroundColor: isRegister ? '#2A9BB5' : '#ffffff',
+            border: isRegister ? 'none' : 'none',
+          }}
+          title="Volver a página principal"
+        >
+          <span 
+            className="text-2xl font-bold leading-none"
+            style={{
+              color: isRegister ? '#ffffff' : '#F26A2E',
+              transform: 'translateY(-3px)',
+            }}
+          >
+            ×
+          </span>
+        </button>
 
         {/* FORMULARIO LOGIN */}
         <div className={`absolute top-0 left-0 w-1/2 h-full flex flex-col items-center justify-center px-10 transition-all duration-500 ${isRegister ? 'opacity-0 pointer-events-none translate-x-[-100%]' : 'opacity-100 translate-x-0'}`}>
