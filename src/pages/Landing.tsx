@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import beachBg from '../assets/PlayaPrincipal.png'
 import creditCard from '../assets/credicard.png'
 import possibleLogo from '../assets/PosibleLogo.png'
 const beachVideo = new URL('../assets/videoplaya.mp4', import.meta.url).toString()

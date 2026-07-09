@@ -63,7 +63,7 @@
 
 /* landing background subtle color that matches palette */
 .landing-bg {
-  background-color: rgba(228,194,162,0.06);
+  background-color: #f4ede9;
 }
 
 /* Sections linked from feature boxes */
@@ -75,10 +75,34 @@
   position: relative;
   z-index: 1;
 }
-.section-multicurrency { background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.6)); }
-.section-best-rates { background: linear-gradient(180deg, rgba(245,255,253,0.8), rgba(225,255,244,0.6)); }
-.section-secure { background: linear-gradient(180deg, rgba(240,249,255,0.9), rgba(230,245,255,0.7)); }
-.section-support { background: linear-gradient(180deg, rgba(250,245,255,0.9), rgba(245,240,255,0.75)); }
+.section-multicurrency {
+  background: #ff7d60;
+  color: white;
+}
+.section-best-rates {
+  background: #e4c2a2;
+  color: #0f172a;
+}
+.section-secure {
+  background: #30a9b1;
+  color: white;
+}
+.section-support {
+  background: #233446;
+  color: white;
+}
+.section-multicurrency h3,
+.section-best-rates h3,
+.section-secure h3,
+.section-support h3 {
+  color: inherit;
+}
+.section-multicurrency p,
+.section-best-rates p,
+.section-secure p,
+.section-support p {
+  color: inherit;
+}
 
 /* Ensure smooth scrolling for programmatic/anchor jumps */
 html { scroll-behavior: smooth; }
