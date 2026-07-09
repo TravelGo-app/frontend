@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-const beachVideo = new URL('../assets/videoplaya.mp4', import.meta.url).toString()
+import beachBg from '../assets/PlayaPrincipal.png'
 import creditCard from '../assets/credicard.png'
 import possibleLogo from '../assets/PosibleLogo.png'
+const beachVideo = new URL('../assets/videoplaya.mp4', import.meta.url).toString()
 
 export default function Landing() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const v1Ref = useRef<HTMLVideoElement | null>(null)
+  const v2Ref = useRef<HTMLVideoElement | null>(null)
+  const [visible, setVisible] = useState<1 | 2>(1)
+  const fadingRef = useRef(false)
+  const CROSSFADE = 0.8
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -15,11 +21,10 @@ export default function Landing() {
     }
   }, [isAuthenticated, navigate])
 
-  const v1Ref = useRef<HTMLVideoElement | null>(null)
-  const v2Ref = useRef<HTMLVideoElement | null>(null)
-  const [visible, setVisible] = useState<1 | 2>(1)
-  const fadingRef = useRef(false)
-  const CROSSFADE = 0.9 // segundos
+  useEffect(() => {
+    // start first video
+    v1Ref.current?.play().catch(() => {})
+  }, [])
 
   useEffect(() => {
     const active = () => (visible === 1 ? v1Ref.current : v2Ref.current)
@@ -29,16 +34,17 @@ export default function Landing() {
       const a = active()
       const b = other()
       if (!a || !b || fadingRef.current) return
-      const { currentTime, duration } = a
+      const duration = a.duration
+      const currentTime = a.currentTime
       if (!duration || duration === Infinity) return
       if (currentTime >= duration - CROSSFADE) {
         fadingRef.current = true
-        b.currentTime = 0
-        b.play().catch(() => {})
-        // trigger crossfade by switching visible flag; CSS transition handles opacity
+        try {
+          b.currentTime = 0
+          b.play().catch(() => {})
+        } catch {}
         setVisible((prev) => (prev === 1 ? 2 : 1))
-        // after crossfade finish, pause the previous
-        setTimeout(() => {
+        window.setTimeout(() => {
           try {
             a.pause()
             a.currentTime = 0
@@ -53,47 +59,54 @@ export default function Landing() {
     return () => a?.removeEventListener('timeupdate', onTimeUpdate)
   }, [visible])
 
-  useEffect(() => {
-    // ensure both videos attempt autoplay (muted)
-    v1Ref.current?.play().catch(() => {})
-    v2Ref.current?.play().catch(() => {})
-  }, [])
-
   return (
-    <div className="relative min-h-screen overflow-hidden text-slate-900">
+    <div className="min-h-screen overflow-hidden text-slate-900 relative landing-bg">
+      {/* two videos for seamless looping via crossfade (keeps fixed size) */}
       <video
         ref={v1Ref}
+        id="bg-v1"
         src={beachVideo}
+        autoPlay
         muted
         playsInline
+        loop={false}
         style={{
           position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
           objectFit: 'cover',
-          zIndex: -1,
+          zIndex: 0,
           opacity: visible === 1 ? 1 : 0,
           transition: `opacity ${CROSSFADE}s linear`,
+          pointerEvents: 'none',
+          willChange: 'opacity, transform',
         }}
       />
       <video
         ref={v2Ref}
+        id="bg-v2"
         src={beachVideo}
+        autoPlay={false}
         muted
         playsInline
+        loop={false}
         style={{
           position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
           objectFit: 'cover',
-          zIndex: -1,
+          zIndex: 0,
           opacity: visible === 2 ? 1 : 0,
           transition: `opacity ${CROSSFADE}s linear`,
+          pointerEvents: 'none',
+          willChange: 'opacity, transform',
         }}
       />
-      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:px-8 lg:py-14 xl:grid-cols-[1.1fr_0.9fr] xl:items-start">
+      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:px-8 lg:py-14 xl:grid-cols-[1.1fr_0.9fr] xl:items-start" style={{ position: 'relative', zIndex: 1 }}>
         <div className="space-y-8 xl:max-w-xl xl:-mt-8">
           <div className="mt-4 flex items-center gap-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl xl:text-6xl">
             <img src={possibleLogo} alt="Logo TravelGo" className="h-20 w-auto sm:h-24 xl:h-28" />
@@ -133,38 +146,94 @@ export default function Landing() {
         </div>
       </div>
 
-      <div className="features-scroll">
-        <section className="feature-section feat-multicurrency">
-          <div className="feature-content max-w-3xl text-center">
-            <h2 className="text-3xl font-extrabold text-white mb-4">Billetera multimoneda</h2>
-            <p className="text-lg text-white/90">Administrá todas tus divisas desde un mismo lugar, sin cambiar de app. Mantené control total sobre tus saldos y movimientos.</p>
+      <div className="mx-auto grid w-full max-w-7xl gap-6 px-6 lg:px-8 sm:grid-cols-2 xl:grid-cols-4">
+        <button
+          type="button"
+          className="feature-card text-left"
+          onClick={() => document.getElementById('section-multicurrency')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <div className="flex items-center gap-3">
+            <div className="feature-accent bg-orange-400 shadow-sm" />
+            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Billetera multimoneda</h2>
           </div>
-        </section>
+          <p className="mt-3 text-sm leading-6 text-slate-600">Administrá todas tus divisas desde un mismo lugar, sin cambiar de app.</p>
+        </button>
 
-        <section className="feature-section feat-best-rates">
-          <div className="feature-content max-w-3xl text-center">
-            <h2 className="text-3xl font-extrabold text-white mb-4">Mejores tasas de cambio</h2>
-            <p className="text-lg text-white/90">Aprovechá las mejores tasas en cada transferencia y evitá sorpresas. Cambiá con transparencia y rapidez.</p>
+        <button
+          type="button"
+          className="feature-card text-left"
+          onClick={() => document.getElementById('section-best-rates')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <div className="flex items-center gap-3">
+            <div className="feature-accent bg-emerald-400 shadow-sm" />
+            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Mejores tasas de cambio</h2>
           </div>
-        </section>
+          <p className="mt-3 text-sm leading-6 text-slate-600">Aprovechá las mejores tasas en cada transferencia y evitá sorpresas.</p>
+        </button>
 
-        <section className="feature-section feat-secure">
-          <div className="feature-content max-w-3xl text-center">
-            <h2 className="text-3xl font-extrabold text-white mb-4">Segura y confiable</h2>
-            <p className="text-lg text-white/90">Tu dinero protegido con tecnologías de seguridad modernas y controles de fraude avanzados.</p>
+        <button
+          type="button"
+          className="feature-card text-left"
+          onClick={() => document.getElementById('section-secure')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <div className="flex items-center gap-3">
+            <div className="feature-accent bg-cyan-400 shadow-sm" />
+            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Segura y confiable</h2>
           </div>
-        </section>
+          <p className="mt-3 text-sm leading-6 text-slate-600">Tu dinero protegido con tecnologías de seguridad modernas.</p>
+        </button>
 
-        <section className="feature-section feat-support">
-          <div className="feature-content max-w-3xl text-center">
-            <h2 className="text-3xl font-extrabold text-white mb-4">Soporte 24/7</h2>
-            <p className="text-lg text-white/90">Soporte disponible siempre que lo necesites, en cualquier momento y en varios idiomas.</p>
+        <button
+          type="button"
+          className="feature-card text-left"
+          onClick={() => document.getElementById('section-support')?.scrollIntoView({ behavior: 'smooth' })}
+        >
+          <div className="flex items-center gap-3">
+            <div className="feature-accent bg-violet-400 shadow-sm" />
+            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Soporte 24/7</h2>
           </div>
-        </section>
+          <p className="mt-3 text-sm leading-6 text-slate-600">Soporte disponible siempre que lo necesites, en cualquier momento.</p>
+        </button>
+      </div>
 
-        <footer className="landing-footer">
-          <div className="max-w-7xl mx-auto px-6 py-10 text-center text-sm text-slate-200">© {new Date().getFullYear()} TravelGo — Todos los derechos reservados. Espacio reservado para padding inferior.</div>
-        </footer>
+      {/* Secciones objetivo para cada box */}
+      <section id="section-multicurrency" className="landing-section section-multicurrency" aria-label="Billetera multimoneda">
+        <div className="max-w-4xl mx-auto px-6 py-20">
+          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Billetera multimoneda</h3>
+          <p className="text-lg text-slate-700">Administrá todas tus divisas desde un mismo lugar, controla saldos, envíos y conversiones con transparencia y rapidez.</p>
+        </div>
+      </section>
+
+      <section id="section-best-rates" className="landing-section section-best-rates" aria-label="Mejores tasas de cambio">
+        <div className="max-w-4xl mx-auto px-6 py-20">
+          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Mejores tasas de cambio</h3>
+          <p className="text-lg text-slate-700">Conecta con las mejores tasas del mercado y obtené transparencia en el proceso de cambio.</p>
+        </div>
+      </section>
+
+      <section id="section-secure" className="landing-section section-secure" aria-label="Segura y confiable">
+        <div className="max-w-4xl mx-auto px-6 py-20">
+          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Segura y confiable</h3>
+          <p className="text-lg text-slate-700">Protecciones de seguridad de nivel bancario y monitoreo constante para tu tranquilidad.</p>
+        </div>
+      </section>
+
+      <section id="section-support" className="landing-section section-support" aria-label="Soporte 24/7">
+        <div className="max-w-4xl mx-auto px-6 py-20">
+          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Soporte 24/7</h3>
+          <p className="text-lg text-slate-700">Atención multicanal y multilingüe siempre disponible para ayudarte.</p>
+        </div>
+      </section>
+      {/* cajas de ejemplo para permitir scroll */}
+      <div className="mx-auto max-w-7xl px-6 py-12 space-y-6">
+        <div className="feature-card">
+          <h3 className="text-xl font-bold">Caja de ejemplo 1</h3>
+          <p className="mt-2 text-sm text-slate-600">Contenido de ejemplo: información adicional que se ve al scrollear.</p>
+        </div>
+        <div className="feature-card">
+          <h3 className="text-xl font-bold">Caja de ejemplo 2</h3>
+          <p className="mt-2 text-sm text-slate-600">Contenido de ejemplo: otra sección para probar scroll.</p>
+        </div>
       </div>
     </div>
   )
