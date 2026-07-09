@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import beachBg from '../assets/PlayaPrincipal.png'
+const beachVideo = new URL('../assets/videoplaya.mp4', import.meta.url).toString()
 import creditCard from '../assets/credicard.png'
 import possibleLogo from '../assets/PosibleLogo.png'
 
@@ -15,11 +15,84 @@ export default function Landing() {
     }
   }, [isAuthenticated, navigate])
 
+  const v1Ref = useRef<HTMLVideoElement | null>(null)
+  const v2Ref = useRef<HTMLVideoElement | null>(null)
+  const [visible, setVisible] = useState<1 | 2>(1)
+  const fadingRef = useRef(false)
+  const CROSSFADE = 0.9 // segundos
+
+  useEffect(() => {
+    const active = () => (visible === 1 ? v1Ref.current : v2Ref.current)
+    const other = () => (visible === 1 ? v2Ref.current : v1Ref.current)
+
+    const onTimeUpdate = () => {
+      const a = active()
+      const b = other()
+      if (!a || !b || fadingRef.current) return
+      const { currentTime, duration } = a
+      if (!duration || duration === Infinity) return
+      if (currentTime >= duration - CROSSFADE) {
+        fadingRef.current = true
+        b.currentTime = 0
+        b.play().catch(() => {})
+        // trigger crossfade by switching visible flag; CSS transition handles opacity
+        setVisible((prev) => (prev === 1 ? 2 : 1))
+        // after crossfade finish, pause the previous
+        setTimeout(() => {
+          try {
+            a.pause()
+            a.currentTime = 0
+          } catch {}
+          fadingRef.current = false
+        }, CROSSFADE * 1000 + 50)
+      }
+    }
+
+    const a = active()
+    a?.addEventListener('timeupdate', onTimeUpdate)
+    return () => a?.removeEventListener('timeupdate', onTimeUpdate)
+  }, [visible])
+
+  useEffect(() => {
+    // ensure both videos attempt autoplay (muted)
+    v1Ref.current?.play().catch(() => {})
+    v2Ref.current?.play().catch(() => {})
+  }, [])
+
   return (
-    <div
-      className="min-h-screen overflow-hidden text-slate-900"
-      style={{ backgroundImage: `url(${beachBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
-    >
+    <div className="relative min-h-screen overflow-hidden text-slate-900">
+      <video
+        ref={v1Ref}
+        src={beachVideo}
+        muted
+        playsInline
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: -1,
+          opacity: visible === 1 ? 1 : 0,
+          transition: `opacity ${CROSSFADE}s linear`,
+        }}
+      />
+      <video
+        ref={v2Ref}
+        src={beachVideo}
+        muted
+        playsInline
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: -1,
+          opacity: visible === 2 ? 1 : 0,
+          transition: `opacity ${CROSSFADE}s linear`,
+        }}
+      />
       <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:px-8 lg:py-14 xl:grid-cols-[1.1fr_0.9fr] xl:items-start">
         <div className="space-y-8 xl:max-w-xl xl:-mt-8">
           <div className="mt-4 flex items-center gap-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl xl:text-6xl">
@@ -55,43 +128,43 @@ export default function Landing() {
           <img
             src={creditCard}
             alt="Tarjeta TravelGo"
-            className="mx-auto h-auto max-h-[76vh] w-full max-w-full rounded-[2rem] object-contain"
+            className="mx-auto h-auto max-h-[76vh] w-full max-w-full rounded-[2rem] object-contain breathing"
           />
         </div>
       </div>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-6 px-6 lg:px-8 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="feature-card">
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-orange-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Billetera multimoneda</h2>
+      <div className="features-scroll">
+        <section className="feature-section feat-multicurrency">
+          <div className="feature-content max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold text-white mb-4">Billetera multimoneda</h2>
+            <p className="text-lg text-white/90">Administrá todas tus divisas desde un mismo lugar, sin cambiar de app. Mantené control total sobre tus saldos y movimientos.</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Administrá todas tus divisas desde un mismo lugar, sin cambiar de app.</p>
-        </div>
+        </section>
 
-        <div className="feature-card">
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-emerald-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Mejores tasas de cambio</h2>
+        <section className="feature-section feat-best-rates">
+          <div className="feature-content max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold text-white mb-4">Mejores tasas de cambio</h2>
+            <p className="text-lg text-white/90">Aprovechá las mejores tasas en cada transferencia y evitá sorpresas. Cambiá con transparencia y rapidez.</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Aprovechá las mejores tasas en cada transferencia y evitá sorpresas.</p>
-        </div>
+        </section>
 
-        <div className="feature-card">
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-cyan-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Segura y confiable</h2>
+        <section className="feature-section feat-secure">
+          <div className="feature-content max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold text-white mb-4">Segura y confiable</h2>
+            <p className="text-lg text-white/90">Tu dinero protegido con tecnologías de seguridad modernas y controles de fraude avanzados.</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Tu dinero protegido con tecnologías de seguridad modernas.</p>
-        </div>
+        </section>
 
-        <div className="feature-card">
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-violet-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Soporte 24/7</h2>
+        <section className="feature-section feat-support">
+          <div className="feature-content max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold text-white mb-4">Soporte 24/7</h2>
+            <p className="text-lg text-white/90">Soporte disponible siempre que lo necesites, en cualquier momento y en varios idiomas.</p>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Soporte disponible siempre que lo necesites, en cualquier momento.</p>
-        </div>
+        </section>
+
+        <footer className="landing-footer">
+          <div className="max-w-7xl mx-auto px-6 py-10 text-center text-sm text-slate-200">© {new Date().getFullYear()} TravelGo — Todos los derechos reservados. Espacio reservado para padding inferior.</div>
+        </footer>
       </div>
     </div>
   )
