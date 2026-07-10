@@ -13,20 +13,19 @@ const loadingVideo = new URL('./assets/video loading.mp4', import.meta.url).toSt
 
 function App() {
   const location = useLocation()
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (['/', '/login', '/register'].includes(location.pathname)) return
-    setIsLoading(true)
     const timer = window.setTimeout(() => {
       setIsLoading(false)
-    }, 950)
+    }, 1200)
+
     return () => window.clearTimeout(timer)
-  }, [location.key])
+  }, [])
 
   return (
     <>
-      {location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && <Navbar />}
+      {location.pathname !== '/' && location.pathname !== '/login' && location.pathname !== '/register' && !isLoading && <Navbar />}
       {isLoading ? (
         <div
           style={{
