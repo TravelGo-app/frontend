@@ -410,20 +410,60 @@ export default function Landing() {
       </section>
 
       <section id="section-secure" className={`landing-section section-secure ${activeSection === 'section-secure' ? 'section-active' : ''}`} aria-label="Segura y confiable">
-        <div className="mx-auto max-w-6xl px-6 py-20 section-content">
-          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-            <div>
-              <h3 className="mb-4 text-3xl font-extrabold text-slate-900">Segura y confiable</h3>
-              <p className="text-lg leading-8 text-slate-700">Autenticación segura con JWT, rutas protegidas y token en localStorage para mantener tu sesión activa. La app valida email y contraseña, y protege cada operación con buenas prácticas de seguridad.</p>
+        <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
+          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="space-y-6 max-w-xl">
+              <div className="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm border border-white/15">
+                <span className="text-orange-500">🛡️</span>
+                <span>Tu seguridad, nuestra prioridad</span>
+              </div>
+              <h3 className="text-5xl font-extrabold tracking-tight text-slate-950 sm:text-6xl">
+                Segura y <span className="text-orange-500">confiable</span>
+              </h3>
+              <p className="max-w-xl text-lg leading-8 text-slate-700">Autenticación segura con JWT, rutas protegidas y token en localStorage para mantener tu sesión activa. La app valida email y contraseña, y protege cada operación con buenas prácticas de seguridad.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-5 shadow-[0_15px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-orange-100 text-orange-600">🛡️</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">Autenticación segura (JWT)</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-5 shadow-[0_15px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-900">🔒</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">Rutas protegidas</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-5 shadow-[0_15px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-700">🔑</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">Token en localStorage</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-5 shadow-[0_15px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-cyan-100 text-cyan-700">✉️</span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">Validación de email y contraseña</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div
               ref={secureMediaRef}
-              className="mx-auto flex items-center justify-center overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-950/90 shadow-2xl"
+              className="mx-auto flex items-center justify-center overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/5 shadow-2xl"
               style={{
                 perspective: '1000px',
                 transform: `perspective(1000px) rotateX(${secureRotation.x}deg) rotateY(${secureRotation.y}deg)`,
                 transition: 'transform 0.2s ease-out',
-                maxWidth: '520px',
+                maxWidth: '560px',
               }}
             >
               <video
@@ -433,7 +473,7 @@ export default function Landing() {
                 loop
                 playsInline
                 className="h-full w-full object-contain"
-                style={{ maxHeight: '360px' }}
+                style={{ maxHeight: '420px' }}
               />
             </div>
           </div>
