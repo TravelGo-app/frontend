@@ -254,7 +254,11 @@ html { scroll-behavior: smooth; }
 
   .section-multicurrency > .section-content > .grid {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: 1.5rem;
+  }
+
+  .section-multicurrency .section-content > .grid > div:first-child {
+    padding-right: 0;
   }
 
   .section-multicurrency .multicurrency-card-wrapper {
@@ -268,6 +272,15 @@ html { scroll-behavior: smooth; }
 }
 
 @media (max-width: 540px) {
+  .section-multicurrency .section-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .section-multicurrency .grid {
+    gap: 1.25rem;
+  }
+
   .section-multicurrency .multicurrency-card-image {
     max-height: 320px;
   }

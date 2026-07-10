@@ -320,26 +320,32 @@ export default function Landing() {
       {/* Secciones objetivo para cada box */}
       <section id="section-multicurrency" className={`landing-section section-multicurrency ${activeSection === 'section-multicurrency' ? 'section-active' : ''}`} aria-label="Billetera multimoneda">
         <div className="mx-auto max-w-none px-6 py-20 section-content" style={{ maxWidth: 'none' }}>
-          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-            <div>
-              <div className="mb-6 flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.32em] text-white/90">
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="space-y-6 max-w-xl">
+              <div className="mb-4 flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.32em] text-white/90">
                 <span className="rounded-full bg-white/20 px-3 py-1 text-white">Nuevo</span>
                 <span className="text-white/80">Todo tu dinero, en un solo lugar</span>
               </div>
-              <h3 className="mb-4 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">Billetera Multimoneda</h3>
-              <p className="mb-8 max-w-xl text-lg leading-8 text-white/90">Gestioná tus saldos en ARS, USD, EUR, BRL y CLP desde una sola aplicación.</p>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">🌐</span>
-                  <span className="text-base font-medium text-white">30+ monedas</span>
+              <h3 className="text-5xl font-extrabold tracking-tight text-white sm:text-6xl">Billetera Multimoneda</h3>
+              <p className="max-w-xl text-lg leading-8 text-white/90">Gestioná tus saldos en ARS, USD, EUR, BRL y CLP desde una sola aplicación.</p>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-4 shadow-[0_15px_35px_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">🌐</span>
+                    <span className="text-sm font-semibold text-white">30+ monedas</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">⚡</span>
-                  <span className="text-base font-medium text-white">Tipo de cambio en tiempo real</span>
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-4 shadow-[0_15px_35px_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">⚡</span>
+                    <span className="text-sm font-semibold text-white">Tipo de cambio en tiempo real</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">🔒</span>
-                  <span className="text-base font-medium text-white">Seguridad de nivel bancario</span>
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-4 shadow-[0_15px_35px_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">🔒</span>
+                    <span className="text-sm font-semibold text-white">Seguridad de nivel bancario</span>
+                  </div>
                 </div>
               </div>
             </div>
