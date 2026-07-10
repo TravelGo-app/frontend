@@ -181,7 +181,6 @@ export default function Landing() {
           willChange: 'opacity, transform',
         }}
       />
-      <div className="watermark-cover" aria-hidden="true" />
       <section className="landing-screen landing-hero-screen mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:px-8 lg:py-14 xl:grid-cols-[1.1fr_0.9fr] xl:items-start landing-hero-grid" style={{ position: 'relative', zIndex: 1 }}>
         <div className="space-y-8 xl:max-w-xl xl:-mt-8 hero-copy">
           <div className="mt-4 flex flex-col items-start gap-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:flex-row sm:items-center sm:justify-center xl:justify-start sm:text-5xl xl:text-6xl">
