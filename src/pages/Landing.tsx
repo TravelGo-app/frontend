@@ -6,6 +6,7 @@ import creditCard from '../assets/credicard.png'
 import secureVideo from '../assets/VideoCandado.mp4'
 import onlyCreditCard from '../assets/OnlyCredicard.png'
 import celularTasas from '../assets/celulartazas.png'
+import phoneTrip from '../assets/phoneTrip.png'
 const beachVideo = new URL('../assets/Playafondo.mp4', import.meta.url).toString()
 
 export default function Landing() {
@@ -481,9 +482,42 @@ export default function Landing() {
       </section>
 
       <section id="section-support" className={`landing-section section-support ${activeSection === 'section-support' ? 'section-active' : ''}`} aria-label="Acceso inmediato">
-        <div className="max-w-4xl mx-auto px-6 py-20 section-content">
-          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Acceso inmediato</h3>
-          <p className="text-lg text-slate-700">Registrate con email o ingresá rápidamente usando Google. Desde el primer momento tenés acceso al dashboard, wallet y todas las herramientas para gestionar tu dinero durante tu viaje.</p>
+        <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
+          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="space-y-6 max-w-xl">
+              <div className="inline-flex items-center gap-3 rounded-full bg-slate-950/10 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(15,23,42,0.12)] border border-white/10 backdrop-blur-sm">
+                <span className="text-cyan-300">⚡</span>
+                <span>Empezá en segundos</span>
+              </div>
+              <h3 className="text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
+                Acceso <span className="text-cyan-300">inmediato</span>
+              </h3>
+              <p className="max-w-lg text-lg leading-8 text-slate-200">Registrate con email o ingresá rápidamente usando Google. Desde el primer momento tenés acceso al dashboard, wallet y todas las herramientas para gestionar tu dinero durante tu viaje.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <button type="button" className="group flex items-center gap-3 rounded-[1.75rem] border border-white/15 bg-slate-950/15 px-5 py-4 text-left transition hover:bg-slate-950/30">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-cyan-300/15 text-cyan-300">✉️</span>
+                  <div>
+                    <p className="text-base font-semibold text-white">Registro con email</p>
+                  </div>
+                </button>
+                <button type="button" className="group flex items-center gap-3 rounded-[1.75rem] border border-white/15 bg-slate-950/15 px-5 py-4 text-left transition hover:bg-slate-950/30">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white">G</span>
+                  <div>
+                    <p className="text-base font-semibold text-white">Ingresá con Google</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <div className="relative mx-auto max-w-xl lg:max-w-2xl">
+              <div className="overflow-hidden rounded-[2rem] bg-transparent p-0">
+                <img
+                  src={phoneTrip}
+                  alt="Celular Trip"
+                  className="w-full h-auto rounded-[1.5rem] object-cover"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
