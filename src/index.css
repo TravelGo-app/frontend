@@ -225,8 +225,51 @@ html { scroll-behavior: smooth; }
   .landing-screen,
   .landing-section {
     min-height: 100vh;
-    height: 100vh;
+    height: auto;
     padding: 2rem 1rem;
+  }
+}
+
+.section-multicurrency .multicurrency-card-wrapper {
+  max-width: 1200px;
+  width: 100%;
+  min-height: 760px;
+}
+
+.section-multicurrency .multicurrency-card-image {
+  max-height: 500px;
+}
+
+@media (max-width: 1024px) {
+  .section-multicurrency .multicurrency-card-wrapper {
+    min-height: 620px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-multicurrency .section-content {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .section-multicurrency > .section-content > .grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .section-multicurrency .multicurrency-card-wrapper {
+    min-height: auto;
+    padding: 0;
+  }
+
+  .section-multicurrency .multicurrency-card-image {
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 540px) {
+  .section-multicurrency .multicurrency-card-image {
+    max-height: 320px;
   }
 }
 

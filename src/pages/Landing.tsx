@@ -322,26 +322,41 @@ export default function Landing() {
         <div className="mx-auto max-w-none px-6 py-20 section-content" style={{ maxWidth: 'none' }}>
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
-              <h3 className="mb-4 text-3xl font-extrabold text-slate-900">Billetera multimoneda</h3>
-              <p className="text-lg text-slate-700">TravelGo te permite gestionar saldos en ARS, USD, EUR, BRL y CLP desde una sola aplicación. Podés ver tus balances, enviar dinero y mantener el control de todas tus divisas sin cambiar de plataforma.</p>
+              <div className="mb-6 flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.32em] text-white/90">
+                <span className="rounded-full bg-white/20 px-3 py-1 text-white">Nuevo</span>
+                <span className="text-white/80">Todo tu dinero, en un solo lugar</span>
+              </div>
+              <h3 className="mb-4 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">Billetera Multimoneda</h3>
+              <p className="mb-8 max-w-xl text-lg leading-8 text-white/90">Gestioná tus saldos en ARS, USD, EUR, BRL y CLP desde una sola aplicación.</p>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">🌐</span>
+                  <span className="text-base font-medium text-white">30+ monedas</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">⚡</span>
+                  <span className="text-base font-medium text-white">Tipo de cambio en tiempo real</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white text-lg">🔒</span>
+                  <span className="text-base font-medium text-white">Seguridad de nivel bancario</span>
+                </div>
+              </div>
             </div>
             <div
               ref={multicurrencyMediaRef}
-              className="mx-auto flex items-center justify-center overflow-hidden"
+              className="mx-auto flex items-center justify-center overflow-hidden multicurrency-card-wrapper"
               style={{
                 perspective: '1000px',
                 transform: `perspective(1000px) rotateX(${multicurrencyRotation.x}deg) rotateY(${multicurrencyRotation.y}deg)`,
                 transition: 'transform 0.2s ease-out',
-                maxWidth: '1200px',
-                width: '100%',
-                minHeight: '860px',
               }}
             >
               <img
                 src={onlyCreditCard}
                 alt="Tarjeta TravelGo"
-                className="w-full h-auto object-contain"
-                style={{ maxHeight: '500px', width: '100%' }}
+                className="w-full h-auto object-contain multicurrency-card-image"
+                style={{ width: '100%' }}
               />
             </div>
           </div>
