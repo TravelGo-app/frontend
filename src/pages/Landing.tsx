@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import creditCard from '../assets/credicard.png'
 import possibleLogo from '../assets/PosibleLogo.png'
 import secureVideo from '../assets/VideoCandado.mp4'
-const beachVideo = new URL('../assets/videoplaya.mp4', import.meta.url).toString()
+const beachVideo = new URL('../assets/Playafondo.mp4', import.meta.url).toString()
 
 export default function Landing() {
   const navigate = useNavigate()
