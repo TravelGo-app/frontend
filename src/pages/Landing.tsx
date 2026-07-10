@@ -27,32 +27,55 @@ export default function Landing() {
   }, [])
 
   useEffect(() => {
-    const sections = [
+    const sectionIds = [
+      'section-feature-boxes',
       'section-multicurrency',
       'section-best-rates',
       'section-secure',
       'section-support',
     ]
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries.find((entry) => entry.isIntersecting)
-        if (visibleEntry?.target.id) {
-          setActiveSection(visibleEntry.target.id)
-        }
-      },
-      {
-        threshold: 0.7,
-        rootMargin: '-10% 0px -10% 0px',
-      },
-    )
+    const container = document.querySelector('.landing-scroll-container')
 
-    sections.forEach((id) => {
-      const section = document.getElementById(id)
-      if (section) observer.observe(section)
-    })
+    const getActiveSection = () => {
+      const sections = sectionIds
+        .map((id) => document.getElementById(id))
+        .filter((section): section is HTMLElement => section !== null)
 
-    return () => observer.disconnect()
-  }, [])
+      const positiveSections = sections
+        .map((section) => ({ section, top: section.getBoundingClientRect().top }))
+        .filter(({ top }) => top >= 0)
+
+      const closest = positiveSections.length > 0
+        ? positiveSections.reduce<{ section: HTMLElement; top: number } | null>((current, candidate) => {
+            if (!current || candidate.top < current.top) {
+              return candidate
+            }
+            return current
+          }, null)
+        : sections
+            .map((section) => ({ section, top: section.getBoundingClientRect().top }))
+            .filter(({ top }) => top < 0)
+            .reduce<{ section: HTMLElement; top: number } | null>((current, candidate) => {
+              if (!current || candidate.top > current.top) {
+                return candidate
+              }
+              return current
+            }, null)
+
+      if (closest?.section?.id && closest.section.id !== activeSection) {
+        setActiveSection(closest.section.id)
+      }
+    }
+
+    getActiveSection()
+    container?.addEventListener('scroll', getActiveSection, { passive: true })
+    window.addEventListener('resize', getActiveSection)
+
+    return () => {
+      container?.removeEventListener('scroll', getActiveSection)
+      window.removeEventListener('resize', getActiveSection)
+    }
+  }, [activeSection])
 
   useEffect(() => {
     const active = () => (visible === 1 ? v1Ref.current : v2Ref.current)
@@ -175,7 +198,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="landing-screen landing-feature-screen mx-auto grid w-full max-w-7xl gap-6 px-6 lg:px-8 feature-boxes-grid">
+      <section id="section-feature-boxes" className="landing-screen landing-feature-screen mx-auto grid w-full max-w-7xl gap-6 px-6 lg:px-8 feature-boxes-grid">
         <button
           type="button"
           className="feature-card text-left"
