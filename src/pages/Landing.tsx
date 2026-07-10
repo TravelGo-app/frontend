@@ -5,6 +5,7 @@ import possibleLogo from '../assets/PosibleLogo.png'
 import creditCard from '../assets/credicard.png'
 import secureVideo from '../assets/VideoCandado.mp4'
 import onlyCreditCard from '../assets/OnlyCredicard.png'
+import celularTasas from '../assets/celulartazas.png'
 const beachVideo = new URL('../assets/Playafondo.mp4', import.meta.url).toString()
 
 export default function Landing() {
@@ -370,9 +371,41 @@ export default function Landing() {
       </section>
 
       <section id="section-best-rates" className={`landing-section section-best-rates ${activeSection === 'section-best-rates' ? 'section-active' : ''}`} aria-label="Mejores tasas de cambio">
-        <div className="max-w-4xl mx-auto px-6 py-20 section-content">
-          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Tasas en tiempo real</h3>
-          <p className="text-lg text-slate-700">Nuestra app consulta tasas actualizadas desde la API y muestra conversiones reales para que puedas elegir el mejor momento para cambiar o transferir. El cálculo se hace al instante para tus monedas favoritas.</p>
+        <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
+          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="space-y-6 max-w-xl">
+              <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                <span className="text-orange-500">⚡</span>
+                <span>En tiempo real</span>
+              </div>
+              <h3 className="text-5xl font-extrabold tracking-tight text-slate-950 sm:text-6xl">Tasas en tiempo real</h3>
+              <p className="max-w-lg text-lg leading-8 text-slate-700">Nuestra app consulta tasas actualizadas desde la API y muestra conversiones reales para que puedas elegir el mejor momento para cambiar o transferir.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-4 shadow-[0_15px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                  <p className="text-sm font-semibold text-slate-950">Actualización al instante</p>
+                  <p className="mt-2 text-sm text-slate-600">Datos en tiempo real desde fuentes confiables.</p>
+                </div>
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-4 shadow-[0_15px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+                  <p className="text-sm font-semibold text-slate-950">Conversiones precisas</p>
+                  <p className="mt-2 text-sm text-slate-600">Cálculos exactos al momento, sin demoras.</p>
+                </div>
+                <div className="rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-4 shadow-[0_15px_35px_rgba(15,23,42,0.08)] backdrop-blur-sm sm:col-span-2">
+                  <p className="text-sm font-semibold text-slate-950">Mejor momento para ti</p>
+                  <p className="mt-2 text-sm text-slate-600">Compara y elige cuando más te convenga.</p>
+                </div>
+              </div>
+            </div>
+            <div className="relative mx-auto max-w-xl lg:max-w-2xl">
+              <div className="overflow-hidden rounded-[2rem] p-4 bg-transparent shadow-none">
+                <img
+                  src={celularTasas}
+                  alt="Celular con tasas en tiempo real"
+                  className="w-full h-auto rounded-[1.5rem] object-cover"
+                  style={{ maxHeight: '860px' }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
