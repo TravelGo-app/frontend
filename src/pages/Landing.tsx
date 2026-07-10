@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import creditCard from '../assets/credicard.png'
 import possibleLogo from '../assets/PosibleLogo.png'
+import creditCard from '../assets/credicard.png'
 import secureVideo from '../assets/VideoCandado.mp4'
+import onlyCreditCard from '../assets/OnlyCredicard.png'
 const beachVideo = new URL('../assets/Playafondo.mp4', import.meta.url).toString()
 
 export default function Landing() {
@@ -13,8 +14,12 @@ export default function Landing() {
   const v2Ref = useRef<HTMLVideoElement | null>(null)
   const [visible, setVisible] = useState<1 | 2>(1)
   const [activeSection, setActiveSection] = useState<string>('')
-  const [videoRotation, setVideoRotation] = useState({ x: 0, y: 0 })
-  const videoContainerRef = useRef<HTMLDivElement | null>(null)
+  const [multicurrencyRotation, setMulticurrencyRotation] = useState({ x: 0, y: 0 })
+  const [secureRotation, setSecureRotation] = useState({ x: 0, y: 0 })
+  const [isMulticurrencyVisible, setIsMulticurrencyVisible] = useState(false)
+  const [isSecureVisible, setIsSecureVisible] = useState(false)
+  const multicurrencyMediaRef = useRef<HTMLDivElement | null>(null)
+  const secureMediaRef = useRef<HTMLDivElement | null>(null)
   const fadingRef = useRef(false)
   const CROSSFADE = 0.8
 
@@ -81,17 +86,58 @@ export default function Landing() {
   }, [activeSection])
 
   useEffect(() => {
-    const handlePointerMove = (event: MouseEvent) => {
-      const rect = videoContainerRef.current?.getBoundingClientRect()
-      if (!rect) return
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.target === multicurrencyMediaRef.current) {
+          setIsMulticurrencyVisible(entry.isIntersecting)
+          if (!entry.isIntersecting) {
+            setMulticurrencyRotation({ x: 0, y: 0 })
+          }
+        }
 
-      const x = (event.clientX - rect.left) / rect.width - 0.5
-      const y = (event.clientY - rect.top) / rect.height - 0.5
-
-      setVideoRotation({
-        x: y * -10,
-        y: x * 10,
+        if (entry.target === secureMediaRef.current) {
+          setIsSecureVisible(entry.isIntersecting)
+          if (!entry.isIntersecting) {
+            setSecureRotation({ x: 0, y: 0 })
+          }
+        }
       })
+    }, { threshold: 0.25 })
+
+    if (multicurrencyMediaRef.current) {
+      observer.observe(multicurrencyMediaRef.current)
+    }
+
+    if (secureMediaRef.current) {
+      observer.observe(secureMediaRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const handlePointerMove = (event: MouseEvent) => {
+      if (isMulticurrencyVisible && multicurrencyMediaRef.current) {
+        const rect = multicurrencyMediaRef.current.getBoundingClientRect()
+        const x = (event.clientX - rect.left) / rect.width - 0.5
+        const y = (event.clientY - rect.top) / rect.height - 0.5
+
+        setMulticurrencyRotation({
+          x: y * -10,
+          y: x * 10,
+        })
+      }
+
+      if (isSecureVisible && secureMediaRef.current) {
+        const rect = secureMediaRef.current.getBoundingClientRect()
+        const x = (event.clientX - rect.left) / rect.width - 0.5
+        const y = (event.clientY - rect.top) / rect.height - 0.5
+
+        setSecureRotation({
+          x: y * -10,
+          y: x * 10,
+        })
+      }
     }
 
     window.addEventListener('mousemove', handlePointerMove)
@@ -99,7 +145,7 @@ export default function Landing() {
     return () => {
       window.removeEventListener('mousemove', handlePointerMove)
     }
-  }, [])
+  }, [isMulticurrencyVisible, isSecureVisible])
 
   useEffect(() => {
     const active = () => (visible === 1 ? v1Ref.current : v2Ref.current)
@@ -273,9 +319,31 @@ export default function Landing() {
 
       {/* Secciones objetivo para cada box */}
       <section id="section-multicurrency" className={`landing-section section-multicurrency ${activeSection === 'section-multicurrency' ? 'section-active' : ''}`} aria-label="Billetera multimoneda">
-        <div className="max-w-4xl mx-auto px-6 py-20 section-content">
-          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Billetera multimoneda</h3>
-          <p className="text-lg text-slate-700">TravelGo te permite gestionar saldos en ARS, USD, EUR, BRL y CLP desde una sola aplicación. Podés ver tus balances, enviar dinero y mantener el control de todas tus divisas sin cambiar de plataforma.</p>
+        <div className="mx-auto max-w-6xl px-6 py-20 section-content">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div>
+              <h3 className="mb-4 text-3xl font-extrabold text-slate-900">Billetera multimoneda</h3>
+              <p className="text-lg text-slate-700">TravelGo te permite gestionar saldos en ARS, USD, EUR, BRL y CLP desde una sola aplicación. Podés ver tus balances, enviar dinero y mantener el control de todas tus divisas sin cambiar de plataforma.</p>
+            </div>
+            <div
+              ref={multicurrencyMediaRef}
+              className="mx-auto flex items-center justify-center overflow-hidden"
+              style={{
+                perspective: '1000px',
+                transform: `perspective(1000px) rotateX(${multicurrencyRotation.x}deg) rotateY(${multicurrencyRotation.y}deg)`,
+                transition: 'transform 0.2s ease-out',
+                maxWidth: '720px',
+                width: '100%',
+              }}
+            >
+              <img
+                src={onlyCreditCard}
+                alt="Tarjeta TravelGo"
+                className="h-full w-full object-contain"
+                style={{ maxHeight: '500px' }}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -294,11 +362,11 @@ export default function Landing() {
               <p className="text-lg leading-8 text-slate-700">Autenticación segura con JWT, rutas protegidas y token en localStorage para mantener tu sesión activa. La app valida email y contraseña, y protege cada operación con buenas prácticas de seguridad.</p>
             </div>
             <div
-              ref={videoContainerRef}
+              ref={secureMediaRef}
               className="mx-auto flex items-center justify-center overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-950/90 shadow-2xl"
               style={{
                 perspective: '1000px',
-                transform: `perspective(1000px) rotateX(${videoRotation.x}deg) rotateY(${videoRotation.y}deg)`,
+                transform: `perspective(1000px) rotateX(${secureRotation.x}deg) rotateY(${secureRotation.y}deg)`,
                 transition: 'transform 0.2s ease-out',
                 maxWidth: '520px',
               }}
