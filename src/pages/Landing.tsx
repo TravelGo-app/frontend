@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import creditCard from '../assets/credicard.png'
 import possibleLogo from '../assets/PosibleLogo.png'
+import secureVideo from '../assets/VideoCandado.mp4'
 const beachVideo = new URL('../assets/videoplaya.mp4', import.meta.url).toString()
 
 export default function Landing() {
@@ -12,6 +13,8 @@ export default function Landing() {
   const v2Ref = useRef<HTMLVideoElement | null>(null)
   const [visible, setVisible] = useState<1 | 2>(1)
   const [activeSection, setActiveSection] = useState<string>('')
+  const [videoRotation, setVideoRotation] = useState({ x: 0, y: 0 })
+  const videoContainerRef = useRef<HTMLDivElement | null>(null)
   const fadingRef = useRef(false)
   const CROSSFADE = 0.8
 
@@ -76,6 +79,27 @@ export default function Landing() {
       window.removeEventListener('resize', getActiveSection)
     }
   }, [activeSection])
+
+  useEffect(() => {
+    const handlePointerMove = (event: MouseEvent) => {
+      const rect = videoContainerRef.current?.getBoundingClientRect()
+      if (!rect) return
+
+      const x = (event.clientX - rect.left) / rect.width - 0.5
+      const y = (event.clientY - rect.top) / rect.height - 0.5
+
+      setVideoRotation({
+        x: y * -10,
+        y: x * 10,
+      })
+    }
+
+    window.addEventListener('mousemove', handlePointerMove)
+
+    return () => {
+      window.removeEventListener('mousemove', handlePointerMove)
+    }
+  }, [])
 
   useEffect(() => {
     const active = () => (visible === 1 ? v1Ref.current : v2Ref.current)
@@ -264,9 +288,33 @@ export default function Landing() {
       </section>
 
       <section id="section-secure" className={`landing-section section-secure ${activeSection === 'section-secure' ? 'section-active' : ''}`} aria-label="Segura y confiable">
-        <div className="max-w-4xl mx-auto px-6 py-20 section-content">
-          <h3 className="text-3xl font-extrabold text-slate-900 mb-4">Segura y confiable</h3>
-          <p className="text-lg text-slate-700">Autenticación segura con JWT, rutas protegidas y token en localStorage para mantener tu sesión activa. La app valida email y contraseña, y protege cada operación con buenas prácticas de seguridad.</p>
+        <div className="mx-auto max-w-6xl px-6 py-20 section-content">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div>
+              <h3 className="mb-4 text-3xl font-extrabold text-slate-900">Segura y confiable</h3>
+              <p className="text-lg leading-8 text-slate-700">Autenticación segura con JWT, rutas protegidas y token en localStorage para mantener tu sesión activa. La app valida email y contraseña, y protege cada operación con buenas prácticas de seguridad.</p>
+            </div>
+            <div
+              ref={videoContainerRef}
+              className="mx-auto flex items-center justify-center overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-950/90 shadow-2xl"
+              style={{
+                perspective: '1000px',
+                transform: `perspective(1000px) rotateX(${videoRotation.x}deg) rotateY(${videoRotation.y}deg)`,
+                transition: 'transform 0.2s ease-out',
+                maxWidth: '520px',
+              }}
+            >
+              <video
+                src={secureVideo}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="h-full w-full object-contain"
+                style={{ maxHeight: '360px' }}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
