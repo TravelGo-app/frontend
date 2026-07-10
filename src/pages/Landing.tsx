@@ -319,8 +319,8 @@ export default function Landing() {
 
       {/* Secciones objetivo para cada box */}
       <section id="section-multicurrency" className={`landing-section section-multicurrency ${activeSection === 'section-multicurrency' ? 'section-active' : ''}`} aria-label="Billetera multimoneda">
-        <div className="mx-auto max-w-none px-6 py-20 section-content" style={{ maxWidth: 'none' }}>
-          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+        <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
+          <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div className="space-y-6 max-w-xl">
               <div className="mb-4 flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.32em] text-white/90">
                 <span className="rounded-full bg-white/20 px-3 py-1 text-white">Nuevo</span>
