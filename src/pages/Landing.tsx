@@ -319,7 +319,7 @@ export default function Landing() {
 
       {/* Secciones objetivo para cada box */}
       <section id="section-multicurrency" className={`landing-section section-multicurrency ${activeSection === 'section-multicurrency' ? 'section-active' : ''}`} aria-label="Billetera multimoneda">
-        <div className="mx-auto max-w-6xl px-6 py-20 section-content">
+        <div className="mx-auto max-w-none px-6 py-20 section-content" style={{ maxWidth: 'none' }}>
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
               <h3 className="mb-4 text-3xl font-extrabold text-slate-900">Billetera multimoneda</h3>
@@ -332,15 +332,16 @@ export default function Landing() {
                 perspective: '1000px',
                 transform: `perspective(1000px) rotateX(${multicurrencyRotation.x}deg) rotateY(${multicurrencyRotation.y}deg)`,
                 transition: 'transform 0.2s ease-out',
-                maxWidth: '720px',
+                maxWidth: '1200px',
                 width: '100%',
+                minHeight: '860px',
               }}
             >
               <img
                 src={onlyCreditCard}
                 alt="Tarjeta TravelGo"
-                className="h-full w-full object-contain"
-                style={{ maxHeight: '500px' }}
+                className="w-full h-auto object-contain"
+                style={{ maxHeight: '500px', width: '100%' }}
               />
             </div>
           </div>
