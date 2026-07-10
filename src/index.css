@@ -112,6 +112,9 @@ body {
   transform: translateY(24px);
   transition: opacity 0.85s ease, transform 0.85s ease, box-shadow 0.85s ease, filter 0.85s ease;
 }
+.landing-feature-screen .section-content {
+  max-width: 1200px;
+}
 .section-multicurrency {
   background: #ff7d60;
   color: white;
@@ -140,7 +143,8 @@ body {
 .section-support .section-content {
   transform: translateY(32px) scale(0.95);
 }
-.landing-section.section-active .section-content {
+.landing-section.section-active .section-content,
+.landing-screen.section-active .section-content {
   opacity: 1;
   transform: translateX(0) translateY(0) scale(1) rotate(0deg);
 }
@@ -388,4 +392,35 @@ html { scroll-behavior: smooth; }
   transform-origin: center;
   animation: breathe 5.5s ease-in-out infinite;
   will-change: transform;
+}
+
+/* Feature cards layout and accents */
+.feature-cards { }
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem;
+  min-height: 140px;
+}
+
+.feature-accent-bar {
+  width: 56px;
+  height: 6px;
+  border-radius: 9999px;
+}
+.accent-orange { background: linear-gradient(90deg,#ff9a66,#ff7d60); }
+.accent-green { background: linear-gradient(90deg,#34d399,#10b981); }
+.accent-cyan { background: linear-gradient(90deg,#67e8f9,#06b6d4); }
+.accent-violet { background: linear-gradient(90deg,#c4b5fd,#a78bfa); }
+
+@media (min-width: 1280px) {
+  .feature-cards { gap: 2rem; }
+}
+
+@media (max-width: 768px) {
+  .feature-cards { grid-template-columns: 1fr; }
+  .feature-card { min-height: auto; }
 }

@@ -15,7 +15,7 @@ export default function Landing() {
   const v1Ref = useRef<HTMLVideoElement | null>(null)
   const v2Ref = useRef<HTMLVideoElement | null>(null)
   const [visible, setVisible] = useState<1 | 2>(1)
-  const [activeSection, setActiveSection] = useState<string>('')
+  const [activeSection, setActiveSection] = useState<string>('section-feature-boxes')
   const [multicurrencyRotation, setMulticurrencyRotation] = useState({ x: 0, y: 0 })
   const [secureRotation, setSecureRotation] = useState({ x: 0, y: 0 })
   const [isMulticurrencyVisible, setIsMulticurrencyVisible] = useState(false)
@@ -269,54 +269,85 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="section-feature-boxes" className="landing-screen landing-feature-screen mx-auto grid w-full max-w-7xl gap-6 px-6 lg:px-8 feature-boxes-grid">
-        <button
-          type="button"
-          className="feature-card text-left"
-          onClick={() => document.getElementById('section-multicurrency')?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-orange-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Billetera multimoneda</h2>
-          </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Controlá tus balances en ARS, USD, EUR, BRL y CLP desde un solo dashboard.</p>
-        </button>
+      <section id="section-feature-boxes" className={`landing-screen landing-section landing-feature-screen mx-auto w-full px-6 py-16 lg:px-8 ${activeSection === 'section-feature-boxes' ? 'section-active' : ''}`}>
+        <div className={`mx-auto w-full max-w-[1440px] section-content rounded-[2.5rem] border border-slate-200/70 bg-white/95 p-10 shadow-[0_40px_120px_rgba(15,23,42,0.08)] backdrop-blur-sm ${activeSection === 'section-feature-boxes' ? 'section-visible' : ''}`}>
+          <div className="grid gap-10 lg:grid-cols-[0.6fr_0.4fr] lg:items-start">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-3 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold uppercase tracking-[0.28em] text-slate-800">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-200 text-cyan-700">🟦</span>
+                TODO LO QUE NECESITÁS
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-5xl font-extrabold tracking-tight text-slate-950 sm:text-6xl">
+                  Una wallet pensada
+                  <span className="block text-orange-500">para tu viaje</span>
+                </h2>
+                <p className="text-lg leading-8 text-slate-600">Tecnología, seguridad y facilidad en un solo lugar. Gestioná tu dinero en el exterior de forma simple, rápida y segura.</p>
+              </div>
+            </div>
+            <div className="feature-cards grid gap-8 xl:gap-10 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => document.getElementById('section-multicurrency')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group feature-card rounded-[1.5rem] bg-white p-6 shadow-[0_10px_30px_rgba(2,6,23,0.06)] transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]"
+              >
+                <div className="feature-accent-bar accent-orange mb-4" />
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-orange-50 text-orange-600 text-xl">💳</div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-900">Billetera multimoneda</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">Controlá tus balances en ARS, USD, EUR, BRL y CLP desde un solo dashboard.</p>
+                  </div>
+                </div>
+              </button>
 
-        <button
-          type="button"
-          className="feature-card text-left"
-          onClick={() => document.getElementById('section-best-rates')?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-emerald-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Tasas en tiempo real</h2>
-          </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Vea conversiones con tasas actualizadas desde la API y elija el mejor momento para cambiar.</p>
-        </button>
+              <button
+                type="button"
+                onClick={() => document.getElementById('section-best-rates')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group feature-card rounded-[1.5rem] bg-white p-6 shadow-[0_10px_30px_rgba(2,6,23,0.06)] transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]"
+              >
+                <div className="feature-accent-bar accent-green mb-4" />
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 text-xl">📈</div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-900">Tasas en tiempo real</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">Vea conversiones con tasas actualizadas desde la API y elija el mejor momento para cambiar.</p>
+                  </div>
+                </div>
+              </button>
 
-        <button
-          type="button"
-          className="feature-card text-left"
-          onClick={() => document.getElementById('section-secure')?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-cyan-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Seguridad avanzada</h2>
-          </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">JWT, rutas protegidas y sesión segura para resguardar cada operación.</p>
-        </button>
+              <button
+                type="button"
+                onClick={() => document.getElementById('section-secure')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group feature-card rounded-[1.5rem] bg-white p-6 shadow-[0_10px_30px_rgba(2,6,23,0.06)] transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]"
+              >
+                <div className="feature-accent-bar accent-cyan mb-4" />
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-cyan-50 text-cyan-600 text-xl">🛡️</div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-900">Seguridad avanzada</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">JWT, rutas protegidas y sesión segura para resguardar cada operación.</p>
+                  </div>
+                </div>
+              </button>
 
-        <button
-          type="button"
-          className="feature-card text-left"
-          onClick={() => document.getElementById('section-support')?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          <div className="flex items-center gap-3">
-            <div className="feature-accent bg-violet-400 shadow-sm" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-700">Acceso inmediato</h2>
+              <button
+                type="button"
+                onClick={() => document.getElementById('section-support')?.scrollIntoView({ behavior: 'smooth' })}
+                className="group feature-card rounded-[1.5rem] bg-white p-6 shadow-[0_10px_30px_rgba(2,6,23,0.06)] transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]"
+              >
+                <div className="feature-accent-bar accent-violet mb-4" />
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-violet-50 text-violet-600 text-xl">⚡</div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-900">Acceso inmediato</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">Registrate rápido o ingresá con Google y llega al dashboard en segundos.</p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Registrate rápido o ingresá con Google y llega al dashboard en segundos.</p>
-        </button>
+        </div>
       </section>
 
       {/* Secciones objetivo para cada box */}
@@ -401,7 +432,7 @@ export default function Landing() {
                 <img
                   src={celularTasas}
                   alt="Celular con tasas en tiempo real"
-                  className="w-full h-auto rounded-[1.5rem] object-cover"
+                  className="w-full h-auto rounded-[1.5rem] object-cover breathing"
                   style={{ maxHeight: '860px' }}
                 />
               </div>
@@ -513,7 +544,7 @@ export default function Landing() {
                 <img
                   src={phoneTrip}
                   alt="Celular Trip"
-                  className="w-full h-auto rounded-[1.5rem] object-cover"
+                  className="w-full h-auto rounded-[1.5rem] object-cover breathing"
                 />
               </div>
             </div>
