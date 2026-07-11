@@ -15,7 +15,8 @@ export default function Landing() {
   const v1Ref = useRef<HTMLVideoElement | null>(null)
   const v2Ref = useRef<HTMLVideoElement | null>(null)
   const [visible, setVisible] = useState<1 | 2>(1)
-  const [activeSection, setActiveSection] = useState<string>('section-feature-boxes')
+  const [visibleSections, setVisibleSections] = useState<string[]>(['section-feature-boxes'])
+  const [isHeroVisible, setIsHeroVisible] = useState(false)
   const [multicurrencyRotation, setMulticurrencyRotation] = useState({ x: 0, y: 0 })
   const [secureRotation, setSecureRotation] = useState({ x: 0, y: 0 })
   const [isMulticurrencyVisible, setIsMulticurrencyVisible] = useState(false)
@@ -32,6 +33,14 @@ export default function Landing() {
   }, [isAuthenticated, navigate])
 
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setIsHeroVisible(true)
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [])
+
+  useEffect(() => {
     // start first video
     v1Ref.current?.play().catch(() => {})
   }, [])
@@ -44,48 +53,40 @@ export default function Landing() {
       'section-secure',
       'section-support',
     ]
-    const container = document.querySelector('.landing-scroll-container')
 
-    const getActiveSection = () => {
-      const sections = sectionIds
-        .map((id) => document.getElementById(id))
-        .filter((section): section is HTMLElement => section !== null)
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section !== null)
 
-      const positiveSections = sections
-        .map((section) => ({ section, top: section.getBoundingClientRect().top }))
-        .filter(({ top }) => top >= 0)
+    if (sections.length === 0) return
 
-      const closest = positiveSections.length > 0
-        ? positiveSections.reduce<{ section: HTMLElement; top: number } | null>((current, candidate) => {
-            if (!current || candidate.top < current.top) {
-              return candidate
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setVisibleSections((currentVisibleSections) => {
+          const nextVisibleSections = new Set(currentVisibleSections)
+
+          entries.forEach(({ isIntersecting, target }) => {
+            const sectionId = target.id
+            if (isIntersecting) {
+              nextVisibleSections.add(sectionId)
+            } else {
+              nextVisibleSections.delete(sectionId)
             }
-            return current
-          }, null)
-        : sections
-            .map((section) => ({ section, top: section.getBoundingClientRect().top }))
-            .filter(({ top }) => top < 0)
-            .reduce<{ section: HTMLElement; top: number } | null>((current, candidate) => {
-              if (!current || candidate.top > current.top) {
-                return candidate
-              }
-              return current
-            }, null)
+          })
 
-      if (closest?.section?.id && closest.section.id !== activeSection) {
-        setActiveSection(closest.section.id)
-      }
-    }
+          return Array.from(nextVisibleSections)
+        })
+      },
+      {
+        threshold: 0.25,
+        rootMargin: '-8% 0px -8% 0px',
+      },
+    )
 
-    getActiveSection()
-    container?.addEventListener('scroll', getActiveSection, { passive: true })
-    window.addEventListener('resize', getActiveSection)
+    sections.forEach((section) => observer.observe(section))
 
-    return () => {
-      container?.removeEventListener('scroll', getActiveSection)
-      window.removeEventListener('resize', getActiveSection)
-    }
-  }, [activeSection])
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -230,7 +231,7 @@ export default function Landing() {
         }}
       />
       <section className="landing-screen landing-hero-screen mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:px-8 lg:py-14 xl:grid-cols-[1.1fr_0.9fr] xl:items-start landing-hero-grid" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="space-y-8 xl:max-w-xl xl:-mt-8 hero-copy">
+        <div className={`space-y-8 xl:max-w-xl xl:-mt-8 hero-copy hero-entrance ${isHeroVisible ? 'hero-entrance-visible' : ''}`}>
           <div className="mt-4 flex flex-col items-start gap-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:flex-row sm:items-center sm:justify-center xl:justify-start sm:text-5xl xl:text-6xl">
             <img src={possibleLogo} alt="Logo TravelGo" className="h-20 w-auto sm:h-24 xl:h-28" />
             <span>
@@ -260,7 +261,7 @@ export default function Landing() {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-2xl xl:max-w-[42rem] xl:flex xl:items-center xl:-mt-10 hero-image">
+        <div className={`mx-auto w-full max-w-2xl xl:max-w-[42rem] xl:flex xl:items-center xl:-mt-10 hero-image hero-entrance ${isHeroVisible ? 'hero-entrance-visible' : ''}`}>
           <img
             src={creditCard}
             alt="Tarjeta TravelGo"
@@ -269,8 +270,8 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="section-feature-boxes" className={`landing-screen landing-section landing-feature-screen feature-boxes-section mx-auto w-full px-6 py-16 lg:px-8 ${activeSection === 'section-feature-boxes' ? 'section-active' : ''}`}>
-        <div className={`mx-auto w-full max-w-[1440px] section-content ${activeSection === 'section-feature-boxes' ? 'section-visible' : ''}`}>
+      <section id="section-feature-boxes" className={`landing-screen landing-section landing-feature-screen feature-boxes-section mx-auto w-full px-6 py-16 lg:px-8 ${visibleSections.includes('section-feature-boxes') ? 'section-active' : ''}`}>
+        <div className={`mx-auto w-full max-w-[1440px] section-content ${visibleSections.includes('section-feature-boxes') ? 'section-visible' : ''}`}>
           <div className="mx-auto max-w-[980px] space-y-10">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-3 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold uppercase tracking-[0.28em] text-slate-800">
@@ -341,7 +342,7 @@ export default function Landing() {
       </section>
 
       {/* Secciones objetivo para cada box */}
-      <section id="section-multicurrency" className={`landing-section section-multicurrency ${activeSection === 'section-multicurrency' ? 'section-active' : ''}`} aria-label="Billetera multimoneda">
+      <section id="section-multicurrency" className={`landing-section section-multicurrency ${visibleSections.includes('section-multicurrency') ? 'section-active' : ''}`} aria-label="Billetera multimoneda">
         <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
           <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div className="space-y-6 max-w-xl">
@@ -392,7 +393,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="section-best-rates" className={`landing-section section-best-rates ${activeSection === 'section-best-rates' ? 'section-active' : ''}`} aria-label="Mejores tasas de cambio">
+      <section id="section-best-rates" className={`landing-section section-best-rates ${visibleSections.includes('section-best-rates') ? 'section-active' : ''}`} aria-label="Mejores tasas de cambio">
         <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div className="space-y-6 max-w-xl">
@@ -431,7 +432,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="section-secure" className={`landing-section section-secure ${activeSection === 'section-secure' ? 'section-active' : ''}`} aria-label="Segura y confiable">
+      <section id="section-secure" className={`landing-section section-secure ${visibleSections.includes('section-secure') ? 'section-active' : ''}`} aria-label="Segura y confiable">
         <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div className="space-y-6 max-w-xl">
@@ -502,7 +503,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="section-support" className={`landing-section section-support ${activeSection === 'section-support' ? 'section-active' : ''}`} aria-label="Acceso inmediato">
+      <section id="section-support" className={`landing-section section-support ${visibleSections.includes('section-support') ? 'section-active' : ''}`} aria-label="Acceso inmediato">
         <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div className="space-y-6 max-w-xl">

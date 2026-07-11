@@ -98,6 +98,17 @@ body {
   padding-bottom: 4rem;
 }
 
+.hero-entrance {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.hero-entrance-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .landing-feature-screen {
   align-items: stretch;
   padding: 4rem 1.5rem;
