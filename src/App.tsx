@@ -17,20 +17,26 @@ const NO_CHROME_PATHS = ['/', '/login', '/register', '/configurar-password', '/r
 
 function App() {
   const location = useLocation()
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(() => !NO_CHROME_PATHS.includes(window.location.pathname))
 
   useEffect(() => {
-    if (NO_CHROME_PATHS.includes(location.pathname)) return
+    if (NO_CHROME_PATHS.includes(location.pathname)) {
+      setIsLoading(false)
+      return
+    }
+
     setIsLoading(true)
+
     const timer = window.setTimeout(() => {
       setIsLoading(false)
-    }, 950)
+    }, 1200)
+
     return () => window.clearTimeout(timer)
-  }, [location.key])
+  }, [location.pathname])
 
   return (
     <>
-      {!NO_CHROME_PATHS.includes(location.pathname) && <Navbar />}
+      {!NO_CHROME_PATHS.includes(location.pathname) && !isLoading && <Navbar />}
       {isLoading ? (
         <div
           style={{
