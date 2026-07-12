@@ -26,10 +26,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [balances, setBalances] = useState<Balance[]>([]);
   const [rates, setRates] = useState<ExchangeRates>({});
-  const [loading, setLoading] = useState(true);
   const [selectedCurrency, setSelectedCurrency] = useState<Balance | null>(
     null,
   );
+  const [dataLoading, setDataLoading] = useState(true);
 
   const handleLogout = () => {
     setTimeout(() => {
@@ -47,13 +47,20 @@ export default function Dashboard() {
       }
 
       try {
-        const ratesRes = await fetch(`${import.meta.env.VITE_API_URL}/rates`);
-        const ratesData = await ratesRes.json();
-        setRates(ratesData.rates);
+        const currencies = ["USD", "EUR", "BRL", "CLP"];
+        const rateResponses = await Promise.all(
+          currencies.map((currency) => api.get(`/rates/ARS/${currency}`)),
+        );
+        const ratesData: ExchangeRates = {};
+        rateResponses.forEach((res, index) => {
+          const rateValue = res.data?.rate ?? res.data?.data?.rate;
+          ratesData[currencies[index]] = rateValue;
+        });
+        setRates(ratesData);
       } catch (err) {
         console.error("Error cargando tasas:", err);
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     };
     fetchData();
@@ -71,15 +78,15 @@ export default function Dashboard() {
     }, 0);
   };
 
-  if (loading) {
+  const nonBaseBalances = balances.filter((b) => b.currencyCode !== "ARS");
+
+  if (dataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-grafito">
-        <p className="text-white text-lg">Cargando...</p>
+        <p className="text-white text-lg">Cargando tu billetera...</p>
       </div>
     );
   }
-
-  const nonBaseBalances = balances.filter((b) => b.currencyCode !== "ARS");
 
   return (
     <div
@@ -114,8 +121,9 @@ export default function Dashboard() {
             <div className="bg-linear-to-br from-terracota to-arena rounded-3xl p-8 text-white shadow-lg mb-5 border border-[#155a70]">
               <p className="text-sm font-semibold opacity-90">Balance total</p>
               <p className="text-4xl font-bold mt-1 mb-4">
-                {calculateTotalInARS().toLocaleString("es-AR", {
+                {calculateTotalInARS().toLocaleString("en-US", {
                   minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 })}{" "}
                 <span className="text-xl font-semibold">ARS</span>
               </p>
@@ -177,8 +185,9 @@ export default function Dashboard() {
                     style={{ width: "26px", height: "18px" }}
                   ></span>
                   <p className="text-sm font-bold text-white">
-                    {parseFloat(balance.amount).toLocaleString("es-AR", {
+                    {parseFloat(balance.amount).toLocaleString("en-US", {
                       minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
                     })}
                   </p>
                   <p className="text-xs font-bold text-oceano">
@@ -281,8 +290,9 @@ export default function Dashboard() {
 
             <p className="text-sm text-grafito/70 mb-1">Balance disponible</p>
             <p className="text-3xl font-bold text-grafito mb-4">
-              {parseFloat(selectedCurrency.amount).toLocaleString("es-AR", {
+              {parseFloat(selectedCurrency.amount).toLocaleString("en-US", {
                 minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
               })}{" "}
               <span className="text-lg">{selectedCurrency.currencyCode}</span>
             </p>
@@ -294,7 +304,10 @@ export default function Dashboard() {
                   {(
                     parseFloat(selectedCurrency.amount) /
                     rates[selectedCurrency.currencyCode]
-                  ).toLocaleString("es-AR", { minimumFractionDigits: 2 })}{" "}
+                  ).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{" "}
                   ARS
                 </span>
               </p>

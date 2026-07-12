@@ -38,20 +38,23 @@ declare global {
 
 export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
   const buttonRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (initialized.current) return
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) { setError("VITE_GOOGLE_CLIENT_ID no está configurada"); return }
 
     const renderGoogleButton = () => {
       if (!window.google || !buttonRef.current) { setError("No se pudo cargar Google Identity"); return }
+      initialized.current = true
       buttonRef.current.innerHTML = "";
       window.google.accounts.id.initialize({
         client_id: clientId,
         ux_mode: "popup",
         callback: async (response: CredentialResponse) => {
-          try {
+            try {
             setError(null)
             if (!response.credential) throw new Error("Google no devolvió una credencial")
             const result = await loginWithGoogle(response.credential)
@@ -79,7 +82,7 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
       if (!window.google) setError("No se pudo cargar Google Identity")
     }, 10000);
     return () => { window.clearInterval(interval); window.clearTimeout(timeout) }
-  }, [onAuthenticated])
+  }, [])
 
   return (
     <div>
