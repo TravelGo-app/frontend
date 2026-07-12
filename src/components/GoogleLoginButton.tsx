@@ -7,6 +7,7 @@ type CredentialResponse = {
 
 type GoogleLoginButtonProps = {
   onAuthenticated: (result: GoogleAuthResponse) => void;
+  onLoadingChange?: (loading: boolean) => void;
 };
 
 declare global {
@@ -36,7 +37,7 @@ declare global {
   }
 }
 
-export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
+export function GoogleLoginButton({ onAuthenticated, onLoadingChange }: GoogleLoginButtonProps) {
   const buttonRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,13 +55,15 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
         client_id: clientId,
         ux_mode: "popup",
         callback: async (response: CredentialResponse) => {
-            try {
+          onLoadingChange?.(true)
+          try {
             setError(null)
             if (!response.credential) throw new Error("Google no devolvió una credencial")
             const result = await loginWithGoogle(response.credential)
             onAuthenticated(result)
           } catch (err) {
             setError(err instanceof Error ? err.message : "Error iniciando sesión")
+            onLoadingChange?.(false)
           }
         },
       });

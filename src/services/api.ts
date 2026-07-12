@@ -5,7 +5,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -33,6 +33,26 @@ export const authService = {
     const response = await api.get('/auth/me')
     return {
       user: response.data.user
+    }
+  },
+
+  forgotPassword: async (email: string) => {
+    const response = await api.post('/auth/forgot-password', {
+      email: email.trim().toLowerCase(),
+    })
+    return {
+      message: response.data.message
+    }
+  },
+
+  resetPassword: async (token: string, password: string) => {
+    const response = await api.post('/auth/reset-password', {
+      token,
+      password,
+    })
+    return {
+      message: response.data.message,
+      user: response.data.user,
     }
   }
 }

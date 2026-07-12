@@ -11,7 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null
   token: string | null
-  login: (user: User, token: string) => void
+  login: (user: User, token: string, rememberMe?: boolean) => void
   logout: () => void
   isAuthenticated: boolean
   loading: boolean
@@ -19,13 +19,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
+const getStoredToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token')
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token')
+    const savedToken = getStoredToken()
     if (savedToken) {
       setToken(savedToken)
       authService
@@ -33,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .then((data) => setUser(data.user))
         .catch(() => {
           localStorage.removeItem('token')
+          sessionStorage.removeItem('token')
           setToken(null)
         })
         .finally(() => setLoading(false))
@@ -41,16 +46,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = (user: User, token: string) => {
+  // rememberMe = true -> localStorage (persiste entre sesiones del navegador)
+  // rememberMe = false -> sessionStorage (se borra al cerrar la pestaña/navegador)
+  const login = (user: User, token: string, rememberMe: boolean = true) => {
     setUser(user)
     setToken(token)
-    localStorage.setItem('token', token)
+    if (rememberMe) {
+      localStorage.setItem('token', token)
+      sessionStorage.removeItem('token')
+    } else {
+      sessionStorage.setItem('token', token)
+      localStorage.removeItem('token')
+    }
   }
 
   const logout = () => {
     setUser(null)
     setToken(null)
     localStorage.removeItem('token')
+    sessionStorage.removeItem('token')
   }
 
   return (
