@@ -1,55 +1,54 @@
-import { useEffect, useState } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Login from './pages/Login'
-import Landing from './pages/Landing'
-import Home from './pages/Home'
-import Dashboard from './pages/Dashboard'
-import SetPassword from './pages/SetPassword'
-import ResetPassword from './pages/ResetPassword'
-import ProtectedRoute from './components/ProtectedRoute'
-import Placeholder from './pages/Placeholder'
-import NotFound from './pages/NotFound'
+import { useEffect, useState } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
+import Landing from "./pages/Landing";
+import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Placeholder from "./pages/Placeholder";
+import NotFound from "./pages/NotFound";
+import Exchange from "./pages/Exchange";
+import Deposit from "./pages/Deposit";
+import Transfer from "./pages/Transfer";
+import Transactions from "./pages/Transactions";
 
-const loadingVideo = new URL('./assets/video loading.mp4', import.meta.url).toString()
-
-const NO_CHROME_PATHS = ['/', '/login', '/register', '/configurar-password', '/reset-password']
+const loadingVideo = new URL(
+  "./assets/video loading.mp4",
+  import.meta.url,
+).toString();
 
 function App() {
-  const location = useLocation()
-  const [isLoading, setIsLoading] = useState(() => !NO_CHROME_PATHS.includes(window.location.pathname))
+  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (NO_CHROME_PATHS.includes(location.pathname)) {
-      setIsLoading(false)
-      return
-    }
-
-    setIsLoading(true)
-
+    if (["/", "/login", "/register"].includes(location.pathname)) return;
+    setIsLoading(true);
     const timer = window.setTimeout(() => {
-      setIsLoading(false)
-    }, 1200)
-
-    return () => window.clearTimeout(timer)
-  }, [location.pathname])
+      setIsLoading(false);
+    }, 950);
+    return () => window.clearTimeout(timer);
+  }, [location.key]);
 
   return (
     <>
-      {!NO_CHROME_PATHS.includes(location.pathname) && !isLoading && <Navbar />}
+      {location.pathname !== "/" &&
+        location.pathname !== "/login" &&
+        location.pathname !== "/register" && <Navbar />}
       {isLoading ? (
         <div
           style={{
-            position: 'fixed',
+            position: "fixed",
             inset: 0,
-            background: '#0f172a',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            flexDirection: 'column',
+            background: "#0f172a",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            flexDirection: "column",
             zIndex: 1000,
-            overflow: 'hidden',
-            paddingBottom: '100px',
+            overflow: "hidden",
+            paddingBottom: "100px",
           }}
         >
           <video
@@ -59,16 +58,26 @@ function App() {
             muted
             playsInline
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
               zIndex: -1,
             }}
           />
-          <span style={{ color: '#000', fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.08em', background: 'rgba(255,255,255,0.75)', padding: '10px 18px', borderRadius: '16px' }}>
+          <span
+            style={{
+              color: "#000",
+              fontSize: "1.5rem",
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              background: "rgba(255,255,255,0.75)",
+              padding: "10px 18px",
+              borderRadius: "16px",
+            }}
+          >
             loading...
           </span>
         </div>
@@ -77,31 +86,61 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Login />} />
-          <Route path="/configurar-password" element={
-            <ProtectedRoute>
-              <SetPassword />
-            </ProtectedRoute>
-          } />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/home" element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/wallet" element={<Placeholder title="Wallet" />} />
-          <Route path="/exchange" element={<Placeholder title="Exchange" />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute>
+                <Transactions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exchange"
+            element={
+              <ProtectedRoute>
+                <Exchange />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/deposit"
+            element={
+              <ProtectedRoute>
+                <Deposit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/transfer"
+            element={
+              <ProtectedRoute>
+                <Transfer />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/history" element={<Placeholder title="History" />} />
           <Route path="/about-us" element={<Placeholder title="About Us" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
