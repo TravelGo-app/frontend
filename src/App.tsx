@@ -9,6 +9,7 @@ import SetPassword from './pages/SetPassword'
 import ProtectedRoute from './components/ProtectedRoute'
 import Placeholder from './pages/Placeholder'
 import NotFound from './pages/NotFound'
+import ChatbotWidget from './components/ChatbotWidget'
 
 const loadingVideo = new URL('./assets/video loading.mp4', import.meta.url).toString()
 
@@ -90,6 +91,11 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
+      {!isLoading &&
+        !['/', '/login', '/register', '/configurar-password'].includes(location.pathname) && (
+          <ChatbotWidget />
+        )}
+
     </>
   )
 }
