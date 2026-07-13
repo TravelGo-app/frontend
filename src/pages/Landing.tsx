@@ -21,6 +21,8 @@ export default function Landing() {
   const [secureRotation, setSecureRotation] = useState({ x: 0, y: 0 })
   const [isMulticurrencyVisible, setIsMulticurrencyVisible] = useState(false)
   const [isSecureVisible, setIsSecureVisible] = useState(false)
+  const [showScrollHint, setShowScrollHint] = useState(true)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const multicurrencyMediaRef = useRef<HTMLDivElement | null>(null)
   const secureMediaRef = useRef<HTMLDivElement | null>(null)
   const fadingRef = useRef(false)
@@ -43,6 +45,25 @@ export default function Landing() {
   useEffect(() => {
     // start first video
     v1Ref.current?.play().catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+
+    const handleScroll = () => {
+      const currentScrollTop = container?.scrollTop ?? window.scrollY ?? 0
+      setShowScrollHint(currentScrollTop < 24)
+    }
+
+    handleScroll()
+
+    container?.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      container?.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('scroll', handleScroll)
+    }
   }, [])
 
   useEffect(() => {
@@ -184,7 +205,7 @@ export default function Landing() {
   }, [visible])
 
   return (
-    <div className="min-h-screen overflow-x-hidden text-slate-900 relative landing-bg landing-scroll-container">
+    <div ref={scrollContainerRef} className="min-h-screen overflow-x-hidden text-slate-900 relative landing-bg landing-scroll-container">
 
       {/* two videos for seamless looping via crossfade (keeps fixed size) */}
       <video
@@ -242,7 +263,7 @@ export default function Landing() {
           onClick={() => navigate('/register')}
           className="floating-cta-button"
         >
-          Empezar
+          Comienza tu viaje
         </button>
       </header>
 
@@ -274,6 +295,11 @@ export default function Landing() {
             alt="Tarjeta TravelGo"
             className="mx-auto h-auto max-h-[76vh] w-full max-w-full rounded-[2rem] object-contain breathing"
           />
+        </div>
+
+        <div className={`scroll-hint ${showScrollHint ? '' : 'scroll-hint-hidden'}`} aria-hidden="true">
+          <span className="scroll-hint-icon">↓</span>
+          <span className="scroll-hint-label">Scroll</span>
         </div>
       </section>
 
