@@ -21,6 +21,7 @@ const loadingVideo = new URL(
   import.meta.url,
 ).toString();
 
+// Rutas donde no se muestra el Navbar ni la pantalla de loading entre rutas
 const NO_CHROME_PATHS = [
   "/",
   "/login",
@@ -28,6 +29,9 @@ const NO_CHROME_PATHS = [
   "/configurar-password",
   "/reset-password",
 ];
+
+// Rutas donde no se muestra el chatbot (más corta: sí aparece en login/register)
+const NO_CHATBOT_PATHS = ["/", "/configurar-password", "/reset-password"];
 
 function App() {
   const location = useLocation();
@@ -157,7 +161,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
-      {!isLoading && !NO_CHROME_PATHS.includes(location.pathname) && (
+      {!isLoading && !NO_CHATBOT_PATHS.includes(location.pathname) && (
         <ChatbotWidget />
       )}
     </>
