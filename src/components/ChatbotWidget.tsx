@@ -80,8 +80,8 @@ export default function ChatbotWidget() {
   return (
     <div className="fixed bottom-5 right-5 z-[999] flex flex-col items-end gap-3">
       {isOpen && (
-        <section className="w-[calc(100vw-2.5rem)] max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
-          <header className="bg-grafito px-5 py-4 text-white">
+        <section className="flex h-[500px] max-h-[70vh] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <header className="flex-shrink-0 bg-grafito px-5 py-4 text-white">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-arena">
               TravelGo
             </p>
@@ -93,7 +93,7 @@ export default function ChatbotWidget() {
 
           <div
             ref={messagesRef}
-            className="flex max-h-80 flex-col gap-3 overflow-y-auto bg-slate-50 px-4 py-4"
+            className="flex flex-1 flex-col gap-3 overflow-y-auto bg-slate-50 px-4 py-4"
           >
             {messages.map((item) => (
               <div
@@ -115,7 +115,7 @@ export default function ChatbotWidget() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="flex gap-2 border-t border-slate-200 bg-white p-3">
+          <form onSubmit={handleSubmit} className="flex flex-shrink-0 gap-2 border-t border-slate-200 bg-white p-3">
             <input
               value={message}
               onChange={(event) => setMessage(event.target.value)}
