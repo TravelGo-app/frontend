@@ -5,6 +5,8 @@ import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import SetPassword from "./pages/SetPassword";
+import ResetPassword from "./pages/ResetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
@@ -12,18 +14,27 @@ import Exchange from "./pages/Exchange";
 import Deposit from "./pages/Deposit";
 import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
+import ChatbotWidget from "./components/ChatbotWidget";
 
 const loadingVideo = new URL(
   "./assets/video loading.mp4",
   import.meta.url,
 ).toString();
 
+const NO_CHROME_PATHS = [
+  "/",
+  "/login",
+  "/register",
+  "/configurar-password",
+  "/reset-password",
+];
+
 function App() {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (["/", "/login", "/register"].includes(location.pathname)) return;
+    if (NO_CHROME_PATHS.includes(location.pathname)) return;
     setIsLoading(true);
     const timer = window.setTimeout(() => {
       setIsLoading(false);
@@ -33,9 +44,7 @@ function App() {
 
   return (
     <>
-      {location.pathname !== "/" &&
-        location.pathname !== "/login" &&
-        location.pathname !== "/register" && <Navbar />}
+      {!NO_CHROME_PATHS.includes(location.pathname) && <Navbar />}
       {isLoading ? (
         <div
           style={{
@@ -86,6 +95,15 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Login />} />
+          <Route
+            path="/configurar-password"
+            element={
+              <ProtectedRoute>
+                <SetPassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/home"
             element={
@@ -138,6 +156,9 @@ function App() {
           <Route path="/about-us" element={<Placeholder title="About Us" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+      )}
+      {!isLoading && !NO_CHROME_PATHS.includes(location.pathname) && (
+        <ChatbotWidget />
       )}
     </>
   );
