@@ -109,6 +109,67 @@ body {
   transform: translateY(0);
 }
 
+.landing-header {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.floating-cta-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
+  color: white;
+  padding: 0.95rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.24);
+  cursor: pointer;
+  will-change: transform;
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+
+.floating-cta-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+}
+
+.landing-header-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 22rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.landing-header-text {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(255,255,255,0.96);
+  text-align: left;
+  text-align-last: left;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
 .landing-feature-screen {
   align-items: stretch;
   padding: 4rem 1.5rem;
@@ -242,6 +303,11 @@ html { scroll-behavior: smooth; }
     min-height: 100vh;
     height: auto;
     padding: 2rem 1rem;
+  }
+
+  .floating-cta-button {
+    padding: 0.85rem 1.15rem;
+    font-size: 0.95rem;
   }
 }
 

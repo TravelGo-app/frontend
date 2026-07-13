@@ -185,6 +185,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen overflow-x-hidden text-slate-900 relative landing-bg landing-scroll-container">
+
       {/* two videos for seamless looping via crossfade (keeps fixed size) */}
       <video
         ref={v1Ref}
@@ -230,6 +231,21 @@ export default function Landing() {
           willChange: 'opacity, transform',
         }}
       />
+      <header className="landing-header">
+        <div className="landing-header-chip">
+          <p className="landing-header-text">
+            Crea tu cuenta gratis y administra tu dinero desde cualquier destino.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/register')}
+          className="floating-cta-button"
+        >
+          Empezar
+        </button>
+      </header>
+
       <section className="landing-screen landing-hero-screen mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:px-8 lg:py-14 xl:grid-cols-[1.1fr_0.9fr] xl:items-start landing-hero-grid" style={{ position: 'relative', zIndex: 1 }}>
         <div className={`space-y-8 xl:max-w-xl xl:-mt-8 hero-copy hero-entrance ${isHeroVisible ? 'hero-entrance-visible' : ''}`}>
           <div className="mt-4 flex flex-col items-start gap-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:flex-row sm:items-center sm:justify-center xl:justify-start sm:text-5xl xl:text-6xl">
@@ -250,15 +266,6 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="flex justify-start sm:justify-center xl:justify-start">
-            <button
-              type="button"
-              onClick={() => navigate('/register')}
-              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-orange-600 px-10 py-4 text-base sm:px-14 sm:py-5 sm:text-xl font-extrabold text-white shadow-2xl hover:from-orange-500 hover:to-orange-700 transform hover:scale-105 transition"
-            >
-              Empezar
-            </button>
-          </div>
         </div>
 
         <div className={`mx-auto w-full max-w-2xl xl:max-w-[42rem] xl:flex xl:items-center xl:-mt-10 hero-image hero-entrance ${isHeroVisible ? 'hero-entrance-visible' : ''}`}>
