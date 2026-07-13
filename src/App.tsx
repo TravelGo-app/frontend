@@ -13,14 +13,15 @@ import NotFound from './pages/NotFound'
 
 const loadingVideo = new URL('./assets/video loading.mp4', import.meta.url).toString()
 
-const NO_CHROME_PATHS = ['/', '/login', '/register', '/configurar-password', '/reset-password']
+const HIDE_NAVBAR_PATHS = ['/', '/login', '/register', '/configurar-password', '/reset-password']
+const NO_LOADING_PATHS = ['/login', '/register', '/configurar-password', '/reset-password']
 
 function App() {
   const location = useLocation()
-  const [isLoading, setIsLoading] = useState(() => !NO_CHROME_PATHS.includes(window.location.pathname))
+  const [isLoading, setIsLoading] = useState(() => !NO_LOADING_PATHS.includes(window.location.pathname))
 
   useEffect(() => {
-    if (NO_CHROME_PATHS.includes(location.pathname)) {
+    if (NO_LOADING_PATHS.includes(location.pathname)) {
       setIsLoading(false)
       return
     }
@@ -36,7 +37,7 @@ function App() {
 
   return (
     <>
-      {!NO_CHROME_PATHS.includes(location.pathname) && !isLoading && <Navbar />}
+      {!HIDE_NAVBAR_PATHS.includes(location.pathname) && !isLoading && <Navbar />}
       {isLoading ? (
         <div
           style={{

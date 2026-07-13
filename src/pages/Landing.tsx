@@ -7,6 +7,7 @@ import secureVideo from '../assets/VideoCandado.mp4'
 import onlyCreditCard from '../assets/OnlyCredicard.png'
 import celularTasas from '../assets/celulartazas.png'
 import phoneTrip from '../assets/phoneTrip.png'
+import beachPoster from '../assets/playa.jpg'
 const beachVideo = new URL('../assets/Playafondo.mp4', import.meta.url).toString()
 
 export default function Landing() {
@@ -212,10 +213,13 @@ export default function Landing() {
         ref={v1Ref}
         id="bg-v1"
         src={beachVideo}
+        poster={beachPoster}
         autoPlay
         muted
         playsInline
         loop={false}
+        preload="auto"
+        onCanPlay={() => v1Ref.current?.play().catch(() => {})}
         style={{
           position: 'absolute',
           top: 0,
@@ -228,16 +232,19 @@ export default function Landing() {
           transition: `opacity ${CROSSFADE}s linear`,
           pointerEvents: 'none',
           willChange: 'opacity, transform',
+          backgroundColor: 'transparent',
         }}
       />
       <video
         ref={v2Ref}
         id="bg-v2"
         src={beachVideo}
+        poster={beachPoster}
         autoPlay={false}
         muted
         playsInline
         loop={false}
+        preload="auto"
         style={{
           position: 'absolute',
           top: 0,
@@ -250,6 +257,7 @@ export default function Landing() {
           transition: `opacity ${CROSSFADE}s linear`,
           pointerEvents: 'none',
           willChange: 'opacity, transform',
+          backgroundColor: 'transparent',
         }}
       />
       <header className="landing-header">
