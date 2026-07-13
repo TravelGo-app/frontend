@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Exchange from "./pages/Exchange";
 import Deposit from "./pages/Deposit";
 import Transfer from "./pages/Transfer";
+import Transactions from "./pages/Transactions";
 
 const loadingVideo = new URL(
   "./assets/video loading.mp4",
@@ -101,7 +102,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/wallet" element={<Placeholder title="Wallet" />} />
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute>
+                <Transactions />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/exchange"
             element={

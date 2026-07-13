@@ -94,7 +94,7 @@ export default function Exchange() {
           onClick={() => navigate("/dashboard")}
           className="text-white/70 hover:text-white text-sm font-semibold mb-6"
         >
-          ← Volver al Dashboard
+          ← Volver a Billetera
         </button>
 
         <div className="bg-white rounded-3xl p-6 shadow-lg border border-[#155a70]">
@@ -119,13 +119,13 @@ export default function Exchange() {
                   onClick={handleNewExchange}
                   className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
                 >
-                  Hacer otro
+                  Nuevo intercambio
                 </button>
                 <button
                   onClick={() => navigate("/dashboard")}
                   className="flex-1 bg-coral text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
                 >
-                  Volver al Dashboard
+                  Volver a Billetera
                 </button>
               </div>
             </div>
