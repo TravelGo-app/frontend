@@ -5,6 +5,7 @@ import { useLoginForm } from '../hooks/useLoginForm'
 import { useRegisterForm } from '../hooks/useRegisterForm'
 import LoginFormFields from '../components/auth/LoginFormFields'
 import RegisterFormFields from '../components/auth/RegisterFormFields'
+import { useChatVisibility } from '../context/ChatVisibilityContext'
 
 export default function Login() {
   const location = useLocation()
@@ -13,6 +14,7 @@ export default function Login() {
   const [isRegister, setIsRegister] = useState(initialRegisterMode)
   const [showWelcome, setShowWelcome] = useState(false)
   const [welcomeName, setWelcomeName] = useState('')
+  const { setHideChat } = useChatVisibility()
 
   const loginForm = useLoginForm()
   const registerForm = useRegisterForm({
@@ -30,6 +32,12 @@ export default function Login() {
       setIsRegister(false)
     }
   }, [location.pathname])
+
+  // Oculta el chat mientras se muestra la pantalla de carga de Google
+  useEffect(() => {
+    setHideChat(loginForm.googleAuthLoading)
+    return () => setHideChat(false)
+  }, [loginForm.googleAuthLoading, setHideChat])
 
   const switchToRegister = () => {
     setIsRegister(true)
@@ -82,7 +90,7 @@ export default function Login() {
       style={{ backgroundImage: `url(${playaImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       {/* ===== DESKTOP/TABLET: panel deslizante horizontal (md en adelante) ===== */}
-      <div className="hidden md:flex relative w-[800px] max-w-full h-[620px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden">
+      <div className="hidden md:flex relative z-[1000] w-[800px] max-w-full h-[620px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden">
         <button
           onClick={() => navigate('/')}
           aria-label="Volver a página principal"
@@ -153,7 +161,7 @@ export default function Login() {
       </div>
 
       {/* ===== MOBILE: tarjeta apilada con transición vertical (debajo de md) ===== */}
-      <div className="flex md:hidden relative w-full max-w-[420px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex-col">
+      <div className="flex md:hidden relative z-[1000] w-full max-w-[420px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex-col">
         <button
           onClick={() => navigate('/')}
           aria-label="Volver a página principal"

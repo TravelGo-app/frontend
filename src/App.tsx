@@ -15,13 +15,13 @@ import Deposit from "./pages/Deposit";
 import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
 import ChatbotWidget from "./components/ChatbotWidget";
+import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
 
 const loadingVideo = new URL(
   "./assets/video loading.mp4",
   import.meta.url,
 ).toString();
 
-// Rutas donde no se muestra el Navbar ni la pantalla de loading entre rutas
 const NO_CHROME_PATHS = [
   "/",
   "/login",
@@ -30,12 +30,14 @@ const NO_CHROME_PATHS = [
   "/reset-password",
 ];
 
-// Rutas donde no se muestra el chatbot (más corta: sí aparece en login/register)
 const NO_CHATBOT_PATHS = ["/", "/configurar-password", "/reset-password"];
 
-function App() {
+const AUTH_CARD_PATHS = ["/login", "/register"];
+
+function AppContent() {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const { hideChat } = useChatVisibility();
 
   useEffect(() => {
     if (NO_CHROME_PATHS.includes(location.pathname)) return;
@@ -45,6 +47,8 @@ function App() {
     }, 950);
     return () => window.clearTimeout(timer);
   }, [location.key]);
+
+  const isAuthCardPage = AUTH_CARD_PATHS.includes(location.pathname);
 
   return (
     <>
@@ -161,11 +165,19 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
-      {!isLoading && !NO_CHATBOT_PATHS.includes(location.pathname) && (
-        <ChatbotWidget />
-      )}
+      {!isLoading &&
+        !hideChat &&
+        !NO_CHATBOT_PATHS.includes(location.pathname) && (
+          <ChatbotWidget compact={isAuthCardPage} />
+        )}
     </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ChatVisibilityProvider>
+      <AppContent />
+    </ChatVisibilityProvider>
+  );
+}
