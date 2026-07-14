@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import possibleLogo from '../assets/PosibleLogo.png'
 import creditCard from '../assets/credicard.png'
@@ -31,11 +31,29 @@ export default function Landing() {
   const fadingRef = useRef(false)
   const CROSSFADE = 0.8
 
+  const location = useLocation()
+
   useEffect(() => {
+    // Si venimos con la intención de mostrar el footer, scrollear hacia él
+    const requested = (location.state as any)?.scrollTo
+    if (requested === 'footer') {
+      const footer = document.getElementById('landing-hero-footer')
+      if (footer) {
+        // esperar al siguiente frame para asegurar layout
+        window.requestAnimationFrame(() => {
+          footer.scrollIntoView({ behavior: 'smooth', block: 'end' })
+          try {
+            // limpiar el state para que no vuelva a scrollear al navegar dentro
+            window.history.replaceState({}, document.title)
+          } catch {}
+        })
+      }
+    }
+
     if (isAuthenticated) {
       navigate('/dashboard', { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, location.key])
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {

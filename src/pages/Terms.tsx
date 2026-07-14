@@ -7,7 +7,7 @@ export default function Terms() {
         <div className="document-hero">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-4">
-              <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-oceano hover:text-grafito transition">
+              <Link to="/" state={{ scrollTo: 'footer' }} className="inline-flex items-center gap-2 text-sm font-semibold text-oceano hover:text-grafito transition">
                 ← Volver a inicio
               </Link>
               <h1 className="document-hero-title">Términos y Condiciones</h1>
