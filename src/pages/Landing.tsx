@@ -650,7 +650,14 @@ export default function Landing() {
                     <button
                       type="button"
                       className="footer-link-button"
-                      onClick={() => document.getElementById('landing-top')?.scrollIntoView({ behavior: 'smooth' })}
+                      onClick={() => {
+                        const container = scrollContainerRef.current
+                        if (container) {
+                          container.scrollTo({ top: 0, behavior: 'smooth' })
+                        } else {
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }
+                      }}
                     >
                       Inicio
                     </button>
