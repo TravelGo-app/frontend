@@ -8,6 +8,7 @@ import onlyCreditCard from '../assets/OnlyCredicard.png'
 import celularTasas from '../assets/celulartazas.png'
 import phoneTrip from '../assets/phoneTrip.png'
 const beachVideo = new URL('../assets/Playafondo.mp4', import.meta.url).toString()
+const footerBackground = new URL('../assets/playa2.png', import.meta.url).toString()
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -22,9 +23,11 @@ export default function Landing() {
   const [isMulticurrencyVisible, setIsMulticurrencyVisible] = useState(false)
   const [isSecureVisible, setIsSecureVisible] = useState(false)
   const [showScrollHint, setShowScrollHint] = useState(true)
+  const [isInFooterScrollZone, setIsInFooterScrollZone] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const multicurrencyMediaRef = useRef<HTMLDivElement | null>(null)
   const secureMediaRef = useRef<HTMLDivElement | null>(null)
+  const supportSectionRef = useRef<HTMLElement | null>(null)
   const fadingRef = useRef(false)
   const CROSSFADE = 0.8
 
@@ -53,6 +56,14 @@ export default function Landing() {
     const handleScroll = () => {
       const currentScrollTop = container?.scrollTop ?? window.scrollY ?? 0
       setShowScrollHint(currentScrollTop < 24)
+
+      const supportSection = supportSectionRef.current
+      if (supportSection) {
+        const rect = supportSection.getBoundingClientRect()
+        const buffer = 110
+        const isFooterZone = rect.top <= buffer
+        setIsInFooterScrollZone(isFooterZone)
+      }
     }
 
     handleScroll()
@@ -302,10 +313,12 @@ export default function Landing() {
           />
         </div>
 
-        <div className={`scroll-hint ${showScrollHint ? '' : 'scroll-hint-hidden'}`} aria-hidden="true">
-          <span className="scroll-hint-icon">↓</span>
-          <span className="scroll-hint-label">Scroll</span>
-        </div>
+        {showScrollHint && !isInFooterScrollZone && (
+          <div className="scroll-hint" aria-hidden="true">
+            <span className="scroll-hint-icon">↓</span>
+            <span className="scroll-hint-label">Scroll</span>
+          </div>
+        )}
       </section>
 
       <section id="section-feature-boxes" className={`landing-screen landing-section landing-feature-screen feature-boxes-section mx-auto w-full px-6 py-16 lg:px-8 ${visibleSections.includes('section-feature-boxes') ? 'section-active' : ''}`}>
@@ -378,6 +391,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      
 
       {/* Secciones objetivo para cada box */}
       <section id="section-multicurrency" className={`landing-section section-multicurrency ${visibleSections.includes('section-multicurrency') ? 'section-active' : ''}`} aria-label="Billetera multimoneda">
@@ -541,7 +556,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="section-support" className={`landing-section section-support ${visibleSections.includes('section-support') ? 'section-active' : ''}`} aria-label="Acceso inmediato">
+      <section ref={supportSectionRef} id="section-support" className={`landing-section section-support ${visibleSections.includes('section-support') ? 'section-active' : ''}`} aria-label="Acceso inmediato">
         <div className="mx-auto max-w-[1440px] px-10 lg:px-14 py-20 section-content" style={{ maxWidth: '1440px' }}>
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div className="space-y-6 max-w-xl">
@@ -579,6 +594,89 @@ export default function Landing() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="landing-section landing-footer-section">
+        <footer id="landing-hero-footer" className="landing-hero-footer" role="contentinfo">
+          <div
+            className="footer-bg-overlay"
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.18)), url(${footerBackground})`,
+            }}
+          />
+          <div className="footer-panel">
+            <div className="footer-container">
+              <div className="footer-col footer-brand">
+                <div className="brand-row">
+                  <img src={possibleLogo} alt="TravelGo logo" className="footer-logo" />
+                  <div>
+                    <p className="footer-brand-title">TravelGo</p>
+                    <p className="footer-brand-subtitle">Tu billetera virtual para viajar sin fronteras.</p>
+                  </div>
+                </div>
+                <p className="footer-desc">Cambia, paga y gestiona tus monedas de forma segura, rápida y confiable.</p>
+                <div className="footer-socials">
+                  <a aria-label="Instagram" href="#">IG</a>
+                  <a aria-label="Facebook" href="#">FB</a>
+                  <a aria-label="Twitter" href="#">TW</a>
+                  <a aria-label="YouTube" href="#">YT</a>
+                </div>
+              </div>
+
+              <div className="footer-col footer-links">
+                <h4>NAVEGACIÓN</h4>
+                <ul>
+                  <li><a href="#">Inicio</a></li>
+                  <li><a href="#">Billetera</a></li>
+                  <li><a href="#">Cambio de divisas</a></li>
+                  <li><a href="#">Historial</a></li>
+                  <li><a href="#">Próximamente</a></li>
+                  <li><a href="#">Sobre nosotros</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col footer-links">
+                <h4>RECURSOS</h4>
+                <ul>
+                  <li><a href="#">Centro de ayuda</a></li>
+                  <li><a href="#">Preguntas frecuentes</a></li>
+                  <li><a href="#">Seguridad</a></li>
+                  <li><a href="#">Tarifas y límites</a></li>
+                  <li><a href="#">Blog</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col footer-links">
+                <h4>EMPRESA</h4>
+                <ul>
+                  <li><a href="#">Sobre nosotros</a></li>
+                  <li><a href="#">Términos y condiciones</a></li>
+                  <li><a href="#">Política de privacidad</a></li>
+                  <li><a href="#">Trabajá con nosotros</a></li>
+                  <li><a href="#">Contacto</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col footer-contact">
+                <h4>CONTÁCTANOS</h4>
+                <div className="contact-list">
+                  <p><span>✉️</span> hola@travelgo.com</p>
+                  <p><span>📞</span> +57 300 123 4567</p>
+                  <p><span>📍</span> Medellín, Colombia</p>
+                </div>
+                <div className="newsletter-block">
+                  <p className="newsletter-title">SUSCRÍBETE A NUESTRO NEWSLETTER</p>
+                  <p className="newsletter-text">Recibe novedades, consejos y ofertas exclusivas.</p>
+                  <form className="footer-newsletter" onSubmit={(e) => e.preventDefault()}>
+                    <input aria-label="email" placeholder="Tu correo electrónico" className="newsletter-input" />
+                    <button className="newsletter-btn" aria-label="subscribe">→</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div className="footer-bottom">© {new Date().getFullYear()} TravelGo. Todos los derechos reservados. <span>Hecho con ❤️ para viajeros como tú.</span></div>
+          </div>
+        </footer>
       </section>
     </div>
   )
