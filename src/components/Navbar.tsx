@@ -1,18 +1,17 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import logo from '../assets/PosibleLogo.png'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import logo from "../assets/PosibleLogo.png";
 
 const navItems = [
-  { label: 'Inicio', path: '/' },
-  { label: 'Panel', path: '/dashboard' },
-  { label: 'Billetera', path: '/wallet' },
-  { label: 'Intercambio', path: '/exchange' },
-  { label: 'Historial', path: '/history' },
-  { label: 'Nosotros', path: '/about-us' },
-]
+  { label: "Inicio", path: "/" },
+  { label: "Billetera", path: "/dashboard" },
+  { label: "Transacciones", path: "/transactions" },
+  { label: "Historial", path: "/history" },
+  { label: "Nosotros", path: "/about-us" },
+];
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
@@ -20,55 +19,91 @@ export default function Navbar() {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Abrir menú"
         style={{
-          position: 'fixed',
+          position: "fixed",
           top: 16,
           left: 16,
           zIndex: 1001,
           width: 44,
           height: 44,
           borderRadius: 12,
-          border: '1px solid #cbd5e1',
-          background: '#fff',
-          display: 'grid',
-          placeItems: 'center',
-          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12)',
-          cursor: 'pointer',
+          border: "1px solid #cbd5e1",
+          background: "#fff",
+          display: "grid",
+          placeItems: "center",
+          boxShadow: "0 10px 30px rgba(15, 23, 42, 0.12)",
+          cursor: "pointer",
         }}
       >
-        <div style={{ display: 'grid', gap: 4 }}>
-          <span style={{ width: 20, height: 2, background: '#1f2937', display: 'block' }} />
-          <span style={{ width: 20, height: 2, background: '#1f2937', display: 'block' }} />
-          <span style={{ width: 20, height: 2, background: '#1f2937', display: 'block' }} />
+        <div style={{ display: "grid", gap: 4 }}>
+          <span
+            style={{
+              width: 20,
+              height: 2,
+              background: "#1f2937",
+              display: "block",
+            }}
+          />
+          <span
+            style={{
+              width: 20,
+              height: 2,
+              background: "#1f2937",
+              display: "block",
+            }}
+          />
+          <span
+            style={{
+              width: 20,
+              height: 2,
+              background: "#1f2937",
+              display: "block",
+            }}
+          />
         </div>
       </button>
 
       <aside
         style={{
-          position: 'fixed',
+          position: "fixed",
           top: 0,
           left: 0,
-          height: '100vh',
+          height: "100vh",
           width: 260,
-          background: '#f8fafc',
-          transform: isOpen ? 'translateX(0)' : 'translateX(-110%)',
-          transition: 'transform 250ms ease-in-out',
+          background: "#f8fafc",
+          transform: isOpen ? "translateX(0)" : "translateX(-110%)",
+          transition: "transform 250ms ease-in-out",
           zIndex: 1000,
-          padding: '20px 16px',
-          boxShadow: isOpen ? '8px 0 24px rgba(15, 23, 42, 0.12)' : 'none',
-          overflowY: 'auto',
+          padding: "20px 16px",
+          boxShadow: isOpen ? "8px 0 24px rgba(15, 23, 42, 0.12)" : "none",
+          overflowY: "auto",
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <Link to="/" onClick={() => setIsOpen(false)} style={{ display: 'inline-flex', alignItems: 'center' }}>
-            <img src={logo} alt="Posible logo" style={{ height: 36, width: 'auto' }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 24,
+          }}
+        >
+          <Link
+            to="/"
+            onClick={() => setIsOpen(false)}
+            style={{ display: "inline-flex", alignItems: "center" }}
+          >
+            <img
+              src={logo}
+              alt="Posible logo"
+              style={{ height: 36, width: "auto" }}
+            />
           </Link>
           <button
             onClick={() => setIsOpen(false)}
             aria-label="Cerrar menú"
             style={{
-              border: 'none',
-              background: 'transparent',
-              cursor: 'pointer',
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
               padding: 0,
               fontSize: 20,
               lineHeight: 1,
@@ -78,23 +113,23 @@ export default function Navbar() {
           </button>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <nav style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               onClick={() => setIsOpen(false)}
               style={{
-                textDecoration: 'none',
-                color: '#1f2937',
+                textDecoration: "none",
+                color: "#1f2937",
                 fontFamily: 'Georgia, "Times New Roman", serif',
                 fontWeight: 700,
-                fontSize: '1rem',
-                letterSpacing: '0.02em',
-                padding: '10px 12px',
+                fontSize: "1rem",
+                letterSpacing: "0.02em",
+                padding: "10px 12px",
                 borderRadius: 12,
-                background: '#fff',
-                boxShadow: '0 5px 12px rgba(15, 23, 42, 0.06)',
+                background: "#fff",
+                boxShadow: "0 5px 12px rgba(15, 23, 42, 0.06)",
               }}
             >
               {item.label}
@@ -103,5 +138,5 @@ export default function Navbar() {
         </nav>
       </aside>
     </>
-  )
+  );
 }
