@@ -25,6 +25,7 @@ const initialMessages: ChatMessage[] = [
 ]
 
 const GRADIENT = 'bg-gradient-to-r from-[#2A9BB5] to-[#F26A2E]'
+const DRAG_THRESHOLD = 5 // px: por debajo de esto se considera "click", no "arrastre"
 
 export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -32,6 +33,11 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
   const [message, setMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
   const messagesRef = useRef<HTMLDivElement | null>(null)
+
+  // Posición arrastrable del botón/panel flotante (solo en modo normal, no compacto)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const dragState = useRef({ startX: 0, startY: 0, originX: 0, originY: 0, dragging: false, moved: false })
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!isOpen) return
@@ -84,12 +90,65 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
     }
   }
 
+  function clampOffset(x: number, y: number) {
+    if (!wrapperRef.current) return { x, y }
+    const rect = wrapperRef.current.getBoundingClientRect()
+    // Límites: no dejar que el wrapper se salga de la pantalla (con 8px de margen)
+    const minX = -(rect.left - dragOffset.x) + 8
+    const maxX = window.innerWidth - rect.right + dragOffset.x - 8
+    const minY = -(rect.top - dragOffset.y) + 8
+    const maxY = window.innerHeight - rect.bottom + dragOffset.y - 8
+    return {
+      x: Math.min(Math.max(x, minX), maxX),
+      y: Math.min(Math.max(y, minY), maxY),
+    }
+  }
+
+  function handlePointerDown(event: React.PointerEvent) {
+    if (compact) return // en modo compacto no se arrastra
+    dragState.current.startX = event.clientX
+    dragState.current.startY = event.clientY
+    dragState.current.originX = dragOffset.x
+    dragState.current.originY = dragOffset.y
+    dragState.current.dragging = true
+    dragState.current.moved = false
+    ;(event.target as HTMLElement).setPointerCapture(event.pointerId)
+  }
+
+  function handlePointerMove(event: React.PointerEvent) {
+    if (!dragState.current.dragging) return
+    const deltaX = event.clientX - dragState.current.startX
+    const deltaY = event.clientY - dragState.current.startY
+
+    if (Math.abs(deltaX) > DRAG_THRESHOLD || Math.abs(deltaY) > DRAG_THRESHOLD) {
+      dragState.current.moved = true
+    }
+
+    if (dragState.current.moved) {
+      const next = clampOffset(dragState.current.originX + deltaX, dragState.current.originY + deltaY)
+      setDragOffset(next)
+    }
+  }
+
+  function handlePointerUp() {
+    dragState.current.dragging = false
+  }
+
+  function handleToggleClick() {
+    // Si el puntero se movió más que el umbral, fue un arrastre: no abrir/cerrar el chat
+    if (dragState.current.moved) {
+      dragState.current.moved = false
+      return
+    }
+    setIsOpen((currentValue) => !currentValue)
+  }
+
   const chatPanel = (
     <section
       className={
         compact
           ? 'flex h-[700px] max-h-[90vh] w-full max-w-[420px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl md:h-[460px] md:max-h-[68vh] md:w-[320px]'
-          : 'flex h-[500px] max-h-[70vh] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl'
+          : 'flex h-[460px] max-h-[68vh] w-[calc(100vw-2.5rem)] max-w-[320px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl'
       }
     >
       <header className={`flex flex-shrink-0 items-start justify-between px-4 py-3 text-white ${GRADIENT}`}>
@@ -167,9 +226,14 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
   const toggleButton = (
     <button
       type="button"
-      onClick={() => setIsOpen((currentValue) => !currentValue)}
+      onClick={handleToggleClick}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
       aria-label={isOpen ? 'Cerrar chat de TravelGo' : 'Abrir chat de TravelGo'}
-      className={`flex h-14 min-w-14 items-center justify-center rounded-full px-5 text-sm font-bold text-white shadow-xl transition hover:-translate-y-0.5 hover:opacity-90 ${GRADIENT}`}
+      className={`flex h-14 min-w-14 items-center justify-center rounded-full px-5 text-sm font-bold text-white shadow-xl transition hover:-translate-y-0.5 hover:opacity-90 touch-none select-none ${
+        compact ? '' : 'cursor-grab active:cursor-grabbing'
+      } ${GRADIENT}`}
     >
       {isOpen ? 'Cerrar' : 'Chat'}
     </button>
@@ -202,10 +266,13 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
     )
   }
 
-  // Caso 3: modo normal (dashboard y resto) → panel y botón apilados en el mismo contenedor,
-  // el gap-3 los separa correctamente sin que se superpongan
+  // Caso 3: modo normal (dashboard y resto) → panel y botón apilados, arrastrables juntos
   return (
-    <div className="fixed bottom-5 right-5 z-[999] flex flex-col items-end gap-3">
+    <div
+      ref={wrapperRef}
+      className="fixed bottom-5 right-5 z-[999] flex flex-col items-end gap-3"
+      style={{ transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` }}
+    >
       {isOpen && chatPanel}
       {toggleButton}
     </div>

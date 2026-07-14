@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import playaImg from '../assets/playa.jpg'
+import playaImg from '../assets/PlayaPrincipal.png'
 
 export default function NotFound() {
   const navigate = useNavigate()

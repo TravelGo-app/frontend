@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import playaImg from '../assets/playa.jpg'
+import playaImg from '../assets/PlayaPrincipal.png'
 
 interface PasswordErrors {
   password?: string
