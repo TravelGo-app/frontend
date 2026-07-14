@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import beachBg from "../assets/Shell.jpg";
+import beachBg from "../assets/Shore.jpg";
 
 const OPTIONS = [
   {
