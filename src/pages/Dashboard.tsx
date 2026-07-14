@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
-import beachBg from "../assets/playa.jpg";
+import beachBg from "../assets/PlayaPrincipal.png";
 
 interface Balance {
   currencyCode: string;
@@ -30,6 +30,24 @@ interface RecentTransaction {
   createdAt: string;
 }
 
+interface AnalyticsTimelinePoint {
+  date: string;
+  currencyCode: string;
+  closingBalance: string;
+  netFlow: string;
+  depositsIn: string;
+  transfersIn: string;
+  transfersOut: string;
+  exchangesIn: string;
+  exchangesOut: string;
+  operationCount: number;
+}
+
+interface ChartDataPoint {
+  date: string;
+  closingBalance: number;
+}
+
 const currencyToCountry: { [key: string]: string } = {
   ARS: "ar",
   USD: "us",
@@ -45,6 +63,30 @@ const TRAVEL_TIPS = [
   "Guardá una copia digital de tus documentos de viaje.",
 ];
 
+const POLL_INTERVAL_MS = 20000;
+
+const buildChartPoints = (data: ChartDataPoint[]) => {
+  if (data.length < 2) return "";
+  const values = data.map((d) => d.closingBalance);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  return data
+    .map((d, i) => {
+      const x = (i / (data.length - 1)) * 300;
+      const y = 55 - ((d.closingBalance - min) / range) * 45;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+};
+
+const getActivityIcon = (tx: RecentTransaction) => {
+  if (tx.type === "deposit") return { icon: "+", bg: "#2391ae" };
+  if (tx.type === "exchange") return { icon: "↔", bg: "#ff4242" };
+  if (tx.direction === "out") return { icon: "↑", bg: "#ff7d60" };
+  return { icon: "↓", bg: "#16a34a" };
+};
+
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -55,8 +97,10 @@ export default function Dashboard() {
   );
   const [activity, setActivity] = useState<RecentTransaction[]>([]);
   const [activityError, setActivityError] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [tipIndex, setTipIndex] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const firstName = user?.name?.split(" ")[0];
 
@@ -74,43 +118,83 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const balancesRes = await api.get("/wallet/balances");
-        setBalances(balancesRes.data.balances);
-      } catch (err) {
-        console.error("Error cargando balances:", err);
-      }
+    const fetchData = async (isInitial = false) => {
+      if (isInitial) setDataLoading(true);
 
-      try {
-        const currencies = ["USD", "EUR", "BRL", "CLP"];
-        const rateResponses = await Promise.all(
-          currencies.map((currency) => api.get(`/rates/ARS/${currency}`)),
-        );
-        const ratesData: ExchangeRates = {};
-        rateResponses.forEach((res, index) => {
-          const rateValue = res.data?.rate ?? res.data?.data?.rate;
-          ratesData[currencies[index]] = rateValue;
-        });
-        setRates(ratesData);
-      } catch (err) {
-        console.error("Error cargando tasas:", err);
-      }
+      const fetchBalances = async () => {
+        try {
+          const res = await api.get("/wallet/balances");
+          setBalances(res.data.balances);
+        } catch (err) {
+          console.error("Error cargando balances:", err);
+        }
+      };
 
-      try {
-        const activityRes = await api.get("/transactions/recent?limit=10");
-        setActivity(activityRes.data.transactions);
-        setActivityError(null);
-      } catch (err) {
-        console.error("Error cargando actividad reciente:", err);
-        setActivityError(
-          "No pudimos cargar tu actividad reciente. Intentá nuevamente.",
-        );
-      } finally {
-        setDataLoading(false);
-      }
+      const fetchRates = async () => {
+        try {
+          const currencies = ["USD", "EUR", "BRL", "CLP"];
+          const rateResponses = await Promise.all(
+            currencies.map((currency) => api.get(`/rates/ARS/${currency}`)),
+          );
+          const ratesData: ExchangeRates = {};
+          rateResponses.forEach((res, index) => {
+            const rateValue = res.data?.rate ?? res.data?.data?.rate;
+            ratesData[currencies[index]] = rateValue;
+          });
+          setRates(ratesData);
+        } catch (err) {
+          console.error("Error cargando tasas:", err);
+        }
+      };
+
+      const fetchActivity = async () => {
+        try {
+          const res = await api.get("/transactions/recent?limit=10");
+          setActivity(res.data.transactions);
+          setActivityError(null);
+        } catch (err) {
+          console.error("Error cargando actividad reciente:", err);
+          setActivityError(
+            "No pudimos cargar tu actividad reciente. Intentá nuevamente.",
+          );
+        }
+      };
+
+      const fetchAnalytics = async () => {
+        try {
+          const res = await api.get("/transactions/analytics?days=7");
+          const timeline: AnalyticsTimelinePoint[] = res.data.timeline || [];
+          const arsTimeline = timeline
+            .filter((point) => point.currencyCode === "ARS")
+            .map((point) => ({
+              date: point.date,
+              closingBalance: Number(point.closingBalance),
+            }));
+          setChartData(arsTimeline);
+        } catch (err) {
+          console.error("Error cargando analytics:", err);
+          setChartData([]);
+        }
+      };
+
+      await Promise.all([
+        fetchBalances(),
+        fetchRates(),
+        fetchActivity(),
+        fetchAnalytics(),
+      ]);
+
+      if (isInitial) setDataLoading(false);
+      setLastUpdated(new Date());
     };
-    fetchData();
+
+    fetchData(true);
+
+    const pollInterval = setInterval(() => {
+      fetchData(false);
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(pollInterval);
   }, []);
 
   const calculateTotalInARS = () => {
@@ -125,7 +209,8 @@ export default function Dashboard() {
     }, 0);
   };
 
-  const nonBaseBalances = balances.filter((b) => b.currencyCode !== "ARS");
+  const arsBalance = balances.find((b) => b.currencyCode === "ARS");
+  const otherBalances = balances.filter((b) => b.currencyCode !== "ARS");
 
   const formatAmount = (value: string) =>
     parseFloat(value).toLocaleString("en-US", {
@@ -152,9 +237,16 @@ export default function Dashboard() {
     });
   };
 
+  const formatLastUpdated = (date: Date) =>
+    date.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
   if (dataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-grafito">
+      <div className="min-h-screen flex items-center justify-center bg-[#233446]">
         <p className="text-white text-lg font-body">Cargando tu billetera...</p>
       </div>
     );
@@ -162,40 +254,45 @@ export default function Dashboard() {
 
   return (
     <div
-      className="min-h-screen p-8 font-body"
+      className="min-h-screen p-8 font-body relative"
       style={{
         backgroundImage: `url(${beachBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundAttachment: "fixed",
       }}
     >
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-4 bg-grafito/55 backdrop-blur-md border border-white/15 rounded-2xl p-5 shadow-lg">
-          <div>
-            <h1
-              className="font-display text-3xl font-bold text-ocean-animated"
-              style={{ WebkitTextStroke: "0.6px rgba(35,52,70,0.55)" }}
-            >
-              ¡Hola, {firstName}!
-            </h1>
-            <p className="text-white/90 mt-1 text-sm font-semibold">
-              Bienvenido a tu billetera TravelGo
-            </p>
+      <div className="absolute inset-0 bg-black/25 pointer-events-none" />
+
+      <div className="max-w-4xl mx-auto relative z-10">
+        <div className="mb-4 bg-[rgba(90,90,90,0.55)] backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg">
+          <div className="flex h-1">
+            <div className="flex-1 bg-[#ff4242]"></div>
+            <div className="flex-1 bg-[#2391ae]"></div>
+            <div className="flex-1 bg-[#ff7d60]"></div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-coral text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-red-600 transition"
-          >
-            Cerrar sesión
-          </button>
+          <div className="flex justify-between items-center p-5">
+            <div>
+              <h1 className="font-display text-3xl font-bold text-[#9fe0ee]">
+                ¡Hola, {firstName}!
+              </h1>
+              <p className="text-white/90 mt-1 text-sm font-semibold">
+                Bienvenido a tu billetera TravelGo
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-[#ff4242] text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-red-600 transition"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 items-start">
           <div>
-            <div className="bg-linear-to-br from-terracota/40 to-arena/30 backdrop-blur-xl border border-white/30 rounded-2xl p-6 text-white shadow-lg mb-4">
+            <div className="bg-linear-to-br from-[#ff7d60]/40 to-[#e4c2a2]/30 backdrop-blur-xl border border-white/30 rounded-2xl p-6 text-white shadow-lg mb-4">
               <p className="text-sm font-extrabold uppercase tracking-wider">
-                Balance total
+                Balance total (equivalente en ARS)
               </p>
               <p
                 className="font-display text-5xl font-bold mt-2 mb-3"
@@ -212,41 +309,76 @@ export default function Dashboard() {
                   ARS
                 </span>
               </p>
-              <svg viewBox="0 0 300 60" className="w-full h-14">
-                <polyline
-                  points="0,45 50,40 100,30 150,35 200,20 250,18 300,8"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  className="animate-draw-line"
-                />
-              </svg>
+              {chartData.length >= 2 ? (
+                <svg viewBox="0 0 300 60" className="w-full h-14">
+                  <polyline
+                    points={buildChartPoints(chartData)}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="animate-draw-line"
+                  />
+                </svg>
+              ) : (
+                <p className="text-xs text-white/70 h-14 flex items-center">
+                  Todavía no hay suficiente historial para el gráfico.
+                </p>
+              )}
               <p className="text-xs font-semibold opacity-85 mt-1">
                 Últimos 7 días
+                {lastUpdated && (
+                  <span className="opacity-70">
+                    {" "}
+                    · Actualizado {formatLastUpdated(lastUpdated)}
+                  </span>
+                )}
               </p>
             </div>
 
             <h2 className="text-white font-bold text-sm mb-2">Tus monedas</h2>
+
+            {arsBalance && (
+              <button
+                onClick={() => setSelectedCurrency(arsBalance)}
+                className="w-full flex items-center justify-between bg-white/70 backdrop-blur-sm rounded-2xl p-3 shadow-lg cursor-pointer hover:brightness-95 transition mb-3"
+              >
+                <span
+                  className="fi fi-ar rounded-md shrink-0"
+                  style={{ width: "60px", height: "44px" }}
+                ></span>
+                <div className="text-right">
+                  <p className="text-grafito font-bold text-lg">
+                    {parseFloat(arsBalance.amount).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
+                  <p className="text-oceano font-bold text-xs mt-0.5">ARS</p>
+                </div>
+              </button>
+            )}
+
             <div className="grid grid-cols-2 gap-3 mb-4">
-              {nonBaseBalances.map((balance) => (
+              {otherBalances.map((balance) => (
                 <button
                   key={balance.currencyCode}
                   onClick={() => setSelectedCurrency(balance)}
-                  className="flex items-center justify-between bg-grafito/55 backdrop-blur-md border border-white/25 rounded-2xl p-3 shadow-lg cursor-pointer hover:brightness-110 transition"
+                  className="flex items-center justify-between bg-white/70 backdrop-blur-sm rounded-2xl p-3 shadow-lg cursor-pointer hover:brightness-95 transition"
                 >
                   <span
                     className={`fi fi-${currencyToCountry[balance.currencyCode]} rounded-md shrink-0`}
                     style={{ width: "60px", height: "44px" }}
                   ></span>
                   <div className="text-right">
-                    <p className="text-white font-bold text-lg">
+                    <p className="text-grafito font-bold text-lg">
                       {parseFloat(balance.amount).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </p>
-                    <p className="text-[#9fe0ee] font-bold text-xs mt-0.5">
+                    <p className="text-oceano font-bold text-xs mt-0.5">
                       {balance.currencyCode}
                     </p>
                   </div>
@@ -256,12 +388,12 @@ export default function Dashboard() {
 
             <button
               onClick={() => navigate("/transactions")}
-              className="w-full bg-grafito/60 backdrop-blur-md border border-white/25 rounded-2xl p-4 flex items-center justify-center gap-3 shadow-lg hover:brightness-110 transition cursor-pointer"
+              className="w-full bg-white/70 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-center gap-3 shadow-lg hover:brightness-95 transition cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-coral text-white flex items-center justify-center text-sm shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#ff4242] text-white flex items-center justify-center text-sm shrink-0">
                 ↔
               </div>
-              <p className="text-sm font-bold text-white">Ir a Transacciones</p>
+              <p className="text-sm font-bold text-grafito">Ir a Transacciones</p>
             </button>
           </div>
 
@@ -291,10 +423,17 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-lg">
-              <p className="text-sm font-bold text-grafito mb-2">
-                Tasas de cambio
-              </p>
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm font-bold text-grafito">
+                  Tasas de cambio
+                </p>
+                {lastUpdated && (
+                  <span className="text-[10px] text-grafito/50 font-semibold">
+                    {formatLastUpdated(lastUpdated)}
+                  </span>
+                )}
+              </div>
               {["USD", "EUR", "BRL", "CLP"].map((currency) => (
                 <div
                   key={currency}
@@ -308,12 +447,12 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-lg">
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
               <h2 className="text-sm font-bold text-grafito mb-3">
                 Actividad reciente
               </h2>
               {activityError ? (
-                <p className="text-sm text-coral font-semibold">
+                <p className="text-sm text-[#ff4242] font-semibold">
                   {activityError}
                 </p>
               ) : activity.length === 0 ? (
@@ -321,56 +460,67 @@ export default function Dashboard() {
                   Todavía no tenés movimientos.
                 </p>
               ) : (
-                activity.map((tx, index) => (
-                  <div
-                    key={tx.id}
-                    className={`py-2 ${
-                      index < activity.length - 1
-                        ? "border-b border-grafito/15"
-                        : ""
-                    }`}
-                  >
-                    {tx.type === "exchange" ? (
-                      <>
-                        <span className="text-sm font-semibold text-grafito">
-                          Intercambio
-                        </span>
-                        <p className="text-sm font-bold text-oceano mt-1">
-                          {formatAmount(tx.fromAmount!)} {tx.fromCurrency} →{" "}
-                          {formatAmount(tx.toAmount!)} {tx.toCurrency}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold text-grafito">
-                            {tx.type === "deposit"
-                              ? "Depósito"
-                              : tx.direction === "out"
-                                ? "Transferencia enviada"
-                                : "Transferencia recibida"}
-                          </span>
-                          <span
-                            className={`text-sm font-bold ${
-                              tx.direction === "out"
-                                ? "text-coral"
-                                : "text-green-700"
-                            }`}
-                          >
-                            {formatSignedAmount(tx.signedAmount!)}{" "}
-                            {tx.currencyCode}
-                          </span>
-                        </div>
-                        {tx.counterpartyEmail && (
-                          <p className="text-xs text-grafito/60 mt-0.5">
-                            {tx.direction === "out" ? "A" : "De"}:{" "}
-                            {tx.counterpartyEmail}
-                          </p>
+                activity.map((tx, index) => {
+                  const { icon, bg } = getActivityIcon(tx);
+                  return (
+                    <div
+                      key={tx.id}
+                      className={`flex items-center gap-3 py-2 ${
+                        index < activity.length - 1
+                          ? "border-b border-grafito/15"
+                          : ""
+                      }`}
+                    >
+                      <div
+                        className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm font-bold shrink-0"
+                        style={{ backgroundColor: bg }}
+                      >
+                        {icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {tx.type === "exchange" ? (
+                          <>
+                            <span className="text-sm font-semibold text-grafito">
+                              Intercambio
+                            </span>
+                            <p className="text-sm font-bold text-oceano mt-0.5">
+                              {formatAmount(tx.fromAmount!)} {tx.fromCurrency}{" "}
+                              → {formatAmount(tx.toAmount!)} {tx.toCurrency}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex justify-between items-center gap-2">
+                              <span className="text-sm font-semibold text-grafito">
+                                {tx.type === "deposit"
+                                  ? "Depósito"
+                                  : tx.direction === "out"
+                                    ? "Transferencia enviada"
+                                    : "Transferencia recibida"}
+                              </span>
+                              <span
+                                className={`text-sm font-bold shrink-0 ${
+                                  tx.direction === "out"
+                                    ? "text-[#ff4242]"
+                                    : "text-green-700"
+                                }`}
+                              >
+                                {formatSignedAmount(tx.signedAmount!)}{" "}
+                                {tx.currencyCode}
+                              </span>
+                            </div>
+                            {tx.counterpartyEmail && (
+                              <p className="text-xs text-grafito/60 mt-0.5 truncate">
+                                {tx.direction === "out" ? "A" : "De"}:{" "}
+                                {tx.counterpartyEmail}
+                              </p>
+                            )}
+                          </>
                         )}
-                      </>
-                    )}
-                  </div>
-                ))
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -423,15 +573,17 @@ export default function Dashboard() {
             )}
 
             <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setSelectedCurrency(null);
-                  navigate("/exchange");
-                }}
-                className="flex-1 bg-coral text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
-              >
-                Intercambiar
-              </button>
+              {selectedCurrency.currencyCode !== "ARS" && (
+                <button
+                  onClick={() => {
+                    setSelectedCurrency(null);
+                    navigate("/exchange");
+                  }}
+                  className="flex-1 bg-[#ff4242] text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
+                >
+                  Intercambiar
+                </button>
+              )}
               <button
                 onClick={() => setSelectedCurrency(null)}
                 className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
