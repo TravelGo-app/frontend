@@ -177,7 +177,7 @@ export default function Dashboard() {
               className="font-display text-3xl font-bold text-ocean-animated"
               style={{ WebkitTextStroke: "0.6px rgba(35,52,70,0.55)" }}
             >
-              ¡Hola, {firstName}! 👋
+              ¡Hola, {firstName}!
             </h1>
             <p className="text-white/90 mt-1 text-sm font-semibold">
               Bienvenido a tu billetera TravelGo
