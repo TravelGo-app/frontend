@@ -3,7 +3,6 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Landing from "./pages/Landing";
-import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -14,6 +13,8 @@ import Exchange from "./pages/Exchange";
 import Deposit from "./pages/Deposit";
 import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
+import Profile from "./pages/Profile";
+import ConfirmEmailChange from "./pages/ConfirmEmailChange";
 import ChatbotWidget from "./components/ChatbotWidget";
 import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
 
@@ -28,9 +29,15 @@ const NO_CHROME_PATHS = [
   "/register",
   "/configurar-password",
   "/reset-password",
+  "/confirm-email-change",
 ];
 
-const NO_CHATBOT_PATHS = ["/", "/configurar-password", "/reset-password"];
+const NO_CHATBOT_PATHS = [
+  "/",
+  "/configurar-password",
+  "/reset-password",
+  "/confirm-email-change",
+];
 
 const AUTH_CARD_PATHS = ["/login", "/register"];
 
@@ -122,11 +129,12 @@ function AppContent() {
             }
           />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
           <Route
             path="/home"
             element={
               <ProtectedRoute>
-                <Home />
+                <Profile />
               </ProtectedRoute>
             }
           />
@@ -167,6 +175,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Transfer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

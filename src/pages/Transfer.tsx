@@ -12,7 +12,7 @@ const generateIdempotencyKey = () => `transfer-${crypto.randomUUID()}`;
 export default function Transfer() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  const [recipientEmail, setRecipientEmail] = useState("");
+  const [recipientIdentifier, setRecipientIdentifier] = useState("");
   const [currencyCode, setCurrencyCode] = useState("ARS");
   const [amount, setAmount] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState(generateIdempotencyKey);
@@ -22,8 +22,8 @@ export default function Transfer() {
     e.preventDefault();
     setError(null);
 
-    if (!recipientEmail || !recipientEmail.includes("@")) {
-      setError("Ingresá un email de destinatario válido.");
+    if (!recipientIdentifier.trim()) {
+      setError("Ingresá el email, alias o CVU del destinatario.");
       return;
     }
 
@@ -43,7 +43,7 @@ export default function Transfer() {
     try {
       const parsedAmount = parseFloat(amount);
       await api.post("/transactions/transfer", {
-        recipientEmail,
+        recipientIdentifier,
         currencyCode,
         amount: parsedAmount.toFixed(2),
         idempotencyKey,
@@ -60,7 +60,7 @@ export default function Transfer() {
   };
 
   const handleNewTransfer = () => {
-    setRecipientEmail("");
+    setRecipientIdentifier("");
     setAmount("");
     setError(null);
     setIdempotencyKey(generateIdempotencyKey());
@@ -86,13 +86,13 @@ export default function Transfer() {
           {step === 0 && (
             <form onSubmit={handleContinue}>
               <label className="block text-sm font-bold text-grafito mb-1">
-                Email del destinatario
+                Email, alias o CVU del destinatario
               </label>
               <input
-                type="email"
-                value={recipientEmail}
-                onChange={(e) => setRecipientEmail(e.target.value)}
-                placeholder="destinatario@email.com"
+                type="text"
+                value={recipientIdentifier}
+                onChange={(e) => setRecipientIdentifier(e.target.value)}
+                placeholder="email@ejemplo.com, alias o CVU"
                 className="w-full border border-[#155a70] rounded-xl p-3 mb-4 text-grafito font-semibold"
               />
 
@@ -156,7 +156,7 @@ export default function Transfer() {
                   {currencyCode}
                 </p>
                 <p className="text-sm text-grafito/60 mt-1">
-                  A: {recipientEmail}
+                  A: {recipientIdentifier}
                 </p>
               </div>
 
@@ -202,7 +202,7 @@ export default function Transfer() {
                 ¡Transferencia realizada!
               </p>
               <p className="text-sm text-grafito/70 mb-6">
-                {amount} {currencyCode} → {recipientEmail}
+                {amount} {currencyCode} → {recipientIdentifier}
               </p>
               <div className="flex gap-3">
                 <button
