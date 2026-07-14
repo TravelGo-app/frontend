@@ -3,6 +3,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Landing from "./pages/Landing";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import SetPassword from "./pages/SetPassword";
@@ -28,6 +30,10 @@ const NO_CHROME_PATHS = [
   "/register",
   "/configurar-password",
   "/reset-password",
+  "/terminos y condiciones",
+  "/politica de privacidad",
+  "/about-us",
+  "/history",
 ];
 
 const NO_CHATBOT_PATHS = ["/", "/configurar-password", "/reset-password"];
@@ -172,6 +178,8 @@ function AppContent() {
           />
           <Route path="/history" element={<Placeholder title="History" />} />
           <Route path="/about-us" element={<Placeholder title="About Us" />} />
+          <Route path="/terminos y condiciones" element={<Terms />} />
+          <Route path="/politica de privacidad" element={<Privacy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}

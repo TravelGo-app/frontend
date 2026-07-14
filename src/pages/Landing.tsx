@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import possibleLogo from '../assets/PosibleLogo.png'
 import creditCard from '../assets/credicard.png'
@@ -629,22 +629,15 @@ export default function Landing() {
                 <h4>NAVEGACIÓN</h4>
                 <ul>
                   <li><a href="#">Inicio</a></li>
-                  <li><a href="#">Billetera</a></li>
-                  <li><a href="#">Cambio de divisas</a></li>
-                  <li><a href="#">Historial</a></li>
                   <li><a href="#">Próximamente</a></li>
-                  <li><a href="#">Sobre nosotros</a></li>
                 </ul>
               </div>
 
               <div className="footer-col footer-links">
                 <h4>RECURSOS</h4>
                 <ul>
-                  <li><a href="#">Centro de ayuda</a></li>
                   <li><a href="#">Preguntas frecuentes</a></li>
                   <li><a href="#">Seguridad</a></li>
-                  <li><a href="#">Tarifas y límites</a></li>
-                  <li><a href="#">Blog</a></li>
                 </ul>
               </div>
 
@@ -652,9 +645,8 @@ export default function Landing() {
                 <h4>EMPRESA</h4>
                 <ul>
                   <li><a href="#">Sobre nosotros</a></li>
-                  <li><a href="#">Términos y condiciones</a></li>
-                  <li><a href="#">Política de privacidad</a></li>
-                  <li><a href="#">Trabajá con nosotros</a></li>
+                  <li><Link to="/terminos y condiciones">Términos y condiciones</Link></li>
+                  <li><Link to="/politica de privacidad">Política de privacidad</Link></li>
                   <li><a href="#">Contacto</a></li>
                 </ul>
               </div>
