@@ -610,7 +610,9 @@ export default function Landing() {
                 <div className="brand-row">
                   <img src={possibleLogo} alt="TravelGo logo" className="footer-logo" />
                   <div>
-                    <p className="footer-brand-title">TravelGo</p>
+                    <p className="footer-brand-title">
+                      Travel<span className="footer-brand-accent">Go</span>
+                    </p>
                     <p className="footer-brand-subtitle">Tu billetera virtual para viajar sin fronteras.</p>
                   </div>
                 </div>
