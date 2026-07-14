@@ -51,7 +51,9 @@ export function useLoginForm() {
 
   const handleGoogleAuth = (result: any) => {
     login(result.user, result.token, rememberMe)
-    if (result.requiresPasswordSetup) {
+    // Algunos endpoints devuelven `requiresPasswordSetup`, otros `isNewUser`.
+    // Manejar ambos para compatibilidad.
+    if (result.requiresPasswordSetup || result.isNewUser) {
       navigate('/configurar-password')
     } else {
       navigate('/dashboard')

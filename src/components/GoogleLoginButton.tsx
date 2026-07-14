@@ -55,15 +55,17 @@ export function GoogleLoginButton({ onAuthenticated, onLoadingChange }: GoogleLo
         client_id: clientId,
         ux_mode: "popup",
         callback: async (response: CredentialResponse) => {
-          onLoadingChange?.(true)
+            onLoadingChange?.(true)
           try {
             setError(null)
             if (!response.credential) throw new Error("Google no devolvió una credencial")
             const result = await loginWithGoogle(response.credential)
-            onAuthenticated(result)
+              onAuthenticated(result)
+              // Asegurar que el loading se desactive tras el éxito
+              onLoadingChange?.(false)
           } catch (err) {
             setError(err instanceof Error ? err.message : "Error iniciando sesión")
-            onLoadingChange?.(false)
+              onLoadingChange?.(false)
           }
         },
       });
