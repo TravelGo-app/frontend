@@ -7,7 +7,7 @@ const navItems = [
   { label: "Billetera", path: "/dashboard" },
   { label: "Transacciones", path: "/transactions" },
   { label: "Historial", path: "/history" },
-  { label: "Nosotros", path: "/about-us" },
+  { label: "Nosotros", path: "/sobre nosotros" },
 ];
 
 export default function Navbar() {

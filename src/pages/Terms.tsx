@@ -2,19 +2,31 @@ import { Link } from 'react-router-dom'
 
 export default function Terms() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl rounded-3xl bg-white p-8 shadow-xl shadow-slate-200/60">
-        <div className="mb-8">
-          <Link to="/" className="text-sm font-semibold text-slate-500 hover:text-slate-900">
-            ← Volver a inicio
-          </Link>
-        </div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-          Términos y Condiciones
-        </h1>
-        <p className="mt-3 text-sm text-slate-500">Última actualización: Julio de 2026</p>
+    <main className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8 document-bg">
+      <div className="mx-auto w-full max-w-5xl document-panel p-10">
+        <div className="document-hero">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-4">
+              <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-oceano hover:text-grafito transition">
+                ← Volver a inicio
+              </Link>
+              <h1 className="document-hero-title">Términos y Condiciones</h1>
+              <p className="document-hero-description">
+                Conocé las reglas que rigen el uso de TravelGo y las responsabilidades básicas de nuestros usuarios.
+                Esta sección está pensada para ser clara, segura y accesible.
+              </p>
+            </div>
+            <span className="document-badge">Documento público</span>
+          </div>
 
-        <div className="prose prose-slate mt-10 max-w-none">
+          <div className="document-summary">
+            <p>
+              Última actualización: <strong>Julio de 2026</strong>. Estos términos describen cómo funciona TravelGo, qué esperas de la plataforma y qué se espera de tu uso.
+            </p>
+          </div>
+        </div>
+
+        <div className="document-content mt-10">
           <p>
             Bienvenido a <strong>TravelGo</strong>.
           </p>

@@ -636,15 +636,15 @@ export default function Landing() {
               <div className="footer-col footer-links">
                 <h4>RECURSOS</h4>
                 <ul>
-                  <li><a href="#">Preguntas frecuentes</a></li>
-                  <li><a href="#">Seguridad</a></li>
+                  <li><Link to="/preguntasfrecuentes">Preguntas frecuentes</Link></li>
+                  <li><Link to="/seguridad">Seguridad</Link></li>
                 </ul>
               </div>
 
               <div className="footer-col footer-links">
                 <h4>EMPRESA</h4>
                 <ul>
-                  <li><a href="#">Sobre nosotros</a></li>
+                  <li><Link to="/sobre nosotros">Sobre nosotros</Link></li>
                   <li><Link to="/terminos y condiciones">Términos y condiciones</Link></li>
                   <li><Link to="/politica de privacidad">Política de privacidad</Link></li>
                   <li><a href="#">Contacto</a></li>

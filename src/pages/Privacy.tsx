@@ -2,19 +2,31 @@ import { Link } from 'react-router-dom'
 
 export default function Privacy() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl rounded-3xl bg-white p-8 shadow-xl shadow-slate-200/60">
-        <div className="mb-8">
-          <Link to="/" className="text-sm font-semibold text-slate-500 hover:text-slate-900">
-            ← Volver a inicio
-          </Link>
-        </div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-          Política de Privacidad
-        </h1>
-        <p className="mt-3 text-sm text-slate-500">Última actualización: Julio de 2026</p>
+    <main className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8 document-bg">
+      <div className="mx-auto w-full max-w-5xl document-panel p-10">
+        <div className="document-hero">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-4">
+              <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-oceano hover:text-grafito transition">
+                ← Volver a inicio
+              </Link>
+              <h1 className="document-hero-title">Política de Privacidad</h1>
+              <p className="document-hero-description">
+                Entendé cómo administramos tu información y qué prácticas de seguridad aplicamos en TravelGo.
+                Esta política está diseñada para ser transparente y clara para todos nuestros usuarios.
+              </p>
+            </div>
+            <span className="document-badge">Documento público</span>
+          </div>
 
-        <div className="prose prose-slate mt-10 max-w-none">
+          <div className="document-summary">
+            <p>
+              Última actualización: <strong>Julio de 2026</strong>. Aquí explicamos la recolección, uso y protección de tus datos personales.
+            </p>
+          </div>
+        </div>
+
+        <div className="prose prose-slate document-content mt-10 max-w-none">
           <p>
             En <strong>TravelGo</strong>, respetamos y protegemos la privacidad de nuestros usuarios. Esta Política de Privacidad describe cómo recopilamos, utilizamos, almacenamos y protegemos la información personal proporcionada durante el uso de nuestra plataforma.
           </p>
