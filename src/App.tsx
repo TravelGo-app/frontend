@@ -9,7 +9,6 @@ import About from "./pages/About";
 import Faq from "./pages/Faq";
 import Security from "./pages/Security";
 import Contact from "./pages/Contact";
-import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
