@@ -690,14 +690,7 @@ export default function Landing() {
                   <p><span>📞</span> +57 300 123 4567</p>
                   <p><span>📍</span> Medellín, Colombia</p>
                 </div>
-                <div className="newsletter-block">
-                  <p className="newsletter-title">SUSCRÍBETE A NUESTRO NEWSLETTER</p>
-                  <p className="newsletter-text">Recibe novedades, consejos y ofertas exclusivas.</p>
-                  <form className="footer-newsletter" onSubmit={(e) => e.preventDefault()}>
-                    <input aria-label="email" placeholder="Tu correo electrónico" className="newsletter-input" />
-                    <button className="newsletter-btn" aria-label="subscribe">→</button>
-                  </form>
-                </div>
+                
               </div>
             </div>
             <div className="footer-bottom">© {new Date().getFullYear()} TravelGo. Todos los derechos reservados. <span>Hecho con ❤️ para viajeros como tú.</span></div>

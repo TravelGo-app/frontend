@@ -379,6 +379,8 @@ body {
   opacity: 1;
   pointer-events: none;
   z-index: 0;
+  background-size: cover;
+  background-position: center;
 }
 
 .footer-panel {
@@ -388,7 +390,7 @@ body {
   max-width: 1280px;
   margin: 0 auto;
   /* reducir padding para que el footer ocupe menos alto y no obligue a scrollear */
-  padding: 40px 20px 28px;
+  padding: 48px 20px;
   box-sizing: border-box;
   background: transparent;
   border-radius: 0;
@@ -606,8 +608,9 @@ body {
 }
 
 .landing-footer-section {
-  min-height: auto;
-  height: auto;
+  /* ocupar toda la pantalla para que no se vea parte de la sección previa */
+  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
