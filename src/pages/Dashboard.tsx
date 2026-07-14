@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import beachBg from "../assets/PlayaPrincipal.png";
+import AnalyticsSection from "../components/AnalyticsSection";
 
 interface Balance {
   currencyCode: string;
@@ -525,6 +526,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        <AnalyticsSection />
       </div>
 
       {selectedCurrency && (
