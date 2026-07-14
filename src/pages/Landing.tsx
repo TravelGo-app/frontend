@@ -216,7 +216,7 @@ export default function Landing() {
   }, [visible])
 
   return (
-    <div ref={scrollContainerRef} className="min-h-screen overflow-x-hidden text-slate-900 relative landing-bg landing-scroll-container">
+    <div id="landing-top" ref={scrollContainerRef} className="min-h-screen overflow-x-hidden text-slate-900 relative landing-bg landing-scroll-container">
 
       {/* two videos for seamless looping via crossfade (keeps fixed size) */}
       <video
@@ -628,8 +628,15 @@ export default function Landing() {
               <div className="footer-col footer-links">
                 <h4>NAVEGACIÓN</h4>
                 <ul>
-                  <li><a href="#">Inicio</a></li>
-                  <li><a href="#">Próximamente</a></li>
+                  <li>
+                    <button
+                      type="button"
+                      className="footer-link-button"
+                      onClick={() => document.getElementById('landing-top')?.scrollIntoView({ behavior: 'smooth' })}
+                    >
+                      Inicio
+                    </button>
+                  </li>
                 </ul>
               </div>
 
@@ -647,7 +654,7 @@ export default function Landing() {
                   <li><Link to="/sobre nosotros">Sobre nosotros</Link></li>
                   <li><Link to="/terminos y condiciones">Términos y condiciones</Link></li>
                   <li><Link to="/politica de privacidad">Política de privacidad</Link></li>
-                  <li><a href="#">Contacto</a></li>
+                  <li><Link to="/contacto">Contacto</Link></li>
                 </ul>
               </div>
 

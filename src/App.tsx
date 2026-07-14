@@ -8,6 +8,7 @@ import Privacy from "./pages/Privacy";
 import About from "./pages/About";
 import Faq from "./pages/Faq";
 import Security from "./pages/Security";
+import Contact from "./pages/Contact";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import SetPassword from "./pages/SetPassword";
@@ -39,6 +40,7 @@ const NO_CHROME_PATHS = [
   "/sobre nosotros",
   "/preguntasfrecuentes",
   "/seguridad",
+  "/contacto",
   "/history",
 ];
 
@@ -194,6 +196,7 @@ function AppContent() {
           <Route path="/politica de privacidad" element={<Privacy />} />
           <Route path="/preguntasfrecuentes" element={<Faq />} />
           <Route path="/seguridad" element={<Security />} />
+          <Route path="/contacto" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
