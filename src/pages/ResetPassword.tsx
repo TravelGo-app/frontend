@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { authService } from '../services/api'
 import { validateNewPasswordField, validateConfirmField } from '../utils/authValidators'
-import playaImg from '../assets/playa.jpg'
+import playaImg from '../assets/PlayaPrincipal.png'
 import logoImg from '../assets/PosibleLogo.png'
 
 const EyeIcon = () => (
