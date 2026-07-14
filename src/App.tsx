@@ -36,27 +36,27 @@ const AUTH_CARD_PATHS = ["/login", "/register"];
 
 function AppContent() {
   const location = useLocation();
-  const [isLoading, setIsLoading] = useState(
-    () => !AUTH_CARD_PATHS.includes(window.location.pathname)
-  );
+ const [isLoading, setIsLoading] = useState(false);
   const { hideChat } = useChatVisibility();
 
   useEffect(() => {
-    if (AUTH_CARD_PATHS.includes(location.pathname)) {
-      setIsLoading(false);
-      return;
-    }
+  // Nunca mostrar loading en estas rutas
+  if (
+    NO_CHROME_PATHS.includes(location.pathname) ||
+    AUTH_CARD_PATHS.includes(location.pathname)
+  ) {
+    setIsLoading(false);
+    return;
+  }
 
-    if (NO_CHROME_PATHS.includes(location.pathname)) return;
+  setIsLoading(true);
 
-    setIsLoading(true);
+  const timer = window.setTimeout(() => {
+    setIsLoading(false);
+  }, 950);
 
-    const timer = window.setTimeout(() => {
-      setIsLoading(false);
-    }, 950);
-
-    return () => window.clearTimeout(timer);
-  }, [location.key]);
+  return () => window.clearTimeout(timer);
+}, [location.pathname]);
 
   const isAuthCardPage = AUTH_CARD_PATHS.includes(location.pathname);
 

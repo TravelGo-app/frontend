@@ -32,12 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedToken = getStoredToken()
     if (savedToken) {
       setToken(savedToken)
-      // Llamada a backend con fallback: si la petición queda bloqueada,
-      // forzamos `loading = false` pasado un timeout seguro.
-      const fallback = window.setTimeout(() => {
-        setLoading(false)
-      }, 7000)
-
       authService
         .me()
         .then((data) => setUser(data.user))
@@ -46,10 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           sessionStorage.removeItem('token')
           setToken(null)
         })
-        .finally(() => {
-          clearTimeout(fallback)
-          setLoading(false)
-        })
+        .finally(() => setLoading(false))
     } else {
       setLoading(false)
     }
