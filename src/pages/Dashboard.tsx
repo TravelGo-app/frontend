@@ -265,7 +265,7 @@ export default function Dashboard() {
       <div className="absolute inset-0 bg-black/25 pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10">
-        <div className="mb-4 bg-[rgba(90,90,90,0.55)] backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg">
+        <div className="mb-4 bg-[#f1efe8] rounded-2xl overflow-hidden shadow-lg">
           <div className="flex h-1">
             <div className="flex-1 bg-[#ff4242]"></div>
             <div className="flex-1 bg-[#2391ae]"></div>
@@ -273,10 +273,10 @@ export default function Dashboard() {
           </div>
           <div className="flex justify-between items-center p-5">
             <div>
-              <h1 className="font-display text-3xl font-bold text-[#9fe0ee]">
+              <h1 className="font-display text-3xl font-bold text-oceano">
                 ¡Hola, {firstName}!
               </h1>
-              <p className="text-white/90 mt-1 text-sm font-semibold">
+              <p className="text-grafito/70 mt-1 text-sm font-semibold">
                 Bienvenido a tu billetera TravelGo
               </p>
             </div>
@@ -461,67 +461,70 @@ export default function Dashboard() {
                   Todavía no tenés movimientos.
                 </p>
               ) : (
-                activity.map((tx, index) => {
-                  const { icon, bg } = getActivityIcon(tx);
-                  return (
-                    <div
-                      key={tx.id}
-                      className={`flex items-center gap-3 py-2 ${
-                        index < activity.length - 1
-                          ? "border-b border-grafito/15"
-                          : ""
-                      }`}
-                    >
+                <div className="max-h-[168px] overflow-y-auto pr-1">
+                  {activity.map((tx, index) => {
+                    const { icon, bg } = getActivityIcon(tx);
+                    return (
                       <div
-                        className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm font-bold shrink-0"
-                        style={{ backgroundColor: bg }}
+                        key={tx.id}
+                        className={`flex items-center gap-3 py-2 ${
+                          index < activity.length - 1
+                            ? "border-b border-grafito/15"
+                            : ""
+                        }`}
                       >
-                        {icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        {tx.type === "exchange" ? (
-                          <>
-                            <span className="text-sm font-semibold text-grafito">
-                              Intercambio
-                            </span>
-                            <p className="text-sm font-bold text-oceano mt-0.5">
-                              {formatAmount(tx.fromAmount!)} {tx.fromCurrency}{" "}
-                              → {formatAmount(tx.toAmount!)} {tx.toCurrency}
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex justify-between items-center gap-2">
+                        <div
+                          className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm font-bold shrink-0"
+                          style={{ backgroundColor: bg }}
+                        >
+                          {icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {tx.type === "exchange" ? (
+                            <>
                               <span className="text-sm font-semibold text-grafito">
-                                {tx.type === "deposit"
-                                  ? "Depósito"
-                                  : tx.direction === "out"
-                                    ? "Transferencia enviada"
-                                    : "Transferencia recibida"}
+                                Intercambio
                               </span>
-                              <span
-                                className={`text-sm font-bold shrink-0 ${
-                                  tx.direction === "out"
-                                    ? "text-[#ff4242]"
-                                    : "text-green-700"
-                                }`}
-                              >
-                                {formatSignedAmount(tx.signedAmount!)}{" "}
-                                {tx.currencyCode}
-                              </span>
-                            </div>
-                            {tx.counterpartyEmail && (
-                              <p className="text-xs text-grafito/60 mt-0.5 truncate">
-                                {tx.direction === "out" ? "A" : "De"}:{" "}
-                                {tx.counterpartyEmail}
+                              <p className="text-sm font-bold text-oceano mt-0.5">
+                                {formatAmount(tx.fromAmount!)}{" "}
+                                {tx.fromCurrency} →{" "}
+                                {formatAmount(tx.toAmount!)} {tx.toCurrency}
                               </p>
-                            )}
-                          </>
-                        )}
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex justify-between items-center gap-2">
+                                <span className="text-sm font-semibold text-grafito">
+                                  {tx.type === "deposit"
+                                    ? "Depósito"
+                                    : tx.direction === "out"
+                                      ? "Transferencia enviada"
+                                      : "Transferencia recibida"}
+                                </span>
+                                <span
+                                  className={`text-sm font-bold shrink-0 ${
+                                    tx.direction === "out"
+                                      ? "text-[#ff4242]"
+                                      : "text-green-700"
+                                  }`}
+                                >
+                                  {formatSignedAmount(tx.signedAmount!)}{" "}
+                                  {tx.currencyCode}
+                                </span>
+                              </div>
+                              {tx.counterpartyEmail && (
+                                <p className="text-xs text-grafito/60 mt-0.5 truncate">
+                                  {tx.direction === "out" ? "A" : "De"}:{" "}
+                                  {tx.counterpartyEmail}
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
