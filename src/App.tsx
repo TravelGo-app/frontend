@@ -3,9 +3,17 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Landing from "./pages/Landing";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import About from "./pages/About";
+import Faq from "./pages/Faq";
+import Security from "./pages/Security";
+import Contact from "./pages/Contact";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
+import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
@@ -30,8 +38,14 @@ const NO_CHROME_PATHS = [
   "/configurar-password",
   "/reset-password",
   "/confirm-email-change",
+  "/terminos y condiciones",
+  "/politica de privacidad",
+  "/sobre nosotros",
+  "/preguntasfrecuentes",
+  "/seguridad",
+  "/contacto",
+  "/history",
 ];
-
 const NO_CHATBOT_PATHS = [
   "/",
   "/configurar-password",
@@ -41,35 +55,41 @@ const NO_CHATBOT_PATHS = [
 
 const AUTH_CARD_PATHS = ["/login", "/register"];
 
+function normalizePath(pathname: string) {
+  return decodeURIComponent(pathname).replace(/\/+$|\/+(?=\?)/g, "");
+}
+
 function AppContent() {
   const location = useLocation();
- const [isLoading, setIsLoading] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const { hideChat } = useChatVisibility();
+  const normalizedPath = normalizePath(location.pathname);
 
   useEffect(() => {
-  // Nunca mostrar loading en estas rutas
-  if (
-    NO_CHROME_PATHS.includes(location.pathname) ||
-    AUTH_CARD_PATHS.includes(location.pathname)
-  ) {
-    setIsLoading(false);
-    return;
-  }
+    // Nunca mostrar loading en estas rutas
+    if (
+      NO_CHROME_PATHS.includes(normalizedPath) ||
+      AUTH_CARD_PATHS.includes(normalizedPath)
+    ) {
+      setIsLoading(false);
+      return;
+    }
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  const timer = window.setTimeout(() => {
-    setIsLoading(false);
-  }, 950);
+    const timer = window.setTimeout(() => {
+      setIsLoading(false);
+    }, 950);
 
-  return () => window.clearTimeout(timer);
-}, [location.pathname]);
+    return () => window.clearTimeout(timer);
+  }, [location.pathname]);
 
-  const isAuthCardPage = AUTH_CARD_PATHS.includes(location.pathname);
+  const isAuthCardPage = AUTH_CARD_PATHS.includes(normalizedPath);
 
   return (
     <>
-      {!NO_CHROME_PATHS.includes(location.pathname) && !isLoading && <Navbar />}
+      {isAuthenticated && !NO_CHROME_PATHS.includes(normalizedPath) && !isLoading && <Navbar />}
       {isLoading ? (
         <div
           style={{
@@ -187,7 +207,12 @@ function AppContent() {
             }
           />
           <Route path="/history" element={<Placeholder title="History" />} />
-          <Route path="/about-us" element={<Placeholder title="About Us" />} />
+          <Route path="/sobre nosotros" element={<About />} />
+          <Route path="/terminos y condiciones" element={<Terms />} />
+          <Route path="/politica de privacidad" element={<Privacy />} />
+          <Route path="/preguntasfrecuentes" element={<Faq />} />
+          <Route path="/seguridad" element={<Security />} />
+          <Route path="/contacto" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}

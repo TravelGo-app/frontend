@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import possibleLogo from '../assets/PosibleLogo.png'
 import creditCard from '../assets/credicard.png'
@@ -31,11 +31,29 @@ export default function Landing() {
   const fadingRef = useRef(false)
   const CROSSFADE = 0.8
 
+  const location = useLocation()
+
   useEffect(() => {
+    // Si venimos con la intención de mostrar el footer, scrollear hacia él
+    const requested = (location.state as any)?.scrollTo
+    if (requested === 'footer') {
+      const footer = document.getElementById('landing-hero-footer')
+      if (footer) {
+        // esperar al siguiente frame para asegurar layout
+        window.requestAnimationFrame(() => {
+          footer.scrollIntoView({ behavior: 'smooth', block: 'end' })
+          try {
+            // limpiar el state para que no vuelva a scrollear al navegar dentro
+            window.history.replaceState({}, document.title)
+          } catch {}
+        })
+      }
+    }
+
     if (isAuthenticated) {
       navigate('/dashboard', { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, location.key])
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -216,7 +234,7 @@ export default function Landing() {
   }, [visible])
 
   return (
-    <div ref={scrollContainerRef} className="min-h-screen overflow-x-hidden text-slate-900 relative landing-bg landing-scroll-container">
+    <div id="landing-top" ref={scrollContainerRef} className="min-h-screen overflow-x-hidden text-slate-900 relative landing-bg landing-scroll-container">
 
       {/* two videos for seamless looping via crossfade (keeps fixed size) */}
       <video
@@ -628,34 +646,40 @@ export default function Landing() {
               <div className="footer-col footer-links">
                 <h4>NAVEGACIÓN</h4>
                 <ul>
-                  <li><a href="#">Inicio</a></li>
-                  <li><a href="#">Billetera</a></li>
-                  <li><a href="#">Cambio de divisas</a></li>
-                  <li><a href="#">Historial</a></li>
-                  <li><a href="#">Próximamente</a></li>
-                  <li><a href="#">Sobre nosotros</a></li>
+                  <li>
+                    <button
+                      type="button"
+                      className="footer-link-button"
+                      onClick={() => {
+                        const container = scrollContainerRef.current
+                        if (container) {
+                          container.scrollTo({ top: 0, behavior: 'smooth' })
+                        } else {
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }
+                      }}
+                    >
+                      Inicio
+                    </button>
+                  </li>
                 </ul>
               </div>
 
               <div className="footer-col footer-links">
                 <h4>RECURSOS</h4>
                 <ul>
-                  <li><a href="#">Centro de ayuda</a></li>
-                  <li><a href="#">Preguntas frecuentes</a></li>
-                  <li><a href="#">Seguridad</a></li>
-                  <li><a href="#">Tarifas y límites</a></li>
-                  <li><a href="#">Blog</a></li>
+                  <li><Link to="/preguntasfrecuentes">Preguntas frecuentes</Link></li>
+                  <li><Link to="/seguridad">Seguridad</Link></li>
                 </ul>
               </div>
 
               <div className="footer-col footer-links">
                 <h4>EMPRESA</h4>
                 <ul>
-                  <li><a href="#">Sobre nosotros</a></li>
-                  <li><a href="#">Términos y condiciones</a></li>
-                  <li><a href="#">Política de privacidad</a></li>
-                  <li><a href="#">Trabajá con nosotros</a></li>
-                  <li><a href="#">Contacto</a></li>
+                  <li><Link to="/sobre nosotros">Sobre nosotros</Link></li>
+                  <li><Link to="/terminos y condiciones">Términos y condiciones</Link></li>
+                  <li><Link to="/politica de privacidad">Política de privacidad</Link></li>
+                  <li><Link to="/contacto">Contacto</Link></li>
                 </ul>
               </div>
 
@@ -666,14 +690,7 @@ export default function Landing() {
                   <p><span>📞</span> +57 300 123 4567</p>
                   <p><span>📍</span> Medellín, Colombia</p>
                 </div>
-                <div className="newsletter-block">
-                  <p className="newsletter-title">SUSCRÍBETE A NUESTRO NEWSLETTER</p>
-                  <p className="newsletter-text">Recibe novedades, consejos y ofertas exclusivas.</p>
-                  <form className="footer-newsletter" onSubmit={(e) => e.preventDefault()}>
-                    <input aria-label="email" placeholder="Tu correo electrónico" className="newsletter-input" />
-                    <button className="newsletter-btn" aria-label="subscribe">→</button>
-                  </form>
-                </div>
+                
               </div>
             </div>
             <div className="footer-bottom">© {new Date().getFullYear()} TravelGo. Todos los derechos reservados. <span>Hecho con ❤️ para viajeros como tú.</span></div>
