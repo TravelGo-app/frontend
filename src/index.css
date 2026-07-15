@@ -644,15 +644,15 @@ body {
   flex-wrap: wrap;
 }
 
-.footer-logo {
-  width: 90px;
+.footer-container .footer-logo {
+  width: 200px;
   max-width: 100%;
   height: auto;
 }
 
 @media (max-width: 900px) {
   .footer-logo {
-    width: 72px;
+    width: 56px;
   }
 
   .brand-row {
@@ -873,13 +873,17 @@ body {
   }
 
   .footer-logo {
-    width: 6px;
+    width: 72px;
   }
 }
 
 @media (max-width: 640px) {
   .footer-panel {
     padding: 42px 16px 28px;
+  }
+
+  .footer-container {
+    gap: 18px;
   }
 
   .footer-desc {
@@ -891,7 +895,7 @@ body {
   }
 
   .footer-logo {
-    width: 64px;
+    width: 60px;
   }
 }
 
