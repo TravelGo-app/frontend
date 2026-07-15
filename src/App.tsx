@@ -191,8 +191,7 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
-      {!isLoading &&
-        !hideChat &&
+      {!hideChat &&
         !NO_CHATBOT_PATHS.includes(location.pathname) && (
           <ChatbotWidget compact={isAuthCardPage} />
         )}
