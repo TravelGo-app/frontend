@@ -144,17 +144,19 @@ export default function Navbar() {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
-        style={menuButtonStyles}
-      >
-        <div style={{ display: "grid", gap: 4 }}>
-          <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
-          <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
-          <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
-        </div>
-      </button>
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          aria-label="Abrir menú"
+          style={menuButtonStyles}
+        >
+          <div style={{ display: "grid", gap: 4 }}>
+            <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
+            <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
+            <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
+          </div>
+        </button>
+      )}
 
       <aside style={asideStyles}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
