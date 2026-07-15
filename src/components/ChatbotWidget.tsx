@@ -16,6 +16,8 @@ function createMessageId() {
   return `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
+const MESSAGES_KEY = 'travelgo_chat_messages'
+
 const initialMessages: ChatMessage[] = [
   {
     id: 'welcome-message',
@@ -23,6 +25,20 @@ const initialMessages: ChatMessage[] = [
     text: 'Hola, soy el asistente de TravelGo. Puedo ayudarte con la app, transferencias, saldos, divisas, cuenta y operaciones dentro de TravelGo.',
   },
 ]
+
+function loadStoredMessages(): ChatMessage[] {
+  try {
+    const raw = sessionStorage.getItem(MESSAGES_KEY)
+    if (!raw) return initialMessages
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed
+    }
+    return initialMessages
+  } catch {
+    return initialMessages
+  }
+}
 
 const HEADER_BG = 'bg-[#233446]'
 const SEND_BG = 'bg-[#233446]'
@@ -40,7 +56,7 @@ function TriStripe({ className = '' }: { className?: string }) {
 
 export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
+  const [messages, setMessages] = useState<ChatMessage[]>(loadStoredMessages)
   const [message, setMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
   const messagesRef = useRef<HTMLDivElement | null>(null)
@@ -48,6 +64,14 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const dragState = useRef({ startX: 0, startY: 0, originX: 0, originY: 0, dragging: false, moved: false })
   const wrapperRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(MESSAGES_KEY, JSON.stringify(messages))
+    } catch {
+      // sessionStorage puede fallar en modo privado/incógnito; no es crítico
+    }
+  }, [messages])
 
   useEffect(() => {
     if (!isOpen) return
@@ -244,9 +268,9 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       aria-label={isOpen ? 'Cerrar chat de TravelGo' : 'Abrir chat de TravelGo'}
-      className={`flex flex-col overflow-hidden rounded-full shadow-xl transition hover:-translate-y-0.5 hover:opacity-90 touch-none select-none ${
+      className={`flex flex-col overflow-hidden rounded-full transition hover:-translate-y-0.5 hover:opacity-90 touch-none select-none ${
         compact ? '' : 'cursor-grab active:cursor-grabbing'
-      } bg-[#233446] text-white`}
+      } bg-[#233446] text-white shadow-[0_10px_28px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.2)]`}
     >
       <span className="flex h-14 min-w-14 items-center justify-center gap-1.5 px-5 text-sm font-bold">
         {!isOpen && (
