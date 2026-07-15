@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import LoadingOverlay from "../components/LoadingOverlay";
 import beachBg from "../assets/PlayaPrincipal.png";
 import AnalyticsSection from "../components/AnalyticsSection";
 
@@ -246,11 +247,7 @@ export default function Dashboard() {
     });
 
   if (dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#233446]">
-        <p className="text-white text-lg font-body">Cargando tu billetera...</p>
-      </div>
-    );
+    return <LoadingOverlay message="Cargando tu billetera..." />;
   }
 
   return (

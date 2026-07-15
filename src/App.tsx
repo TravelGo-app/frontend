@@ -23,12 +23,8 @@ import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
 import ChatbotWidget from "./components/ChatbotWidget";
+import LoadingOverlay from "./components/LoadingOverlay";
 import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
-
-const loadingVideo = new URL(
-  "./assets/video loading.mp4",
-  import.meta.url,
-).toString();
 
 const NO_CHROME_PATHS = [
   "/",
@@ -88,50 +84,7 @@ function AppContent() {
     <>
       {isAuthenticated && !NO_CHROME_PATHS.includes(normalizedPath) && !isLoading && <Navbar />}
       {isLoading ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "#0f172a",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            flexDirection: "column",
-            zIndex: 1000,
-            overflow: "hidden",
-            paddingBottom: "100px",
-          }}
-        >
-          <video
-            src={loadingVideo}
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              zIndex: -1,
-            }}
-          />
-          <span
-            style={{
-              color: "#000",
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              background: "rgba(255,255,255,0.75)",
-              padding: "10px 18px",
-              borderRadius: "16px",
-            }}
-          >
-            loading...
-          </span>
-        </div>
+        <LoadingOverlay />
       ) : (
         <Routes>
           <Route path="/" element={<Landing />} />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 interface ProfileData {
   id: string;
@@ -187,11 +188,7 @@ export default function Profile() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#233446]">
-        <p className="text-white text-lg font-body">Cargando tu perfil...</p>
-      </div>
-    );
+    return <LoadingOverlay message="Cargando tu perfil..." />;
   }
 
   if (!profile) {

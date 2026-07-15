@@ -5,6 +5,7 @@ import { useLoginForm } from '../hooks/useLoginForm'
 import { useRegisterForm } from '../hooks/useRegisterForm'
 import LoginFormFields from '../components/auth/LoginFormFields'
 import RegisterFormFields from '../components/auth/RegisterFormFields'
+import LoadingOverlay from '../components/LoadingOverlay'
 import { useChatVisibility } from '../context/ChatVisibilityContext'
 
 export default function Login() {
@@ -51,18 +52,7 @@ export default function Login() {
 
   // Pantalla de carga mientras se procesa el login con Google
   if (loginForm.googleAuthLoading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4 relative"
-        style={{ backgroundImage: `url(${playaImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-      >
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-white font-medium text-lg">Cargando...</p>
-        </div>
-      </div>
-    )
+    return <LoadingOverlay message="Cargando..." />
   }
 
   if (showWelcome) {
