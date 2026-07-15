@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import About from "./pages/About";
 import Faq from "./pages/Faq";
 import Security from "./pages/Security";
 import Contact from "./pages/Contact";
@@ -22,13 +21,13 @@ import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
+import AboutUs from "./pages/AboutUs";
 import ChatbotWidget from "./components/ChatbotWidget";
-import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
-
-const loadingVideo = new URL(
-  "./assets/video loading.mp4",
-  import.meta.url,
-).toString();
+import LoadingOverlay from "./components/LoadingOverlay";
+import {
+  ChatVisibilityProvider,
+  useChatVisibility,
+} from "./context/ChatVisibilityContext";
 
 const NO_CHROME_PATHS = [
   "/",
@@ -39,11 +38,9 @@ const NO_CHROME_PATHS = [
   "/confirm-email-change",
   "/terminos y condiciones",
   "/politica de privacidad",
-  "/sobre nosotros",
   "/preguntasfrecuentes",
   "/seguridad",
   "/contacto",
-  "/history",
 ];
 const NO_CHATBOT_PATHS = [
   "/",
@@ -60,16 +57,16 @@ function normalizePath(pathname: string) {
 
 function AppContent() {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const { hideChat } = useChatVisibility();
+  const { isAuthenticated } = useAuth();
   const normalizedPath = normalizePath(location.pathname);
 
   useEffect(() => {
     // Nunca mostrar loading en estas rutas
     if (
-      NO_CHROME_PATHS.includes(normalizedPath) ||
-      AUTH_CARD_PATHS.includes(normalizedPath)
+      NO_CHROME_PATHS.includes(location.pathname) ||
+      AUTH_CARD_PATHS.includes(location.pathname)
     ) {
       setIsLoading(false);
       return;
@@ -88,52 +85,11 @@ function AppContent() {
 
   return (
     <>
-      {isAuthenticated && !NO_CHROME_PATHS.includes(normalizedPath) && !isLoading && <Navbar />}
+      {isAuthenticated &&
+        !NO_CHROME_PATHS.includes(normalizedPath) &&
+        !isLoading && <Navbar />}
       {isLoading ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "#0f172a",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            flexDirection: "column",
-            zIndex: 1000,
-            overflow: "hidden",
-            paddingBottom: "100px",
-          }}
-        >
-          <video
-            src={loadingVideo}
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              zIndex: -1,
-            }}
-          />
-          <span
-            style={{
-              color: "#000",
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              background: "rgba(255,255,255,0.75)",
-              padding: "10px 18px",
-              borderRadius: "16px",
-            }}
-          >
-            loading...
-          </span>
-        </div>
+        <LoadingOverlay />
       ) : (
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -148,7 +104,10 @@ function AppContent() {
             }
           />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
+          <Route
+            path="/confirm-email-change"
+            element={<ConfirmEmailChange />}
+          />
           <Route
             path="/home"
             element={
@@ -206,7 +165,7 @@ function AppContent() {
             }
           />
           <Route path="/history" element={<Placeholder title="History" />} />
-          <Route path="/sobre nosotros" element={<About />} />
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="/terminos y condiciones" element={<Terms />} />
           <Route path="/politica de privacidad" element={<Privacy />} />
           <Route path="/preguntasfrecuentes" element={<Faq />} />
