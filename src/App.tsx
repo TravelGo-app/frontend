@@ -39,11 +39,9 @@ const NO_CHROME_PATHS = [
   "/confirm-email-change",
   "/terminos y condiciones",
   "/politica de privacidad",
-  "/sobre nosotros",
   "/preguntasfrecuentes",
   "/seguridad",
   "/contacto",
-  "/history",
 ];
 const NO_CHATBOT_PATHS = [
   "/",
