@@ -15,8 +15,12 @@ import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
+import AboutUs from "./pages/AboutUs";
 import ChatbotWidget from "./components/ChatbotWidget";
-import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
+import {
+  ChatVisibilityProvider,
+  useChatVisibility,
+} from "./context/ChatVisibilityContext";
 
 const loadingVideo = new URL(
   "./assets/video loading.mp4",
@@ -43,27 +47,27 @@ const AUTH_CARD_PATHS = ["/login", "/register"];
 
 function AppContent() {
   const location = useLocation();
- const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { hideChat } = useChatVisibility();
 
   useEffect(() => {
-  // Nunca mostrar loading en estas rutas
-  if (
-    NO_CHROME_PATHS.includes(location.pathname) ||
-    AUTH_CARD_PATHS.includes(location.pathname)
-  ) {
-    setIsLoading(false);
-    return;
-  }
+    // Nunca mostrar loading en estas rutas
+    if (
+      NO_CHROME_PATHS.includes(location.pathname) ||
+      AUTH_CARD_PATHS.includes(location.pathname)
+    ) {
+      setIsLoading(false);
+      return;
+    }
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  const timer = window.setTimeout(() => {
-    setIsLoading(false);
-  }, 950);
+    const timer = window.setTimeout(() => {
+      setIsLoading(false);
+    }, 950);
 
-  return () => window.clearTimeout(timer);
-}, [location.pathname]);
+    return () => window.clearTimeout(timer);
+  }, [location.pathname]);
 
   const isAuthCardPage = AUTH_CARD_PATHS.includes(location.pathname);
 
@@ -129,7 +133,10 @@ function AppContent() {
             }
           />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
+          <Route
+            path="/confirm-email-change"
+            element={<ConfirmEmailChange />}
+          />
           <Route
             path="/home"
             element={
@@ -187,7 +194,7 @@ function AppContent() {
             }
           />
           <Route path="/history" element={<Placeholder title="History" />} />
-          <Route path="/about-us" element={<Placeholder title="About Us" />} />
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
