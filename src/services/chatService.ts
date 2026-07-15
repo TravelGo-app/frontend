@@ -1,41 +1,49 @@
-import api from './api'
+import api from "./api";
 
-const CHAT_SESSION_STORAGE_KEY = 'travelgo_chat_session_id'
+const SESSION_KEY = "travelgo_chat_session_id";
 
-export type ChatReplyResponse = {
-  reply: string
-}
-
-function createSessionId() {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID()
-  }
-
-  return `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`
-}
-
-export function getChatSessionId() {
-  let sessionId = sessionStorage.getItem(CHAT_SESSION_STORAGE_KEY)
+function getSessionId(): string {
+  let sessionId = sessionStorage.getItem(SESSION_KEY);
 
   if (!sessionId) {
-    sessionId = createSessionId()
-    sessionStorage.setItem(CHAT_SESSION_STORAGE_KEY, sessionId)
+    sessionId = crypto.randomUUID();
+    sessionStorage.setItem(SESSION_KEY, sessionId);
   }
 
-  return sessionId
+  return sessionId;
 }
 
-export function resetChatSession() {
-  sessionStorage.removeItem(CHAT_SESSION_STORAGE_KEY)
+export interface ChatResponse {
+  reply: string;
 }
 
-export async function sendChatMessage(message: string) {
-  const sessionId = getChatSessionId()
+const ERROR_MESSAGES: Record<number, string> = {
+  400: "Revisá el mensaje e intentá nuevamente.",
+  422: "El asistente no puede procesar esa solicitud.",
+  429: "TravelGo todavía está respondiendo el mensaje anterior.",
+  502: "El asistente no pudo generar una respuesta válida.",
+  503: "El asistente no está disponible temporalmente. Intentá nuevamente.",
+};
 
-  const response = await api.post<ChatReplyResponse>('/chat', {
-    sessionId,
-    message,
-  })
+export function getChatErrorMessage(err: any): string {
+  const status = err?.response?.status;
+  return (
+    ERROR_MESSAGES[status] ??
+    "No se pudo contactar al asistente. Intentá nuevamente."
+  );
+}
 
-  return response.data.reply
+export async function sendChatMessage(message: string): Promise<ChatResponse> {
+  const cleanMessage = message.trim();
+
+  if (!cleanMessage) {
+    throw new Error("El mensaje está vacío");
+  }
+
+  const response = await api.post<ChatResponse>("/chat", {
+    sessionId: getSessionId(),
+    message: cleanMessage,
+  });
+
+  return response.data;
 }
