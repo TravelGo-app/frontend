@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import About from "./pages/About";
 import Faq from "./pages/Faq";
 import Security from "./pages/Security";
 import Contact from "./pages/Contact";
@@ -22,9 +21,13 @@ import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
+import AboutUs from "./pages/AboutUs";
 import ChatbotWidget from "./components/ChatbotWidget";
 import LoadingOverlay from "./components/LoadingOverlay";
-import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
+import {
+  ChatVisibilityProvider,
+  useChatVisibility,
+} from "./context/ChatVisibilityContext";
 
 const NO_CHROME_PATHS = [
   "/",
@@ -54,16 +57,16 @@ function normalizePath(pathname: string) {
 
 function AppContent() {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const { hideChat } = useChatVisibility();
+  const { isAuthenticated } = useAuth();
   const normalizedPath = normalizePath(location.pathname);
 
   useEffect(() => {
     // Nunca mostrar loading en estas rutas
     if (
-      NO_CHROME_PATHS.includes(normalizedPath) ||
-      AUTH_CARD_PATHS.includes(normalizedPath)
+      NO_CHROME_PATHS.includes(location.pathname) ||
+      AUTH_CARD_PATHS.includes(location.pathname)
     ) {
       setIsLoading(false);
       return;
@@ -82,7 +85,9 @@ function AppContent() {
 
   return (
     <>
-      {isAuthenticated && !NO_CHROME_PATHS.includes(normalizedPath) && !isLoading && <Navbar />}
+      {isAuthenticated &&
+        !NO_CHROME_PATHS.includes(normalizedPath) &&
+        !isLoading && <Navbar />}
       {isLoading ? (
         <LoadingOverlay />
       ) : (
@@ -99,7 +104,10 @@ function AppContent() {
             }
           />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
+          <Route
+            path="/confirm-email-change"
+            element={<ConfirmEmailChange />}
+          />
           <Route
             path="/home"
             element={
@@ -157,7 +165,7 @@ function AppContent() {
             }
           />
           <Route path="/history" element={<Placeholder title="History" />} />
-          <Route path="/sobre nosotros" element={<About />} />
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="/terminos y condiciones" element={<Terms />} />
           <Route path="/politica de privacidad" element={<Privacy />} />
           <Route path="/preguntasfrecuentes" element={<Faq />} />

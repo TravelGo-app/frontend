@@ -7,10 +7,34 @@ const navItems = [
     label: "Billetera",
     path: "/dashboard",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 7H21V17C21 18.1046 20.1046 19 19 19H5C3.8954 19 3 18.1046 3 17V7Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M3 7L3 5C3 3.8954 3.8954 3 5 3H19C20.1046 3 21 3.8954 21 5V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M16 12.5H16.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3 7H21V17C21 18.1046 20.1046 19 19 19H5C3.8954 19 3 18.1046 3 17V7Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M3 7L3 5C3 3.8954 3.8954 3 5 3H19C20.1046 3 21 3.8954 21 5V7"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M16 12.5H16.01"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -18,10 +42,34 @@ const navItems = [
     label: "Transacciones",
     path: "/transactions",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 9L12 3L18 9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M6 15L12 21L18 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12 3V21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 9L12 3L18 9"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M6 15L12 21L18 15"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M12 3V21"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -29,20 +77,60 @@ const navItems = [
     label: "Historial",
     path: "/history",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 8V12L15 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M21 12C21 16.9706 16.9706 21 12 21C7.0294 21 3 16.9706 3 12C3 7.0294 7.0294 3 12 3C16.9706 3 21 7.0294 21 12Z" stroke="currentColor" strokeWidth="1.8" />
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 8V12L15 14"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M21 12C21 16.9706 16.9706 21 12 21C7.0294 21 3 16.9706 3 12C3 7.0294 7.0294 3 12 3C16.9706 3 21 7.0294 21 12Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
       </svg>
     ),
   },
   {
     label: "Nosotros",
-    path: "/sobre nosotros",
+    path: "/about-us",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 21V19C16 17.8954 15.1046 17 14 17H10C8.8954 17 8 17.8954 8 19V21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12 11C13.6569 11 15 9.6569 15 8C15 6.3431 13.6569 5 12 5C10.3431 5 9 6.3431 9 8C9 9.6569 10.3431 11 12 11Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M19 21V19C19 17.3431 17.6569 16 16 16H8C6.3431 16 5 17.3431 5 19V21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 21V19C16 17.8954 15.1046 17 14 17H10C8.8954 17 8 17.8954 8 19V21"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M12 11C13.6569 11 15 9.6569 15 8C15 6.3431 13.6569 5 12 5C10.3431 5 9 6.3431 9 8C9 9.6569 10.3431 11 12 11Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M19 21V19C19 17.3431 17.6569 16 16 16H8C6.3431 16 5 17.3431 5 19V21"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
   },
@@ -52,14 +140,33 @@ const profileItem = {
   label: "Perfil",
   path: "/home",
   icon: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
 };
 
-const normalizePath = (pathname: string) => decodeURIComponent(pathname).replace(/\/+$/g, "");
+const normalizePath = (pathname: string) =>
+  decodeURIComponent(pathname).replace(/\/+$/g, "");
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -113,21 +220,25 @@ export default function Navbar() {
     fontWeight: 700,
     letterSpacing: "0.01em",
     transform: "translateZ(0)",
-    transition: "transform 180ms ease, box-shadow 180ms ease, background 180ms ease",
+    transition:
+      "transform 180ms ease, box-shadow 180ms ease, background 180ms ease",
     boxShadow: "0 12px 28px rgba(15, 23, 42, 0.06)",
     background: "#ffffff",
   } as const;
 
-  const iconBadgeStyles = (active?: boolean) => ({
-    width: 42,
-    minWidth: 42,
-    height: 42,
-    borderRadius: 16,
-    display: "grid",
-    placeItems: "center",
-    background: active ? "linear-gradient(135deg, #fb7185, #f97316)" : "rgba(14, 165, 233, 0.12)",
-    color: active ? "#ffffff" : "#0369a1",
-  } as const);
+  const iconBadgeStyles = (active?: boolean) =>
+    ({
+      width: 42,
+      minWidth: 42,
+      height: 42,
+      borderRadius: 16,
+      display: "grid",
+      placeItems: "center",
+      background: active
+        ? "linear-gradient(135deg, #fb7185, #f97316)"
+        : "rgba(14, 165, 233, 0.12)",
+      color: active ? "#ffffff" : "#0369a1",
+    }) as const;
 
   const closeButtonStyles = {
     border: "none",
@@ -152,37 +263,100 @@ export default function Navbar() {
           style={menuButtonStyles}
         >
           <div style={{ display: "grid", gap: 4 }}>
-            <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
-            <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
-            <span style={{ width: 20, height: 2, background: "#0f172a", borderRadius: 999 }} />
+            <span
+              style={{
+                width: 20,
+                height: 2,
+                background: "#0f172a",
+                borderRadius: 999,
+              }}
+            />
+            <span
+              style={{
+                width: 20,
+                height: 2,
+                background: "#0f172a",
+                borderRadius: 999,
+              }}
+            />
+            <span
+              style={{
+                width: 20,
+                height: 2,
+                background: "#0f172a",
+                borderRadius: 999,
+              }}
+            />
           </div>
         </button>
       )}
 
       <aside style={asideStyles}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
-            style={{ display: "inline-flex", alignItems: "center", gap: 12, textDecoration: "none" }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 12,
+              textDecoration: "none",
+            }}
           >
-            <img src={logo} alt="TravelGo" style={{ width: 44, height: 44, objectFit: "contain" }} />
+            <img
+              src={logo}
+              alt="TravelGo"
+              style={{ width: 44, height: 44, objectFit: "contain" }}
+            />
             <div>
-              <p style={{ margin: 0, fontSize: "0.8rem", color: "#475569", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "0.8rem",
+                  color: "#475569",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                }}
+              >
                 TravelGo
               </p>
-              <p style={{ margin: 0, fontSize: "1.05rem", fontWeight: 800, color: "#0f172a" }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "1.05rem",
+                  fontWeight: 800,
+                  color: "#0f172a",
+                }}
+              >
                 Mis finanzas
               </p>
             </div>
           </Link>
 
-          <button onClick={() => setIsOpen(false)} aria-label="Cerrar menú" style={closeButtonStyles}>
+          <button
+            onClick={() => setIsOpen(false)}
+            aria-label="Cerrar menú"
+            style={closeButtonStyles}
+          >
             ×
           </button>
         </div>
 
-        <div style={{ marginTop: 22, color: "#64748b", fontSize: "0.95rem", lineHeight: 1.6 }}>
+        <div
+          style={{
+            marginTop: 22,
+            color: "#64748b",
+            fontSize: "0.95rem",
+            lineHeight: 1.6,
+          }}
+        >
           Navega rápido entre tu wallet, transferencias e historial.
         </div>
 
@@ -196,9 +370,13 @@ export default function Navbar() {
                 onClick={() => setIsOpen(false)}
                 style={{
                   ...linkBaseStyles,
-                  background: isActive ? "rgba(251, 113, 133, 0.15)" : "#ffffff",
+                  background: isActive
+                    ? "rgba(251, 113, 133, 0.15)"
+                    : "#ffffff",
                   color: isActive ? "#B91C1C" : "#0F172A",
-                  boxShadow: isActive ? "0 28px 70px rgba(251, 113, 133, 0.18)" : "0 12px 28px rgba(15, 23, 42, 0.06)",
+                  boxShadow: isActive
+                    ? "0 28px 70px rgba(251, 113, 133, 0.18)"
+                    : "0 12px 28px rgba(15, 23, 42, 0.06)",
                   transform: isActive ? "translateX(1px)" : undefined,
                 }}
               >
@@ -209,7 +387,13 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div style={{ marginTop: 26, borderTop: "1px solid rgba(148, 163, 184, 0.16)", paddingTop: 20 }}>
+        <div
+          style={{
+            marginTop: 26,
+            borderTop: "1px solid rgba(148, 163, 184, 0.16)",
+            paddingTop: 20,
+          }}
+        >
           <Link
             to={profileItem.path}
             onClick={() => setIsOpen(false)}
@@ -217,12 +401,20 @@ export default function Navbar() {
               ...linkBaseStyles,
               width: "100%",
               justifyContent: "space-between",
-              background: activePath === profileItem.path ? "rgba(251, 113, 133, 0.15)" : "#ffffff",
+              background:
+                activePath === profileItem.path
+                  ? "rgba(251, 113, 133, 0.15)"
+                  : "#ffffff",
               color: activePath === profileItem.path ? "#B91C1C" : "#0F172A",
-              boxShadow: activePath === profileItem.path ? "0 24px 60px rgba(251, 113, 133, 0.18)" : "0 12px 28px rgba(15, 23, 42, 0.06)",
+              boxShadow:
+                activePath === profileItem.path
+                  ? "0 24px 60px rgba(251, 113, 133, 0.18)"
+                  : "0 12px 28px rgba(15, 23, 42, 0.06)",
             }}
           >
-            <span style={iconBadgeStyles(activePath === profileItem.path)}>{profileItem.icon}</span>
+            <span style={iconBadgeStyles(activePath === profileItem.path)}>
+              {profileItem.icon}
+            </span>
             <span style={{ flex: 1 }}>{profileItem.label}</span>
           </Link>
         </div>
@@ -235,15 +427,35 @@ export default function Navbar() {
             bottom: 0,
             height: 180,
             pointerEvents: "none",
-            background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(254, 247, 237, 0.95) 50%, rgba(255, 246, 239, 1) 100%)",
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(254, 247, 237, 0.95) 50%, rgba(255, 246, 239, 1) 100%)",
             borderBottomLeftRadius: 36,
             borderBottomRightRadius: 36,
           }}
         >
-          <svg width="100%" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
-            <path d="M0 90C70 120 110 135 160 135C210 135 250 120 320 90V180H0V90Z" fill="#bae6fd" opacity="0.66" />
-            <path d="M0 110C70 140 110 155 160 155C210 155 250 140 320 110V180H0V110Z" fill="#7dd3fc" opacity="0.34" />
-            <path d="M0 130C70 152 110 166 160 166C210 166 250 152 320 130V180H0V130Z" fill="#38bdf8" opacity="0.18" />
+          <svg
+            width="100%"
+            height="180"
+            viewBox="0 0 320 180"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: "block" }}
+          >
+            <path
+              d="M0 90C70 120 110 135 160 135C210 135 250 120 320 90V180H0V90Z"
+              fill="#bae6fd"
+              opacity="0.66"
+            />
+            <path
+              d="M0 110C70 140 110 155 160 155C210 155 250 140 320 110V180H0V110Z"
+              fill="#7dd3fc"
+              opacity="0.34"
+            />
+            <path
+              d="M0 130C70 152 110 166 160 166C210 166 250 152 320 130V180H0V130Z"
+              fill="#38bdf8"
+              opacity="0.18"
+            />
           </svg>
         </div>
       </aside>
