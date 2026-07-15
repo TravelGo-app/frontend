@@ -513,7 +513,7 @@ body {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1000px) {
   .landing-header {
     flex-direction: column;
     align-items: stretch;
@@ -526,10 +526,7 @@ body {
   }
 
   .landing-header-chip {
-    width: 100%;
-    max-width: 100%;
-    justify-content: center;
-    font-size: 0.92rem;
+    display: none;
   }
 
   .landing-header-text {
