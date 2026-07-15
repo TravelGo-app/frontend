@@ -4,16 +4,6 @@ import logo from "../assets/PosibleLogo.png";
 
 const navItems = [
   {
-    label: "Inicio",
-    path: "/home",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 10.5L12 3L21 10.5V21C21 21.5523 20.5523 22 20 22H4C3.4477 22 3 21.5523 3 21V10.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9 22V13.5H15V22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
     label: "Billetera",
     path: "/dashboard",
     icon: (
@@ -57,6 +47,17 @@ const navItems = [
     ),
   },
 ];
+
+const profileItem = {
+  label: "Perfil",
+  path: "/home",
+  icon: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+};
 
 const normalizePath = (pathname: string) => decodeURIComponent(pathname).replace(/\/+$/g, "");
 
@@ -207,6 +208,24 @@ export default function Navbar() {
             );
           })}
         </nav>
+
+        <div style={{ marginTop: 26, borderTop: "1px solid rgba(148, 163, 184, 0.16)", paddingTop: 20 }}>
+          <Link
+            to={profileItem.path}
+            onClick={() => setIsOpen(false)}
+            style={{
+              ...linkBaseStyles,
+              width: "100%",
+              justifyContent: "space-between",
+              background: activePath === profileItem.path ? "rgba(251, 113, 133, 0.15)" : "#ffffff",
+              color: activePath === profileItem.path ? "#B91C1C" : "#0F172A",
+              boxShadow: activePath === profileItem.path ? "0 24px 60px rgba(251, 113, 133, 0.18)" : "0 12px 28px rgba(15, 23, 42, 0.06)",
+            }}
+          >
+            <span style={iconBadgeStyles(activePath === profileItem.path)}>{profileItem.icon}</span>
+            <span style={{ flex: 1 }}>{profileItem.label}</span>
+          </Link>
+        </div>
 
         <div
           style={{
