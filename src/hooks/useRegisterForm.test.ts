@@ -29,6 +29,7 @@ describe('useRegisterForm', () => {
       result.current.handleEmailChange('nadia@travelgo.com')
       result.current.handlePasswordChange('password123')
       result.current.handleConfirmChange('password123')
+      result.current.handleBirthDateChange('2000-05-14')
     })
 
     await act(async () => {
@@ -64,6 +65,7 @@ describe('useRegisterForm', () => {
       result.current.handleEmailChange('nadia@travelgo.com')
       result.current.handlePasswordChange('password123')
       result.current.handleConfirmChange('password123')
+      result.current.handleBirthDateChange('2000-05-14')
       result.current.handleTermsChange(true)
     })
 
@@ -86,6 +88,7 @@ describe('useRegisterForm', () => {
       result.current.handleEmailChange('nadia@travelgo.com')
       result.current.handlePasswordChange('password123')
       result.current.handleConfirmChange('password123')
+      result.current.handleBirthDateChange('2000-05-14')
       result.current.handleTermsChange(true)
     })
 
@@ -124,6 +127,7 @@ describe('useRegisterForm', () => {
       result.current.handleEmailChange('nadia@travelgo.com')
       result.current.handlePasswordChange('password123')
       result.current.handleConfirmChange('password123')
+      result.current.handleBirthDateChange('2000-05-14')
       result.current.handleTermsChange(true)
     })
 
