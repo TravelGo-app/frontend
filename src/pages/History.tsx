@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { sendDashboardSummaryEmail } from "../services/emailPreferences.service";
 import beachBg from "../assets/PlayaPrincipal.png";
 
 type Category = "AUTH" | "PROFILE" | "WALLET" | "EMAIL" | "SECURITY" | "SYSTEM";
@@ -121,10 +120,6 @@ export default function History() {
   const [filter, setFilter] = useState<SimpleFilter>("all");
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const filterMenuRef = useRef<HTMLDivElement | null>(null);
-  const [summarySending, setSummarySending] = useState(false);
-  const [summaryToast, setSummaryToast] = useState<
-    { type: "success" | "error"; message: string } | null
-  >(null);
 
   const activeCategory = FILTERS.find((f) => f.value === filter)?.category;
   const activeFilterLabel = FILTERS.find((f) => f.value === filter)?.label ?? "Todos";
@@ -167,12 +162,6 @@ export default function History() {
     loadInitial();
   }, [loadInitial]);
 
-  useEffect(() => {
-    if (!summaryToast) return;
-    const timeout = window.setTimeout(() => setSummaryToast(null), 5000);
-    return () => window.clearTimeout(timeout);
-  }, [summaryToast]);
-
   // Cierra el menú de filtros al hacer clic afuera
   useEffect(() => {
     if (!filterMenuOpen) return;
@@ -208,40 +197,6 @@ export default function History() {
     }
   };
 
-  const handleSendHistoryEmail = async () => {
-    setSummaryToast(null);
-    setSummarySending(true);
-
-    try {
-      await sendDashboardSummaryEmail(30);
-      setSummaryToast({
-        type: "success",
-        message: "Historial programado. Revisá tu correo en los próximos minutos.",
-      });
-    } catch (err: any) {
-      console.error("Error enviando historial por email:", err);
-      const status = err.response?.status;
-      if (status === 429) {
-        setSummaryToast({
-          type: "error",
-          message: "Ya solicitaste un envío recientemente. Esperá unos minutos.",
-        });
-      } else if (status === 401) {
-        setSummaryToast({
-          type: "error",
-          message: "Tu sesión venció. Iniciá sesión nuevamente.",
-        });
-      } else {
-        setSummaryToast({
-          type: "error",
-          message: "No se pudo enviar el historial por email.",
-        });
-      }
-    } finally {
-      setSummarySending(false);
-    }
-  };
-
   const displayedItems = items.filter((item) => {
     if (filter === "all" || filter === "account") return true;
     const type = item.eventType.toLowerCase();
@@ -270,20 +225,6 @@ export default function History() {
     >
       <div className="absolute inset-0 bg-black/25 pointer-events-none" />
 
-      {summaryToast && (
-        <div className="fixed top-4 right-4 left-4 sm:left-auto z-50 sm:w-full sm:max-w-sm">
-          <div
-            className={`rounded-2xl px-4 py-3 shadow-xl ring-1 ring-black/10 text-sm font-semibold transition-transform duration-300 ${
-              summaryToast.type === "success"
-                ? "bg-emerald-500 text-white"
-                : "bg-[#ff4242] text-white"
-            }`}
-          >
-            {summaryToast.message}
-          </div>
-        </div>
-      )}
-
       <div className="max-w-3xl mx-auto relative z-10 h-full flex flex-col">
         <button
           onClick={() => navigate("/dashboard")}
@@ -298,20 +239,11 @@ export default function History() {
             <div className="flex-1 bg-[#2391ae]"></div>
             <div className="flex-1 bg-[#ff7d60]"></div>
           </div>
-          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="text-white font-bold text-2xl sm:text-3xl">Historial</h1>
-              <p className="text-white/80 text-xs sm:text-sm mt-1">
-                Toda tu actividad en TravelGo, de la más reciente a la más antigua
-              </p>
-            </div>
-            <button
-              onClick={handleSendHistoryEmail}
-              disabled={summarySending}
-              className="inline-flex items-center justify-center rounded-full bg-[#2391ae] px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#1c7a98] transition disabled:cursor-not-allowed disabled:bg-slate-400 shrink-0 whitespace-nowrap self-start sm:self-auto"
-            >
-              {summarySending ? "Preparando..." : "Enviar resumen por mail ✉️"}
-            </button>
+          <div className="p-4 sm:p-5">
+            <h1 className="text-white font-bold text-2xl sm:text-3xl">Historial</h1>
+            <p className="text-white/80 text-xs sm:text-sm mt-1">
+              Toda tu actividad en TravelGo, de la más reciente a la más antigua
+            </p>
           </div>
         </div>
 
