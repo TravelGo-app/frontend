@@ -1,261 +1,243 @@
 # TravelGo — Frontend
 
-Billetera digital multi-moneda para viajeros argentinos. Permite gestionar saldos en ARS, USD, EUR, BRL y CLP, ver tasas de cambio en tiempo real y realizar transacciones simuladas.
+Billetera digital que ayuda al turista argentino a comprender, organizar y practicar el uso de diferentes monedas antes y durante un viaje al exterior.
 
-## 🚀 Deploy
+**Producción:** https://travelgo-pink.vercel.app
+**Backend:** https://travelgo-njke.up.railway.app/api
 
-Frontend: [https://travelgo-pink.vercel.app](https://travelgo-pink.vercel.app)  
-Backend: [https://travelgo-njke.up.railway.app](https://travelgo-njke.up.railway.app)
+---
 
-## 🛠 Stack tecnológico
+## Stack
 
-- React 19 + TypeScript
-- Vite 8
-- Tailwind CSS 4
-- React Router DOM 7
-- Axios
-- Google Identity Services (OAuth)
-- Recharts (gráficos de analytics)
+- **React 18** + **TypeScript**
+- **Vite** (bundler)
+- **Tailwind CSS v4**
+- **React Router** (enrutamiento)
+- **Axios** (cliente HTTP)
+- **Recharts** (gráficos de Analytics)
+- Deploy: **Vercel** (frontend, autodeploy en `main`) + **Railway** (backend, PostgreSQL)
 
-## 📁 Estructura del proyecto
+---
 
-```
-src/
-├── assets/              # Imágenes, videos, logos
-├── components/          
-│   ├── Navbar.tsx              # Menú sidebar responsive
-│   ├── ProtectedRoute.tsx       # Guard para rutas autenticadas
-│   ├── GoogleLoginButton.tsx    # Integración OAuth con Google
-│   ├── ChatbotWidget.tsx        # Widget de chat
-│   ├── LoadingOverlay.tsx       # Pantalla de carga (950ms)
-│   ├── AnalyticsSection.tsx     # Sección de analytics con gráficos
-│   └── auth/
-│       ├── LoginFormFields.tsx
-│       ├── RegisterFormFields.tsx
-│       ├── GoogleAuthButton.tsx
-│       ├── ForgotPasswordModal.tsx
-│       ├── TermsModal.tsx
-│       └── AuthIcons.tsx
-├── context/             
-│   ├── AuthContext.tsx          # Gestión global de autenticación
-│   └── ChatVisibilityContext.tsx # Control de visibilidad del chat
-├── hooks/               
-│   ├── useLoginForm.ts          # Lógica de login con validación
-│   └── useRegisterForm.ts       # Lógica de registro con validación
-├── pages/               
-│   ├── Landing.tsx              # Página de inicio (hero + features + footer)
-│   ├── Login.tsx                # Página de login/register
-│   ├── Dashboard.tsx            # Dashboard con balances y analytics
-│   ├── Profile.tsx              # Perfil del usuario
-│   ├── Exchange.tsx             # Intercambio de monedas
-│   ├── Transfer.tsx             # Transferencias
-│   ├── Deposit.tsx              # Depósitos
-│   ├── Transactions.tsx         # Historial de transacciones
-│   ├── SetPassword.tsx          # Configurar contraseña (post-Google)
-│   ├── ResetPassword.tsx        # Resetear contraseña
-│   ├── ConfirmEmailChange.tsx   # Confirmar cambio de email
-│   ├── AboutUs.tsx              # Página sobre nosotros
-│   ├── Contact.tsx              # Contacto
-│   ├── Faq.tsx                  # Preguntas frecuentes
-│   ├── Privacy.tsx              # Política de privacidad
-│   ├── Security.tsx             # Seguridad
-│   ├── Terms.tsx                # Términos y condiciones
-│   ├── Placeholder.tsx          # Placeholder para rutas pendientes
-│   └── NotFound.tsx             # Página 404
-├── services/            
-│   ├── api.ts                   # Cliente Axios con interceptor de token
-│   ├── auth.service.ts          # Servicios de autenticación
-│   ├── chatService.ts           # Servicios del chatbot
-│   └── emailPreferences.service.ts # Preferencias de email y resumen
-├── types/               
-│   └── index.ts                 # Definiciones de tipos globales
-└── utils/               
-    ├── authValidators.ts        # Validadores para email, password, name
-    └── authValidators.test.ts   # Tests de validadores
-```
+## Requisitos
 
-## ⚙️ Instalación y setup local
+- Node.js 18+
+- npm
 
-### 1. Clonar el repositorio
+## Instalación
 
 ```bash
 git clone https://github.com/TravelGo-app/frontend.git
 cd frontend
-```
-
-### 2. Instalar dependencias
-
-```bash
 npm install
 ```
 
-### 3. Configurar variables de entorno
+## Variables de entorno
 
-Crear un archivo `.env` en la raíz del proyecto:
+Crear un archivo `.env.local` en la raíz con:
 
 ```
 VITE_API_URL=https://travelgo-njke.up.railway.app/api
-VITE_GOOGLE_CLIENT_ID=tu_google_client_id
+VITE_GOOGLE_CLIENT_ID=<client_id de Google OAuth>
 ```
 
-### 4. Correr en modo desarrollo
+Para desarrollo local contra un backend local, ajustar `VITE_API_URL` a `http://localhost:3000/api`.
+
+## Correr en desarrollo
 
 ```bash
 npm run dev
 ```
 
-La app corre en `http://localhost:5173`
+Levanta en `http://localhost:5173`.
 
-### 5. Scripts disponibles
+## Build de producción
 
 ```bash
-npm run dev        # Servidor desarrollo con hot reload
-npm run build      # Build para producción
-npm run lint       # Verificar linting
-npm run preview    # Previsualizar build
-npm run test       # Correr tests unitarios
-npm run test:watch # Tests en modo watch
+npm run build
 ```
 
-## 🎨 Páginas Implementadas
+Compila con `tsc -b && vite build`. La salida queda en `dist/`.
 
-### 📍 Landing Page (`/`)
+---
 
-Página de bienvenida con:
+## Estructura del proyecto
 
-- **Hero Section**: Logo, headline "Tu dinero, dondequiera que vayas", CTA principal
-- **Feature Cards**: 4 tarjetas destacando:
-  - 💳 Billetera Multimoneda (ARS, USD, EUR, BRL, CLP)
-  - 📈 Tasas en Tiempo Real
-  - 🛡️ Seguridad Avanzada
-  - 🤝 Soporte 24/7
-- **Multicurrency Section**: Showcase de soportar múltiples monedas
-- **Secure Section**: Énfasis en seguridad JWT y rutas protegidas
-- **Travel Tips Section**: Consejos rotatorios para viajeros
-- **Footer**: Links a términos, privacidad, FAQ, seguridad, contacto, "Sobre nosotros"
-
-**Características especiales:**
-- Scroll hint animado (↓ Scroll)
-- Crossfade smooth entre videos de fondo
-- 3D rotation effects en elementos (parallax)
-- Fully responsive: mobile, tablet, desktop
-- Redirección automática a `/dashboard` si ya está autenticado
-
-### 🔐 Login/Register (`/login`, `/register`)
-
-Página unificada con dos modos:
-
-- **Login**: Email + Password + Remember Me checkbox
-- **Register**: Name + Email + Password + Términos y condiciones
-- Toggle entre modos
-- Validación real-time de campos
-- Error handling: email duplicado, credenciales inválidas
-- Google OAuth integration con fallback: si la cuenta fue creada con Google, muestra mensaje "Iniciá sesión con Google"
-- Pantalla de carga mientras se procesa Google Auth
-- Background de playa responsive
-- TriStripe (barra de colores rojo, azul, naranja)
-
-### 📊 Dashboard (`/dashboard`)
-
-Panel principal post-login con:
-
-- **Balances Widget**:
-  - Saldo principal en ARS (con equivalente en monedas seleccionadas)
-  - Tarjetas para USD, EUR, BRL, CLP (con flags 🇦🇷🇺🇸🇪🇺)
-  - Equivalente a ARS en cada moneda
-
-- **Exchange Rates Section**: Tasas actuales de cambio
-
-- **Recent Transactions**: Últimas transacciones con:
-  - Tipo de transacción (deposit, transfer, exchange)
-  - Monto y dirección (in/out)
-  - Estado (completed, pending, failed)
-  - Timestamp
-
-- **Analytics Section** (Recharts):
-  - Gráfico de cierre de balance por fecha
-  - Datos de últimos 30 días
-  - Polling cada 20s para actualización
-
-- **Travel Tips**: Consejos rotatorios
-
-- **Email Summary Button**: Envía resumen de dashboard por email
-  - POST `/profile/dashboard-summary-email` con `days: 30`
-  - Rate limiting: 429 si ya solicitó recientemente
-  - Toast notifications (éxito/error)
-
-- **Logout Button**: Con delay de 500ms
-
-- **Last Updated**: Timestamp de la última actualización
-
-### 📱 Responsive Design
-
-Implementado con **Tailwind CSS breakpoints**:
-
-```css
-Mobile First:
-- sm: 640px   (tablets)
-- md: 768px   (tablets grandes)
-- lg: 1024px  (laptops)
-- xl: 1280px  (desktops)
+```
+src/
+├── assets/              # Imágenes, videos, logo
+├── components/
+│   ├── auth/            # LoginFormFields, RegisterFormFields, GoogleAuthButton, TermsModal, ForgotPasswordModal, AuthIcons
+│   ├── AnalyticsSection.tsx
+│   ├── ChatbotWidget.tsx
+│   ├── GoogleLoginButton.tsx
+│   ├── LoadingOverlay.tsx
+│   ├── Navbar.tsx
+│   ├── ProtectedRoute.tsx
+│   └── StepIndicator.tsx
+├── context/
+│   ├── AuthContext.tsx
+│   └── ChatVisibilityContext.tsx
+├── hooks/
+│   ├── useLoginForm.ts
+│   ├── useRegisterForm.ts
+│   └── useIsDesktop.ts
+├── pages/
+│   ├── Landing.tsx
+│   ├── Login.tsx              # Login + Register combinados
+│   ├── Dashboard.tsx          # "Billetera"
+│   ├── Transactions.tsx
+│   ├── Deposit.tsx
+│   ├── Exchange.tsx
+│   ├── Transfer.tsx
+│   ├── Profile.tsx            # Ruta /home y /perfil
+│   ├── History.tsx            # Ruta /history
+│   ├── AboutUs.tsx            # Ruta /about-us
+│   ├── SetPassword.tsx
+│   ├── ResetPassword.tsx
+│   ├── ConfirmEmailChange.tsx
+│   └── NotFound.tsx
+├── services/
+│   ├── api.ts                 # Instancia de Axios + authService
+│   ├── auth.service.ts        # Google OAuth
+│   ├── chatService.ts         # Asistente virtual
+│   └── emailPreferences.service.ts
+├── utils/
+│   └── authValidators.ts
+├── App.tsx
+└── main.tsx
 ```
 
-Ejemplos en componentes:
-- **Landing Hero**: `grid md:grid-cols-2 lg:grid-cols-3`
-- **Navbar**: Hamburguesa en mobile, sidebar que aparece con transición
-- **Feature Cards**: 1 col mobile → 2 cols tablet → 4 cols desktop
-- **Dashboard**: Stack vertical mobile → flex horizontal desktop
-- **Footer**: 1 col mobile → 4 cols desktop
+---
 
-Todos los textos usan `text-sm sm:text-base md:text-lg` para escalabilidad.
+## Rutas principales
 
-## 🔐 Autenticación
-
-- Registro y login con email y contraseña
-- Login con Google OAuth (redirect flow)
-- Persistencia de sesión con JWT en localStorage (Remember Me) o sessionStorage (sesión actual)
-- Rutas protegidas con `<ProtectedRoute>` — redirige a "/" si no hay sesión activa
-- Token enviado automáticamente en header `Authorization: Bearer {token}`
-- Validación de token en cada carga: GET `/auth/me`
-
-## 📧 Email & Preferencias
-
-### Servicio de Email: `emailPreferences.service.ts`
-
-```typescript
-// Obtener preferencias
-getEmailPreferences(): Promise<EmailPreferences>
-
-// Actualizar preferencias
-updateEmailPreferences(changes: Partial<EmailPreferences>): Promise<EmailPreferences>
-
-// Enviar resumen de dashboard (30 o 7 días)
-sendDashboardSummaryEmail(days: 7 | 30 = 30): Promise<any>
-```
-
-**Preferencias disponibles:**
-- `notifyDeposits` - Notificaciones de depósitos
-- `notifyTransfersSent` - Notificaciones de transferencias enviadas
-- `notifyTransfersReceived` - Notificaciones de transferencias recibidas
-- `notifyExchanges` - Notificaciones de intercambios
-- `notifyLoginDashboardReminder` - Recordatorio diario del dashboard
-
-**Email Summary:**
-- POST `/profile/dashboard-summary-email` con `{ days: 30 }`
-- Respuesta exitosa: toast "Resumen programado. Revisá tu correo en los próximos minutos."
-- Error 429: "Ya solicitaste un resumen recientemente. Esperá unos minutos."
-- Error 401: "Tu sesión venció. Iniciá sesión nuevamente."
-
-## 📄 Variables de entorno
-
-| Variable | Descripción | Ejemplo |
+| Ruta | Página | Protegida |
 |---|---|---|
-| `VITE_API_URL` | URL base del backend | `https://travelgo-njke.up.railway.app/api` |
-| `VITE_GOOGLE_CLIENT_ID` | Client ID de Google OAuth | `xxx.apps.googleusercontent.com` |
+| `/` | Landing | No |
+| `/login`, `/register` | Login / Registro | No |
+| `/home`, `/perfil` | Perfil (datos, CVU, alias) | Sí |
+| `/dashboard` | Billetera | Sí |
+| `/transactions` | Menú de transacciones | Sí |
+| `/deposit` | Depósito simulado | Sí |
+| `/exchange` | Intercambio de divisas | Sí |
+| `/transfer` | Transferencias | Sí |
+| `/history` | Historial de actividad | Sí |
+| `/about-us` | Nosotros | No |
+| `/reset-password` | Reseteo de contraseña | No |
+| `/confirm-email-change` | Confirmación de cambio de email | No |
 
-## 👥 Equipo
+---
 
-- **Nadia Starna** — Frontend (Login, Register, AuthContext, rutas)
-- **Emanuel Florez** — Frontend (Navbar, carga)
-- **Katy Tejada** — Frontend (Dashboard, balances, tasas)
-- **Joaquín Gonzalez** — Backend (Express, PostgreSQL, Railway)
+## Funcionalidades principales
+
+### Autenticación
+- Login con email/contraseña
+- Login con Google (Google Identity Services)
+- Registro con validación de fecha de nacimiento (edad mínima 17 años)
+- Recuperación de contraseña
+- "Recordarme" (localStorage vs sessionStorage)
+
+### Billetera (Dashboard)
+- Balance total consolidado en ARS
+- Balances por moneda (ARS, USD, EUR, BRL, CLP)
+- Gráfico de evolución de balance (últimos 7 días)
+- Tasas de cambio en vivo
+- Actividad reciente
+- Analytics con pestañas (Resumen / Evolución / Distribución / Detalle)
+
+### Transacciones
+- Depósito simulado
+- Intercambio entre monedas
+- Transferencias (por email, alias o CVU)
+- Wizard de 4 pasos en cada operación (Ingresar datos → Confirmar → Procesando → Listo)
+
+### Perfil
+- Datos personales editables (nombre, teléfono, fecha de nacimiento, moneda preferida)
+- CVU y alias de TravelGo (simulados, para transferencias internas)
+- Cambio de email con confirmación por link
+- Avatar (foto de Google o iniciales)
+
+### Historial
+- Actividad completa del usuario
+- Filtros por tipo (Depósitos, Transferencias, Intercambios, Cuenta)
+- Paginación con scroll infinito
+- Estados visuales (Exitoso / Error / Pendiente / Info)
+
+### Asistente virtual (chat)
+- Widget flotante y arrastrable, disponible en toda la app
+- Persiste mensajes entre navegaciones
+- Oculto durante pantallas de carga
+
+---
+
+## Paleta de colores
+
+| Nombre | Hex | Uso |
+|---|---|---|
+| Coral | `#ff4242` | Acentos, alertas, franja tricolor |
+| Océano | `#2391ae` | Acentos secundarios, texto sobre blanco |
+| Terracota | `#ff7d60` | Acentos, franja tricolor |
+| Grafito | `#233446` | Fondos oscuros, texto principal |
+| Arena | `#e4c2a2` | Fondos cálidos, degradés |
+
+La franja tricolor (coral → océano → terracota) es un recurso visual presente en headers de Billetera, Transacciones, Login, Historial y en el botón del Asistente.
+
+---
+
+## Flujo de ramas Git
+
+```
+feature/xxx → develop → main
+```
+
+- `main`: producción, autodeploy en Vercel
+- `develop`: integración del equipo
+- `feature/*`: trabajo individual por persona/funcionalidad
+
+---
+
+## Scripts disponibles
+
+```bash
+npm run dev       # servidor de desarrollo
+npm run build     # build de producción (tsc -b && vite build)
+npm run preview   # previsualizar el build localmente
+```
+
+---
+
+## Tests
+
+El proyecto usa **Vitest** + **React Testing Library** para tests unitarios de hooks y componentes.
+
+```bash
+npm run test
+```
+
+Cobertura actual:
+
+| Archivo | Tests |
+|---|---|
+| `src/utils/authValidators.test.ts` | 5 |
+| `src/hooks/useLoginForm.test.ts` | 7 |
+| `src/hooks/useRegisterForm.test.ts` | 6 |
+| `src/components/auth/LoginFormFields.test.tsx` | 2 |
+
+**Total: 20 tests, 4 archivos.**
+
+---
+
+## Equipo
+
+| Integrante | Área |
+|---|---|
+| Nadia | Autenticación, Perfil, Billetera, Historial |
+| Katy | Billetera, Transacciones |
+| Ema | Navbar, Landing, Nosotros |
+
+---
+
+## Licencia
+
+Proyecto académico — Henry Bootcamp, cohorte FT73.
