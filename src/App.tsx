@@ -174,10 +174,9 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
-      {!hideChat &&
-        !NO_CHATBOT_PATHS.includes(location.pathname) && (
-          <ChatbotWidget compact={isAuthCardPage} />
-        )}
+      {!hideChat && !NO_CHATBOT_PATHS.includes(location.pathname) && (
+        <ChatbotWidget compact={isAuthCardPage} />
+      )}
     </>
   );
 }
