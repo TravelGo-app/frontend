@@ -40,6 +40,13 @@ export default function Transactions() {
       <div className="absolute inset-0 bg-black/25 pointer-events-none" />
 
       <div className="max-w-3xl mx-auto relative z-10">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="text-white/80 hover:text-white text-sm font-semibold mb-3 sm:mb-6 self-start"
+        >
+          ← Ir a Billetera
+        </button>
+
         <div className="mb-6 bg-[#233446]/50 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg">
           <div className="flex h-1">
             <div className="flex-1 bg-[#ff4242]"></div>

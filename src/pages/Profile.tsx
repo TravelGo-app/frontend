@@ -63,10 +63,6 @@ export default function Profile() {
   const [aliasInput, setAliasInput] = useState("");
   const [editingAlias, setEditingAlias] = useState(false);
 
-  const [editingEmail, setEditingEmail] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
-  const [emailRequestSent, setEmailRequestSent] = useState(false);
-
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -150,36 +146,6 @@ export default function Profile() {
     }
   };
 
-  const handleRequestEmailChange = async () => {
-    setError(null);
-    setSuccess(null);
-
-    if (!newEmail || !newEmail.includes("@")) {
-      setError("Ingresá un email válido.");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const res = await api.post("/profile/email-change/request", {
-        newEmail,
-      });
-      setEmailRequestSent(true);
-      setSuccess(
-        res.data.message ||
-          "Te enviamos un enlace al nuevo email para confirmar el cambio.",
-      );
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          "No se pudo solicitar el cambio de email.",
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleCopyCvu = () => {
     if (!profile) return;
     navigator.clipboard.writeText(profile.wallet.travelgoCvu);
@@ -230,9 +196,7 @@ export default function Profile() {
               </div>
             )}
             <div>
-              <h1 className="text-xl font-bold text-grafito">
-                {profile.name}
-              </h1>
+              <h1 className="text-xl font-bold text-grafito">{profile.name}</h1>
               <p className="text-sm text-grafito/60">{profile.email}</p>
               {!profile.requirements.profileComplete && (
                 <p className="text-xs text-[#854F0B] font-semibold mt-1">
@@ -260,9 +224,7 @@ export default function Profile() {
 
         <div className="bg-white rounded-3xl p-6 shadow-lg mb-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-grafito">
-              Datos personales
-            </h2>
+            <h2 className="text-lg font-bold text-grafito">Datos personales</h2>
             {!editing && (
               <button
                 onClick={() => setEditing(true)}
@@ -377,62 +339,15 @@ export default function Profile() {
         </div>
 
         <div className="bg-white rounded-3xl p-6 shadow-lg mb-4">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-bold text-grafito">
-              Correo electrónico
-            </h2>
-            {!editingEmail && (
-              <button
-                onClick={() => setEditingEmail(true)}
-                className="text-sm font-semibold text-oceano hover:underline"
-              >
-                Cambiar email
-              </button>
-            )}
-          </div>
+          <h2 className="text-lg font-bold text-grafito mb-3">
+            Correo electrónico
+          </h2>
           <p className="text-sm text-grafito font-semibold mb-1">
             {profile.email}
           </p>
-          <p className="text-xs text-grafito/50 mb-3">
+          <p className="text-xs text-grafito/50">
             {profile.account.emailVerified ? "Verificado" : "Sin verificar"}
           </p>
-
-          {editingEmail && !emailRequestSent && (
-            <div className="mt-3">
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Nuevo email
-              </label>
-              <input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="nuevo@email.com"
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-3 text-grafito font-semibold"
-              />
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setEditingEmail(false)}
-                  className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleRequestEmailChange}
-                  disabled={saving}
-                  className="flex-1 bg-oceano text-white py-2 rounded-full font-bold hover:brightness-110 transition disabled:opacity-50"
-                >
-                  Enviar enlace de confirmación
-                </button>
-              </div>
-            </div>
-          )}
-
-          {emailRequestSent && (
-            <p className="text-sm text-grafito/70 mt-2">
-              Revisá <strong>{newEmail}</strong> para confirmar el cambio. El
-              enlace vence en 60 minutos.
-            </p>
-          )}
         </div>
 
         <div className="bg-white rounded-3xl p-6 shadow-lg">
