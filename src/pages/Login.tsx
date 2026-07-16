@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import playaImg from '../assets/PlayaPrincipal.png'
 import { useLoginForm } from '../hooks/useLoginForm'
 import { useRegisterForm } from '../hooks/useRegisterForm'
+import { useIsDesktop } from '../hooks/useIsDesktop'
 import LoginFormFields from '../components/auth/LoginFormFields'
 import RegisterFormFields from '../components/auth/RegisterFormFields'
 import { useChatVisibility } from '../context/ChatVisibilityContext'
@@ -25,6 +26,7 @@ export default function Login() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [welcomeName, setWelcomeName] = useState('')
   const { setHideChat } = useChatVisibility()
+  const isDesktop = useIsDesktop()
 
   const loginForm = useLoginForm()
   const registerForm = useRegisterForm({
@@ -96,11 +98,10 @@ export default function Login() {
             </div>
           </div>
         </div>
-      ) : (
-        // ===== Formulario de login/registro =====
+      ) : isDesktop ? (
+        // ===== DESKTOP/TABLET: panel deslizante horizontal =====
         <div className="min-h-screen flex items-center justify-center py-8 px-4 relative z-10">
-          {/* ===== DESKTOP/TABLET: panel deslizante horizontal (md en adelante) ===== */}
-          <div className="hidden md:flex relative z-[1000] w-[800px] max-w-full h-[628px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex-col">
+          <div className="relative z-[1000] w-[800px] max-w-full h-[660px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <TriStripe />
             <div className="relative flex-1">
               <button
@@ -142,10 +143,13 @@ export default function Login() {
                   serverError={registerForm.serverError}
                   loading={registerForm.loading}
                   acceptedTerms={registerForm.acceptedTerms}
+                  emailCheckStatus={registerForm.emailCheckStatus}
+                  isSubmitDisabled={registerForm.isSubmitDisabled}
                   onNameChange={registerForm.handleNameChange}
                   onEmailChange={registerForm.handleEmailChange}
                   onPasswordChange={registerForm.handlePasswordChange}
                   onConfirmChange={registerForm.handleConfirmChange}
+                  onBirthDateChange={registerForm.handleBirthDateChange}
                   onTermsChange={registerForm.handleTermsChange}
                   onSubmit={registerForm.handleSubmit}
                 />
@@ -172,9 +176,11 @@ export default function Login() {
               </div>
             </div>
           </div>
-
-          {/* ===== MOBILE: tarjeta apilada con transición vertical (debajo de md) ===== */}
-          <div className="flex md:hidden relative z-[1000] w-full max-w-[420px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex-col">
+        </div>
+      ) : (
+        // ===== MOBILE: tarjeta apilada con transición vertical =====
+        <div className="min-h-screen flex items-center justify-center py-8 px-4 relative z-10">
+          <div className="relative z-[1000] w-full max-w-[420px] bg-[#faf9f7] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <TriStripe />
             <button
               onClick={() => navigate('/')}
@@ -232,10 +238,13 @@ export default function Login() {
                   serverError={registerForm.serverError}
                   loading={registerForm.loading}
                   acceptedTerms={registerForm.acceptedTerms}
+                  emailCheckStatus={registerForm.emailCheckStatus}
+                  isSubmitDisabled={registerForm.isSubmitDisabled}
                   onNameChange={registerForm.handleNameChange}
                   onEmailChange={registerForm.handleEmailChange}
                   onPasswordChange={registerForm.handlePasswordChange}
                   onConfirmChange={registerForm.handleConfirmChange}
+                  onBirthDateChange={registerForm.handleBirthDateChange}
                   onTermsChange={registerForm.handleTermsChange}
                   onSubmit={registerForm.handleSubmit}
                 />

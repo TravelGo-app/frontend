@@ -12,6 +12,9 @@ export type GoogleAuthResponse = {
   token: string;
   isNewUser: boolean;
   accountLinked: boolean;
+  requiresPasswordSetup: boolean;
+  hasPassword: boolean;
+  hasGoogle: boolean;
 };
 
 export async function loginWithGoogle(
