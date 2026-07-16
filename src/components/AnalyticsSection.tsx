@@ -122,9 +122,7 @@ export default function AnalyticsSection() {
   return (
     <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg mt-4">
       <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
-        <h2 className="text-sm font-bold text-grafito">
-          Analytics y gráficos
-        </h2>
+        <h2 className="text-sm font-bold text-grafito">Análisis y Gráficos</h2>
         <div className="flex gap-2">
           <select
             value={days}
@@ -153,12 +151,12 @@ export default function AnalyticsSection() {
         </div>
       </div>
 
-      <div className="flex gap-1 mb-4 border-b border-grafito/10">
+      <div className="flex gap-1 mb-4 border-b border-grafito/10 overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`text-xs font-semibold px-3 py-2 border-b-2 transition ${
+            className={`text-xs font-semibold px-3 py-2 border-b-2 transition whitespace-nowrap shrink-0 ${
               activeTab === tab
                 ? "border-[#ff4242] text-grafito"
                 : "border-transparent text-grafito/50 hover:text-grafito/80"
@@ -361,9 +359,7 @@ export default function AnalyticsSection() {
                   <thead>
                     <tr className="text-grafito/50 text-left border-b border-grafito/10">
                       <th className="py-1.5 font-semibold">Fecha</th>
-                      <th className="py-1.5 font-semibold text-right">
-                        Saldo
-                      </th>
+                      <th className="py-1.5 font-semibold text-right">Saldo</th>
                       <th className="py-1.5 font-semibold text-right">
                         Flujo neto
                       </th>
@@ -386,9 +382,7 @@ export default function AnalyticsSection() {
                           className="py-1.5 text-right font-semibold"
                           style={{
                             color:
-                              Number(row.netFlow) >= 0
-                                ? "#16a34a"
-                                : "#ff4242",
+                              Number(row.netFlow) >= 0 ? "#16a34a" : "#ff4242",
                           }}
                         >
                           {Number(row.netFlow) >= 0 ? "+" : ""}

@@ -308,6 +308,7 @@ export default function Dashboard() {
         backgroundImage: `url(${beachBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundAttachment: "fixed",
       }}
     >
       <div className="absolute inset-0 bg-black/25 pointer-events-none" />
@@ -334,7 +335,10 @@ export default function Dashboard() {
           </div>
           <div className="flex justify-between items-center p-5">
             <div>
-              <h1 className="font-display text-3xl font-bold text-oceano">
+              <h1
+                className="font-display text-3xl font-bold text-brand-animated"
+                style={{ WebkitTextStroke: "0.5px rgba(35,52,70,0.4)" }}
+              >
                 ¡Hola, {firstName}!
               </h1>
               <p className="text-grafito/70 mt-1 text-sm font-semibold">
@@ -455,7 +459,9 @@ export default function Dashboard() {
               <div className="w-8 h-8 rounded-full bg-[#ff4242] text-white flex items-center justify-center text-sm shrink-0">
                 ↔
               </div>
-              <p className="text-sm font-bold text-grafito">Ir a Transacciones</p>
+              <p className="text-sm font-bold text-grafito">
+                Ir a Transacciones
+              </p>
             </button>
           </div>
 
@@ -558,9 +564,8 @@ export default function Dashboard() {
                                 Intercambio
                               </span>
                               <p className="text-sm font-bold text-oceano mt-0.5">
-                                {formatAmount(tx.fromAmount!)}{" "}
-                                {tx.fromCurrency} →{" "}
-                                {formatAmount(tx.toAmount!)} {tx.toCurrency}
+                                {formatAmount(tx.fromAmount!)} {tx.fromCurrency}{" "}
+                                → {formatAmount(tx.toAmount!)} {tx.toCurrency}
                               </p>
                             </>
                           ) : (
