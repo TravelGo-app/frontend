@@ -2261,3 +2261,779 @@ html {
   
 }
 
+/* TRAVELGO_FOOTER_REPAIR_DEVELOP_V2_START */
+.landing-footer-section {
+  min-height: auto !important;
+  height: auto !important;
+  display: block !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.landing-hero-footer {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: auto !important;
+  height: auto !important;
+  display: block !important;
+  padding: clamp(3rem, 7vw, 5.5rem) 1rem;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1f4f65 0%, #102c40 100%);
+}
+
+.landing-hero-footer .footer-bg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+}
+
+.landing-hero-footer .footer-panel {
+  width: min(1180px, 100%);
+  min-height: auto !important;
+  margin: 0 auto;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  display: block;
+  color: var(--color-grafito);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: clamp(1.5rem, 3vw, 2.25rem);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
+  backdrop-filter: blur(14px);
+}
+
+.landing-hero-footer .footer-container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns:
+    minmax(250px, 1.4fr)
+    repeat(3, minmax(145px, 0.8fr))
+    minmax(200px, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
+  background: transparent !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.landing-hero-footer .footer-col {
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.landing-hero-footer .footer-brand {
+  grid-column: auto;
+  color: var(--color-grafito);
+}
+
+.landing-hero-footer .footer-brand-title {
+  margin: 0;
+  color: var(--color-grafito);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.landing-hero-footer .footer-brand-accent {
+  color: var(--color-terracota);
+}
+
+.landing-hero-footer .footer-brand-subtitle {
+  margin: 0.85rem 0 0;
+  color: rgba(35, 52, 70, 0.82);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.landing-hero-footer .footer-desc,
+.landing-hero-footer .footer-contact p {
+  margin: 0.75rem 0 0;
+  color: rgba(35, 52, 70, 0.7);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.landing-hero-footer .footer-links h4,
+.landing-hero-footer .footer-contact h4 {
+  margin: 0 0 1rem;
+  color: var(--color-oceano);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.landing-hero-footer .footer-links ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-hero-footer .footer-links li {
+  margin: 0 0 0.7rem;
+}
+
+.landing-hero-footer .footer-links a,
+.landing-hero-footer .footer-link-button,
+.landing-hero-footer .footer-contact-link {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(35, 52, 70, 0.82);
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.55;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.landing-hero-footer .footer-links a:hover,
+.landing-hero-footer .footer-link-button:hover,
+.landing-hero-footer .footer-contact-link:hover {
+  color: var(--color-coral);
+}
+
+.landing-hero-footer .footer-contact-link {
+  display: inline-block;
+  margin-top: 0.8rem;
+  color: var(--color-oceano);
+  font-weight: 800;
+}
+
+.landing-hero-footer .footer-bottom {
+  width: 100%;
+  max-width: none;
+  margin: clamp(1.75rem, 4vw, 3rem) 0 0;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid rgba(35, 52, 70, 0.14);
+  color: rgba(35, 52, 70, 0.68);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.landing-hero-footer .footer-bottom span {
+  display: block;
+  margin-top: 0.2rem;
+  color: rgba(35, 52, 70, 0.58);
+}
+
+@media (max-width: 1100px) {
+  .landing-hero-footer .footer-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-hero-footer .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-hero-footer {
+    padding: 2.25rem 0.75rem;
+  }
+
+  .landing-hero-footer .footer-panel {
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+  }
+
+  .landing-hero-footer .footer-container {
+    grid-template-columns: 1fr;
+    gap: 1.65rem;
+  }
+
+  .landing-hero-footer .footer-brand {
+    grid-column: auto;
+  }
+
+  .landing-hero-footer .footer-bottom {
+    text-align: left;
+  }
+}
+/* TRAVELGO_FOOTER_REPAIR_DEVELOP_V2_END */
+
+/* TRAVELGO_FOOTER_FULL_VIEWPORT_V1_START */
+.landing-footer-section {
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  display: flex !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.landing-hero-footer {
+  width: 100%;
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box;
+}
+/* TRAVELGO_FOOTER_FULL_VIEWPORT_V1_END */
+
+/* TRAVELGO_FOOTER_CLEAN_BACKGROUND_V1_START */
+.landing-footer-section {
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  display: flex !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.landing-hero-footer {
+  width: 100%;
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+}
+
+.landing-hero-footer .footer-bg-overlay {
+  display: none !important;
+}
+
+.landing-hero-footer .footer-panel {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 100dvh !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding:
+    clamp(5.5rem, 9vh, 7rem)
+    clamp(2rem, 7vw, 7rem)
+    clamp(2.5rem, 5vh, 4rem) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.landing-hero-footer .footer-container {
+  width: min(1180px, 100%) !important;
+  margin: 0 auto !important;
+}
+
+.landing-hero-footer .footer-bottom {
+  width: min(1180px, 100%) !important;
+  margin:
+    clamp(2rem, 5vh, 3.5rem)
+    auto
+    0 !important;
+}
+
+@media (max-width: 640px) {
+  .landing-footer-section,
+  .landing-hero-footer,
+  .landing-hero-footer .footer-panel {
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  .landing-hero-footer .footer-panel {
+    padding: 5.5rem 1.5rem 2.5rem !important;
+    justify-content: flex-start !important;
+  }
+}
+/* TRAVELGO_FOOTER_CLEAN_BACKGROUND_V1_END */
+
+/* TRAVELGO_ABOUT_BACK_BUTTON_V2_START */
+.about-back-button {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.05rem 0.75rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-grafito);
+  font-size: 0.94rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.about-back-button:hover {
+  transform: translateY(-2px);
+  background: #ffffff;
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.24);
+}
+
+.about-back-button:active {
+  transform: translateY(0);
+}
+
+.about-back-button:focus-visible {
+  outline: 3px solid rgba(35, 145, 174, 0.42);
+  outline-offset: 4px;
+}
+
+.about-back-button svg {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .about-back-button {
+    top: 0.85rem;
+    left: 0.85rem;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.95rem 0.7rem 0.75rem;
+  }
+}
+/* TRAVELGO_ABOUT_BACK_BUTTON_V2_END */
+
+/* TRAVELGO_PUBLIC_PAGES_V1_START */
+.public-page {
+  min-height: 100dvh;
+  padding: 6.5rem 1.25rem 4rem;
+  color: var(--color-grafito);
+  background:
+    radial-gradient(circle at 8% 8%, rgba(35, 145, 174, 0.16), transparent 28rem),
+    radial-gradient(circle at 92% 14%, rgba(255, 125, 96, 0.18), transparent 24rem),
+    linear-gradient(180deg, #f8fafc 0%, #f4ede9 100%);
+}
+
+.public-back-button {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.05rem 0.75rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-grafito);
+  font-weight: 800;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.public-back-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.22);
+}
+
+.public-back-button:focus-visible {
+  outline: 3px solid rgba(35, 145, 174, 0.4);
+  outline-offset: 4px;
+}
+
+.public-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.public-hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(2rem, 6vw, 4.5rem);
+  border: 1px solid rgba(35, 52, 70, 0.08);
+  border-radius: 2.25rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 30px 80px rgba(35, 52, 70, 0.1);
+}
+
+.public-hero::after {
+  content: "";
+  position: absolute;
+  width: 18rem;
+  height: 18rem;
+  right: -7rem;
+  bottom: -10rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(35, 145, 174, 0.2), rgba(255, 125, 96, 0.2));
+}
+
+.public-badge {
+  display: inline-flex;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(35, 145, 174, 0.1);
+  color: var(--color-oceano);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.public-title {
+  position: relative;
+  z-index: 1;
+  max-width: 54rem;
+  margin: 1.25rem 0 0;
+  color: var(--color-grafito);
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.public-subtitle {
+  position: relative;
+  z-index: 1;
+  max-width: 48rem;
+  margin: 1.25rem 0 0;
+  color: #5b6b7d;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.75;
+}
+
+.public-update {
+  margin: 1rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.faq-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.faq-item {
+  border: 1px solid rgba(35, 52, 70, 0.1);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 40px rgba(35, 52, 70, 0.06);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem 1.5rem;
+  color: var(--color-grafito);
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq-item summary::-webkit-details-marker { display: none; }
+
+.faq-toggle {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: rgba(35, 145, 174, 0.1);
+  color: var(--color-oceano);
+  transition: transform 180ms ease;
+}
+
+.faq-item[open] .faq-toggle { transform: rotate(45deg); }
+
+.faq-answer {
+  padding: 0 1.5rem 1.4rem;
+  color: #5b6b7d;
+  line-height: 1.75;
+}
+
+.public-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 1.75rem;
+  border-radius: 1.75rem;
+  background: var(--color-grafito);
+  color: #fff;
+}
+
+.public-cta h2,
+.public-card h2,
+.guide-panel h2 { margin: 0; }
+.public-cta p { margin: 0.5rem 0 0; color: rgba(255,255,255,0.75); }
+.public-cta-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+.public-primary-link,
+.public-secondary-link,
+.public-submit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.public-primary-link,
+.public-submit-button {
+  border: 0;
+  background: linear-gradient(135deg, var(--color-terracota), var(--color-coral));
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(255, 66, 66, 0.2);
+}
+
+.public-secondary-link {
+  border: 1px solid rgba(35, 52, 70, 0.16);
+  background: #fff;
+  color: var(--color-grafito);
+}
+
+.public-cta .public-secondary-link { border-color: rgba(255,255,255,0.22); }
+.public-primary-link:hover,
+.public-secondary-link:hover,
+.public-submit-button:hover { transform: translateY(-2px); }
+
+.public-two-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.public-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.public-card {
+  padding: 1.6rem;
+  border: 1px solid rgba(35, 52, 70, 0.09);
+  border-radius: 1.75rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 45px rgba(35, 52, 70, 0.07);
+}
+
+.public-card p,
+.public-muted { color: #5b6b7d; line-height: 1.7; }
+.public-card-icon { display: inline-block; margin-bottom: 0.8rem; font-size: 1.8rem; }
+.public-wide-card { margin-top: 1.25rem; }
+.public-help-card { display: flex; flex-direction: column; align-items: flex-start; gap: 0.85rem; }
+
+.contact-form { display: grid; gap: 1rem; margin-top: 1.5rem; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.public-field { display: grid; gap: 0.45rem; color: var(--color-grafito); font-weight: 700; }
+.public-field input,
+.public-field select,
+.public-field textarea {
+  width: 100%;
+  border: 1px solid rgba(35, 52, 70, 0.15);
+  border-radius: 1rem;
+  background: #fff;
+  color: var(--color-grafito);
+  padding: 0.85rem 1rem;
+  font: inherit;
+  box-sizing: border-box;
+}
+.public-field textarea { resize: vertical; }
+.public-field input:focus,
+.public-field select:focus,
+.public-field textarea:focus { outline: 3px solid rgba(35, 145, 174, 0.18); border-color: var(--color-oceano); }
+.public-submit-button { justify-self: start; cursor: pointer; }
+
+.public-success {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #166534;
+}
+
+.public-note,
+.public-legal-note,
+.guide-tip {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(35, 145, 174, 0.08);
+  color: var(--color-grafito);
+}
+.public-note p,
+.public-legal-note p,
+.guide-tip p { margin: 0.4rem 0 0; color: #5b6b7d; line-height: 1.65; }
+.public-legal-note { margin-top: 1.25rem; }
+
+.public-check-list,
+.public-step-list { display: grid; gap: 0.75rem; padding-left: 1.25rem; color: #475569; line-height: 1.6; }
+
+.guide-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.6fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.guide-nav {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+  padding: 1rem;
+  border-radius: 1.75rem;
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(35,52,70,0.08);
+}
+
+.guide-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 0;
+  border-radius: 1rem;
+  background: transparent;
+  color: #475569;
+  font: inherit;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+}
+.guide-tab:hover { background: rgba(35,145,174,0.08); }
+.guide-tab-active { background: var(--color-grafito); color: #fff; }
+.guide-tab-active:hover { background: var(--color-grafito); }
+
+.guide-panel {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 2rem;
+  background: #fff;
+  border: 1px solid rgba(35,52,70,0.08);
+  box-shadow: 0 24px 60px rgba(35,52,70,0.08);
+}
+.guide-panel-icon { font-size: 2.4rem; }
+.guide-kicker { margin: 0.8rem 0 0.35rem; color: var(--color-oceano); font-size: 0.74rem; font-weight: 900; letter-spacing: 0.16em; }
+.guide-intro { color: #5b6b7d; }
+.guide-steps { display: grid; gap: 0.85rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+.guide-steps li { display: grid; grid-template-columns: 2.2rem 1fr; gap: 0.8rem; align-items: start; }
+.guide-steps li > span { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: rgba(255,125,96,0.14); color: var(--color-coral); font-weight: 900; }
+.guide-steps p { margin: 0.35rem 0 0; color: #475569; line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .public-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .public-two-columns,
+  .guide-layout { grid-template-columns: 1fr; }
+  .guide-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .public-page { padding: 5.5rem 0.75rem 2.5rem; }
+  .public-back-button { top: 0.8rem; left: 0.8rem; }
+  .public-hero { padding: 1.5rem; border-radius: 1.5rem; }
+  .public-title { font-size: 2.55rem; }
+  .public-card-grid,
+  .form-grid,
+  .guide-nav { grid-template-columns: 1fr; }
+  .public-cta { align-items: flex-start; flex-direction: column; }
+  .public-card { padding: 1.25rem; border-radius: 1.4rem; }
+}
+/* TRAVELGO_PUBLIC_PAGES_V1_END */
+
+/* TRAVELGO_LANDING_NATURAL_SCROLL_V2_START */
+
+/*
+ * El scroll vuelve a usar el documento completo.
+ * Así se conserva el tamaño visual original de todas las secciones.
+ */
+html.landing-scroll-mode,
+body.landing-scroll-mode {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  overscroll-behavior-y: contain;
+}
+
+body.landing-scroll-mode {
+  overflow-y: auto;
+}
+
+.landing-scroll-container {
+  width: 100%;
+  height: auto !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  scroll-snap-type: none !important;
+}
+
+/*
+ * El ajuste es suave: acerca cada sección a una posición limpia,
+ * pero no fuerza su altura ni altera su escala visual.
+ */
+.landing-scroll-container > .landing-screen,
+.landing-scroll-container > .landing-section {
+  height: auto !important;
+  scroll-snap-align: center;
+  scroll-snap-stop: normal;
+}
+
+/*
+ * El hero y el footer mantienen una pantalla completa.
+ * Las secciones intermedias conservan su tamaño natural.
+ */
+.landing-scroll-container > .landing-hero-screen,
+.landing-scroll-container > .landing-footer-section {
+  min-height: 100dvh !important;
+}
+
+@media (max-width: 768px), (max-height: 619px) {
+  html.landing-scroll-mode,
+  body.landing-scroll-mode {
+    scroll-snap-type: y proximity;
+  }
+
+  .landing-scroll-container > .landing-screen,
+  .landing-scroll-container > .landing-section {
+    scroll-snap-align: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.landing-scroll-mode,
+  body.landing-scroll-mode {
+    scroll-behavior: auto;
+  }
+}
+
+/* TRAVELGO_LANDING_NATURAL_SCROLL_V2_END */

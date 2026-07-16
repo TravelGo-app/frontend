@@ -16,6 +16,12 @@ import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
 import History from "./pages/History";
 import AboutUs from "./pages/AboutUs";
+import Faq from "./pages/Faq";
+import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Security from "./pages/Security";
+import Terms from "./pages/Terms";
+import HelpGuide from "./pages/HelpGuide";
 import ChatbotWidget from "./components/ChatbotWidget";
 import {
   ChatVisibilityProvider,
@@ -34,6 +40,13 @@ const NO_CHROME_PATHS = [
   "/configurar-password",
   "/reset-password",
   "/confirm-email-change",
+  "/about-us",
+  "/preguntasfrecuentes",
+  "/seguridad",
+  "/contacto",
+  "/politica de privacidad",
+  "/terminos y condiciones",
+  "/ayuda",
 ];
 
 const NO_CHATBOT_PATHS = [
@@ -41,20 +54,28 @@ const NO_CHATBOT_PATHS = [
   "/configurar-password",
   "/reset-password",
   "/confirm-email-change",
+  "/about-us",
+  "/preguntasfrecuentes",
+  "/seguridad",
+  "/contacto",
+  "/politica de privacidad",
+  "/terminos y condiciones",
+  "/ayuda",
 ];
 
 const AUTH_CARD_PATHS = ["/login", "/register"];
 
 function AppContent() {
   const location = useLocation();
+  const normalizedPath =
+    decodeURIComponent(location.pathname).replace(/\/+$/g, "") || "/";
   const [isLoading, setIsLoading] = useState(false);
   const { hideChat } = useChatVisibility();
 
   useEffect(() => {
-    // Nunca mostrar loading en estas rutas
     if (
-      NO_CHROME_PATHS.includes(location.pathname) ||
-      AUTH_CARD_PATHS.includes(location.pathname)
+      NO_CHROME_PATHS.includes(normalizedPath) ||
+      AUTH_CARD_PATHS.includes(normalizedPath)
     ) {
       setIsLoading(false);
       return;
@@ -67,13 +88,14 @@ function AppContent() {
     }, 950);
 
     return () => window.clearTimeout(timer);
-  }, [location.pathname]);
+  }, [normalizedPath]);
 
-  const isAuthCardPage = AUTH_CARD_PATHS.includes(location.pathname);
+  const isAuthCardPage = AUTH_CARD_PATHS.includes(normalizedPath);
 
   return (
     <>
-      {!NO_CHROME_PATHS.includes(location.pathname) && !isLoading && <Navbar />}
+      {!NO_CHROME_PATHS.includes(normalizedPath) && !isLoading && <Navbar />}
+
       {isLoading ? (
         <div
           style={{
@@ -202,12 +224,21 @@ function AppContent() {
             }
           />
           <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/preguntasfrecuentes" element={<Faq />} />
+          <Route path="/seguridad" element={<Security />} />
+          <Route path="/contacto" element={<Contact />} />
+          <Route path="/politica de privacidad" element={<Privacy />} />
+          <Route path="/terminos y condiciones" element={<Terms />} />
+          <Route path="/ayuda" element={<HelpGuide />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
-      {!hideChat && !NO_CHATBOT_PATHS.includes(location.pathname) && (
-        <ChatbotWidget compact={isAuthCardPage} />
-      )}
+
+      {!isLoading &&
+        !hideChat &&
+        !NO_CHATBOT_PATHS.includes(normalizedPath) && (
+          <ChatbotWidget compact={isAuthCardPage} />
+        )}
     </>
   );
 }

@@ -90,8 +90,42 @@ export default function AboutUs() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleBack = () => {
+    const historyIndex = window.history.state?.idx;
+
+    if (typeof historyIndex === "number" && historyIndex > 0) {
+      navigate(-1);
+      return;
+    }
+
+    navigate("/");
+  };
+
   return (
     <div ref={containerRef} className="about-page">
+      <button
+        type="button"
+        className="about-back-button"
+        onClick={handleBack}
+        aria-label="Volver a la página anterior"
+      >
+        <svg
+          aria-hidden="true"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="M15 18L9 12L15 6"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span>Volver</span>
+      </button>
       <section className="about-shell about-hero" id="que-es">
         <div data-reveal>
           <span className="about-eyebrow">
@@ -362,15 +396,6 @@ export default function AboutUs() {
                 operaciones financieras reales.
               </p>
             </div>
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: 32 }} data-reveal>
-            <button
-              className="about-button about-button-primary"
-              onClick={() => navigate("/register")}
-            >
-              Comenzá tu viaje →
-            </button>
           </div>
         </div>
       </section>

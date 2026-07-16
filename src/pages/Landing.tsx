@@ -34,6 +34,16 @@ export default function Landing() {
   const location = useLocation()
 
   useEffect(() => {
+    document.documentElement.classList.add('landing-scroll-mode')
+    document.body.classList.add('landing-scroll-mode')
+
+    return () => {
+      document.documentElement.classList.remove('landing-scroll-mode')
+      document.body.classList.remove('landing-scroll-mode')
+    }
+  }, [])
+
+  useEffect(() => {
     // Si venimos con la intención de mostrar el footer, scrollear hacia él
     const requested = (location.state as any)?.scrollTo
     if (requested === 'footer') {
@@ -616,73 +626,67 @@ export default function Landing() {
           <div
             className="footer-bg-overlay"
             style={{
-              backgroundImage: `linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.18)), url(${footerBackground})`,
+              backgroundImage: `linear-gradient(
+                rgba(16, 44, 64, 0.34),
+                rgba(16, 44, 64, 0.54)
+              ), url(${footerBackground})`,
             }}
           />
+
           <div className="footer-panel">
+            <div className="footer-container">
               <div className="footer-col footer-brand">
-                <div className="brand-row">
-                  <img src={possibleLogo} alt="TravelGo logo" className="footer-logo" />
-                  <div>
-                    <p className="footer-brand-title">
-                      Travel<span className="footer-brand-accent">Go</span>
-                    </p>
-                    <p className="footer-brand-subtitle">Tu billetera virtual para viajar sin fronteras.</p>
-                  </div>
-                </div>
-                <p className="footer-desc">Cambia, paga y gestiona tus monedas de forma segura, rápida y confiable.</p>
+                <p className="footer-brand-title">
+                  Travel<span className="footer-brand-accent">Go</span>
+                </p>
+                <p className="footer-brand-subtitle">
+                  Tu billetera virtual para viajar sin fronteras.
+                </p>
+                <p className="footer-desc">
+                  Cambiá, transferí y administrá tus monedas de forma simple,
+                  segura y confiable.
+                </p>
               </div>
 
-              <div className="footer-col footer-links">
+              <nav className="footer-col footer-links" aria-label="Navegación">
                 <h4>NAVEGACIÓN</h4>
                 <ul>
-                  <li>
-                    <button
-                      type="button"
-                      className="footer-link-button"
-                      onClick={() => {
-                        const container = scrollContainerRef.current
-                        if (container) {
-                          container.scrollTo({ top: 0, behavior: 'smooth' })
-                        } else {
-                          window.scrollTo({ top: 0, behavior: 'smooth' })
-                        }
-                      }}
-                    >
-                      Inicio
-                    </button>
-                  </li>
+                  <li><Link to="/login">Iniciar sesión</Link></li>
+                  <li><Link to="/register">Crear cuenta</Link></li>
                 </ul>
-              </div>
+              </nav>
 
-              <div className="footer-col footer-links">
+              <nav className="footer-col footer-links" aria-label="Recursos">
                 <h4>RECURSOS</h4>
                 <ul>
                   <li><Link to="/preguntasfrecuentes">Preguntas frecuentes</Link></li>
                   <li><Link to="/seguridad">Seguridad</Link></li>
                 </ul>
-              </div>
+              </nav>
 
-              <div className="footer-col footer-links">
+              <nav className="footer-col footer-links" aria-label="Empresa">
                 <h4>EMPRESA</h4>
                 <ul>
-                  <li><Link to="/sobre nosotros">Sobre nosotros</Link></li>
+                  <li><Link to="/about-us">Sobre nosotros</Link></li>
                   <li><Link to="/terminos y condiciones">Términos y condiciones</Link></li>
                   <li><Link to="/politica de privacidad">Política de privacidad</Link></li>
                   <li><Link to="/contacto">Contacto</Link></li>
                 </ul>
-              </div>
+              </nav>
 
               <div className="footer-col footer-contact">
-                <h4>CONTÁCTANOS</h4>
-                <div className="contact-list">
-                  <p><span>✉️</span> hola@travelgo.com</p>
-                  <p><span>📞</span> +57 300 123 4567</p>
-                  <p><span>📍</span> Medellín, Colombia</p>
-                </div>
-                
+                <h4>AYUDA</h4>
+                <p>¿Es tu primera vez en TravelGo o necesitás recordar un paso?</p>
+                <Link className="footer-contact-link" to="/ayuda">
+                  Abrir guía paso a paso
+                </Link>
               </div>
-            <div className="footer-bottom">© {new Date().getFullYear()} TravelGo. Todos los derechos reservados. <span>Hecho con ❤️ para viajeros como tú.</span></div>
+            </div>
+
+            <div className="footer-bottom">
+              © {new Date().getFullYear()} TravelGo. Todos los derechos reservados.
+              <span>Hecho para acompañarte en cada viaje.</span>
+            </div>
           </div>
         </footer>
       </section>

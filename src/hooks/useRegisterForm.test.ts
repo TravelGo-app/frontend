@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useRegisterForm } from "./useRegisterForm";
 import { authService } from "../services/api";
+import { checkEmailRegistered } from "../services/checkEmail";
 
 const mockLogin = vi.fn();
 
@@ -15,8 +16,48 @@ vi.mock("../services/api", () => ({
   },
 }));
 
+vi.mock("../services/checkEmail", () => ({
+  checkEmailRegistered: vi.fn(),
+}));
+
+type HookResult = ReturnType<typeof useRegisterForm>;
+
+function completeValidForm(
+  result: { current: HookResult },
+  options: { acceptTerms?: boolean } = {},
+) {
+  const { acceptTerms = true } = options;
+
+  act(() => {
+    result.current.handleNameChange("Nadia");
+  });
+
+  act(() => {
+    result.current.handleEmailChange("nadia@travelgo.com");
+  });
+
+  act(() => {
+    result.current.handlePasswordChange("password123");
+  });
+
+  act(() => {
+    result.current.handleConfirmChange("password123");
+  });
+
+  act(() => {
+    result.current.handleBirthDateChange("1995-05-15");
+  });
+
+  if (acceptTerms) {
+    act(() => {
+      result.current.handleTermsChange(true);
+    });
+  }
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  (checkEmailRegistered as any).mockResolvedValue({ status: "available" });
 });
 
 describe("useRegisterForm", () => {
@@ -24,12 +65,7 @@ describe("useRegisterForm", () => {
     const onSuccess = vi.fn();
     const { result } = renderHook(() => useRegisterForm({ onSuccess }));
 
-    act(() => {
-      result.current.handleNameChange("Nadia");
-      result.current.handleEmailChange("nadia@travelgo.com");
-      result.current.handlePasswordChange("password123");
-      result.current.handleConfirmChange("password123");
-    });
+    completeValidForm(result, { acceptTerms: false });
 
     await act(async () => {
       await result.current.handleSubmit({ preventDefault: vi.fn() } as any);
@@ -47,7 +83,14 @@ describe("useRegisterForm", () => {
     );
 
     act(() => {
+      result.current.handlePasswordChange("abc123");
+    });
+
+    act(() => {
       result.current.handleConfirmChange("abc123");
+    });
+
+    act(() => {
       result.current.handlePasswordChange("otraPassword");
     });
 
@@ -65,20 +108,22 @@ describe("useRegisterForm", () => {
     const onSuccess = vi.fn();
     const { result } = renderHook(() => useRegisterForm({ onSuccess }));
 
-    act(() => {
-      result.current.handleNameChange("Nadia");
-      result.current.handleEmailChange("nadia@travelgo.com");
-      result.current.handlePasswordChange("password123");
-      result.current.handleConfirmChange("password123");
-      result.current.handleBirthDateChange("1995-05-15");
-      result.current.handleTermsChange(true);
-    });
+    completeValidForm(result);
 
     await act(async () => {
       await result.current.handleSubmit({ preventDefault: vi.fn() } as any);
     });
 
-    expect(onSuccess).toHaveBeenCalledWith("Nadia");
+    await waitFor(() => {
+      expect(authService.register).toHaveBeenCalledWith(
+        "Nadia",
+        "nadia@travelgo.com",
+        "password123",
+        "1995-05-15",
+      );
+      expect(mockLogin).toHaveBeenCalled();
+      expect(onSuccess).toHaveBeenCalledWith("Nadia");
+    });
   });
 
   it("muestra el error del servidor cuando falla el registro", async () => {
@@ -90,20 +135,15 @@ describe("useRegisterForm", () => {
       useRegisterForm({ onSuccess: vi.fn() }),
     );
 
-    act(() => {
-      result.current.handleNameChange("Nadia");
-      result.current.handleEmailChange("nadia@travelgo.com");
-      result.current.handlePasswordChange("password123");
-      result.current.handleConfirmChange("password123");
-      result.current.handleBirthDateChange("1995-05-15");
-      result.current.handleTermsChange(true);
-    });
+    completeValidForm(result);
 
     await act(async () => {
       await result.current.handleSubmit({ preventDefault: vi.fn() } as any);
     });
 
-    expect(result.current.serverError).toBe("El email ya está en uso");
+    await waitFor(() => {
+      expect(result.current.serverError).toBe("El email ya está en uso");
+    });
   });
 
   it("valida la nueva contraseña en vivo mientras se escribe", () => {
@@ -133,25 +173,27 @@ describe("useRegisterForm", () => {
       useRegisterForm({ onSuccess: vi.fn() }),
     );
 
-    act(() => {
-      result.current.handleNameChange("Nadia");
-      result.current.handleEmailChange("nadia@travelgo.com");
-      result.current.handlePasswordChange("password123");
-      result.current.handleConfirmChange("password123");
-      result.current.handleBirthDateChange("1995-05-15");
-      result.current.handleTermsChange(true);
-    });
+    completeValidForm(result);
 
     await act(async () => {
       await result.current.handleSubmit({ preventDefault: vi.fn() } as any);
     });
 
-    expect(result.current.serverError).toBe("El email ya está en uso");
+    await waitFor(() => {
+      expect(result.current.serverError).toBe("El email ya está en uso");
+    });
+
+    act(() => {
+      result.current.handleNameChange("");
+    });
+
+    expect(result.current.registerErrors.name).toBe("El nombre es obligatorio");
 
     act(() => {
       result.current.resetErrors();
     });
 
     expect(result.current.serverError).toBe("");
+    expect(result.current.registerErrors).toEqual({});
   });
 });
