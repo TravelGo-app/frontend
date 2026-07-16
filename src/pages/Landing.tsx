@@ -632,6 +632,12 @@ export default function Landing() {
                   </div>
                 </div>
                 <p className="footer-desc">Cambia, paga y gestiona tus monedas de forma segura, rápida y confiable.</p>
+                <div className="footer-socials">
+                  <a aria-label="Instagram" href="#">IG</a>
+                  <a aria-label="Facebook" href="#">FB</a>
+                  <a aria-label="Twitter" href="#">TW</a>
+                  <a aria-label="YouTube" href="#">YT</a>
+                </div>
               </div>
 
               <div className="footer-col footer-links">
@@ -681,7 +687,6 @@ export default function Landing() {
                   <p><span>📞</span> +57 300 123 4567</p>
                   <p><span>📍</span> Medellín, Colombia</p>
                 </div>
-                
               </div>
             </div>
             <div className="footer-bottom">© {new Date().getFullYear()} TravelGo. Todos los derechos reservados. <span>Hecho con ❤️ para viajeros como tú.</span></div>
