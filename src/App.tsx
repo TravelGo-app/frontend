@@ -7,7 +7,6 @@ import Dashboard from "./pages/Dashboard";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
 import Exchange from "./pages/Exchange";
 import Deposit from "./pages/Deposit";
@@ -15,6 +14,13 @@ import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
+import History from "./pages/History";
+import AboutUs from "./pages/AboutUs";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Faq from "./pages/Faq";
+import Security from "./pages/Security";
+import Contact from "./pages/Contact";
 import ChatbotWidget from "./components/ChatbotWidget";
 import {
   ChatVisibilityProvider,
@@ -192,8 +198,20 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route path="/history" element={<Placeholder title="History" />} />
-          <Route path="/about-us" element={<Placeholder title="About Us" />} />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <History />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/terminos y condiciones" element={<Terms />} />
+          <Route path="/politica de privacidad" element={<Privacy />} />
+          <Route path="/preguntasfrecuentes" element={<Faq />} />
+          <Route path="/seguridad" element={<Security />} />
+          <Route path="/contacto" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
