@@ -28,3 +28,22 @@ export const validateConfirmField = (value: string, password: string): string | 
   if (value !== password) return 'Las contraseñas no coinciden'
   return undefined
 }
+
+export const validateBirthDateField = (value: string): string | undefined => {
+  if (!value) return 'La fecha de nacimiento es obligatoria'
+
+  const birth = new Date(value)
+  if (isNaN(birth.getTime())) return 'Fecha inválida'
+
+  const today = new Date()
+  if (birth > today) return 'Fecha inválida'
+
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+
+  if (age < 17) return 'Tenés que tener al menos 17 años para usar TravelGo'
+  return undefined
+}

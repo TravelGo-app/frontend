@@ -620,7 +620,6 @@ export default function Landing() {
             }}
           />
           <div className="footer-panel">
-            <div className="footer-container">
               <div className="footer-col footer-brand">
                 <div className="brand-row">
                   <img src={possibleLogo} alt="TravelGo logo" className="footer-logo" />
@@ -683,7 +682,6 @@ export default function Landing() {
                 </div>
                 
               </div>
-            </div>
             <div className="footer-bottom">© {new Date().getFullYear()} TravelGo. Todos los derechos reservados. <span>Hecho con ❤️ para viajeros como tú.</span></div>
           </div>
         </footer>

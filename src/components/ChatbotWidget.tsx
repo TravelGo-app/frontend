@@ -61,6 +61,9 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
   const [isSending, setIsSending] = useState(false)
   const messagesRef = useRef<HTMLDivElement | null>(null)
 
+  // El botón toggle se puede arrastrar SIEMPRE (compact o no), para que en
+  // Login/Register se pueda mover a un costado si tapa el botón de Google
+  // en pantallas chicas.
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const dragState = useRef({ startX: 0, startY: 0, originX: 0, originY: 0, dragging: false, moved: false })
   const wrapperRef = useRef<HTMLDivElement | null>(null)
@@ -138,7 +141,6 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
   }
 
   function handlePointerDown(event: React.PointerEvent) {
-    if (compact) return
     dragState.current.startX = event.clientX
     dragState.current.startY = event.clientY
     dragState.current.originX = dragOffset.x
@@ -268,9 +270,7 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       aria-label={isOpen ? 'Cerrar chat de TravelGo' : 'Abrir chat de TravelGo'}
-      className={`flex flex-col overflow-hidden rounded-full transition hover:-translate-y-0.5 hover:opacity-90 touch-none select-none ${
-        compact ? '' : 'cursor-grab active:cursor-grabbing'
-      } bg-[#233446] text-white shadow-[0_10px_28px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.2)]`}
+      className="flex flex-col overflow-hidden rounded-full bg-[#233446] text-white cursor-grab active:cursor-grabbing touch-none select-none shadow-[0_10px_28px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.2)] transition hover:-translate-y-0.5 hover:opacity-90"
     >
       <span className="flex h-14 min-w-14 items-center justify-center gap-1.5 px-5 text-sm font-bold">
         {!isOpen && (
@@ -288,6 +288,7 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
     </button>
   )
 
+  // Caso 1: modo compacto (login/register) con el chat abierto EN MOBILE → modal centrado
   if (compact && isOpen) {
     return (
       <>
@@ -304,14 +305,20 @@ export default function ChatbotWidget({ compact = false }: ChatbotWidgetProps) {
     )
   }
 
+  // Caso 2: modo compacto con el chat cerrado → solo el botón, arrastrable
   if (compact) {
     return (
-      <div className="fixed bottom-5 right-5 z-[2000] flex">
+      <div
+        ref={wrapperRef}
+        className="fixed bottom-5 right-5 z-[2000] flex"
+        style={{ transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` }}
+      >
         {toggleButton}
       </div>
     )
   }
 
+  // Caso 3: modo normal (dashboard y resto) → panel y botón apilados, arrastrables juntos
   return (
     <div
       ref={wrapperRef}
