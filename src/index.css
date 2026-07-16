@@ -2,7 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
-:root {
+@theme {
   --color-terracota: #ff7d60;
   --color-coral: #ff4242;
   --color-arena: #e4c2a2;
@@ -96,6 +96,25 @@
     #7dd3fc 75%,
     #38bdf8 100%
   );
+}
+
+@keyframes brand-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.text-brand-animated {
+  color: transparent;
+  background: linear-gradient(90deg, #ff4242 0%, #2391ae 50%, #ff7d60 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: brand-shift 5s ease-in-out infinite;
 }
 
 .document-bg {
@@ -1203,31 +1222,6 @@ html {
     padding: 2rem 1rem;
   }
 
-  .landing-hero-screen {
-    min-height: 100vh;
-    height: 100vh;
-    padding: 0 1rem;
-  }
-
-  .landing-hero-grid {
-    gap: 1.5rem;
-  }
-
-  .landing-hero-grid .hero-copy {
-    max-height: calc(100vh - 12rem);
-    overflow: auto;
-  }
-
-  .hero-image {
-    width: calc(100% - 2rem);
-    margin-top: 0.75rem;
-    padding: 0.5rem;
-  }
-
-  .hero-image img {
-    max-height: 28vh;
-  }
-
   .floating-cta-button {
     padding: 0.85rem 1.15rem;
     font-size: 0.95rem;
@@ -1631,6 +1625,7 @@ html {
   background-attachment: fixed;
   background-size: cover;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 .about-page h1,
@@ -1660,7 +1655,7 @@ html {
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(15, 30, 45, 0.55);
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(10px);
   border-radius: 999px;
@@ -1749,6 +1744,7 @@ html {
 .about-floating-card {
   position: absolute;
   background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(15, 30, 45, 0.55);
   border-radius: 16px;
   padding: 10px 12px;
   box-shadow: 0 20px 40px rgba(10, 20, 30, 0.3);
@@ -2021,7 +2017,7 @@ html {
 }
 
 .about-mini-action {
-  border: 1.5px solid rgba(15, 30, 45, 0.25);
+  border: 2px solid rgba(15, 30, 45, 0.55);
   background: rgba(35, 52, 70, 0.04);
   border-radius: 15px;
   padding: 12px 6px;
@@ -2037,7 +2033,7 @@ html {
 .about-mini-action:hover {
   transform: translateY(-3px);
   background: rgba(255, 125, 96, 0.1);
-  border-color: rgba(15, 30, 45, 0.4);
+  border-color: rgba(15, 30, 45, 0.7);
 }
 
 .about-bars {
@@ -2335,9 +2331,9 @@ html {
 }
 
 .about-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
   padding: 28px 0 40px;
-  color: var(--about-muted);
+  color: #ffffff;
 }
 
 .about-footer-inner {
@@ -2345,7 +2341,10 @@ html {
   justify-content: space-between;
   gap: 20px;
   flex-wrap: wrap;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(15, 30, 45, 0.4);
 }
 
 [data-reveal] {
@@ -2386,5 +2385,10 @@ html {
   }
   .about-footer-inner {
     flex-direction: column;
+  }
+  .about-floating-card,
+  .about-dot,
+  .about-dashed-line {
+    display: none;
   }
 }
