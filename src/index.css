@@ -623,7 +623,7 @@ body {
 }
 
 .footer-container .brand-row .footer-logo {
-    width: 100px;
+    width: 76px;
     height: auto;
     max-width: none;
     flex-shrink: 0;
@@ -641,12 +641,12 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 56px 0 0;
-  background: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
   border-radius: 0;
   border: none;
   box-shadow: none;
 }
-
 .footer-desc {
   margin: 0.9rem 0 0;
   max-width: 360px;
@@ -2258,4 +2258,6 @@ html {
   .about-dashed-line {
     display: none;
   }
+  
 }
+
