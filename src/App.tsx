@@ -15,6 +15,7 @@ import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
+import History from "./pages/History";
 import ChatbotWidget from "./components/ChatbotWidget";
 import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
 
@@ -186,7 +187,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route path="/history" element={<Placeholder title="History" />} />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <History />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/about-us" element={<Placeholder title="About Us" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
