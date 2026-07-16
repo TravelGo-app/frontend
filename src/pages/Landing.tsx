@@ -287,18 +287,18 @@ export default function Landing() {
         }}
       />
       <header className="landing-header">
-        <div className="landing-header-chip">
-          <p className="landing-header-text">
-            Crea tu cuenta gratis y administra tu dinero desde cualquier destino.
-          </p>
-        </div>
         <button
           type="button"
           onClick={() => navigate('/register')}
           className="floating-cta-button"
+          aria-describedby="cta-announcement"
         >
           Comienza tu viaje
         </button>
+
+        <div id="cta-announcement" className="cta-announcement" role="status" aria-live="polite">
+          Crea tu cuenta gratis y administra tu dinero desde cualquier destino.
+        </div>
       </header>
 
       <section className="landing-screen landing-hero-screen mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:px-8 lg:py-14 xl:grid-cols-[1.1fr_0.9fr] xl:items-start landing-hero-grid" style={{ position: 'relative', zIndex: 1 }}>
@@ -457,7 +457,6 @@ export default function Landing() {
                 src={onlyCreditCard}
                 alt="Tarjeta TravelGo"
                 className="w-full h-auto object-contain multicurrency-card-image"
-                style={{ width: '100%' }}
               />
             </div>
           </div>
@@ -495,7 +494,6 @@ export default function Landing() {
                   src={celularTasas}
                   alt="Celular con tasas en tiempo real"
                   className="w-full h-auto rounded-[1.5rem] object-cover breathing"
-                  style={{ maxHeight: '860px' }}
                 />
               </div>
             </div>
@@ -567,7 +565,6 @@ export default function Landing() {
                 loop
                 playsInline
                 className="h-full w-full object-contain"
-                style={{ maxHeight: '420px' }}
               />
             </div>
           </div>
@@ -635,12 +632,6 @@ export default function Landing() {
                   </div>
                 </div>
                 <p className="footer-desc">Cambia, paga y gestiona tus monedas de forma segura, rápida y confiable.</p>
-                <div className="footer-socials">
-                  <a aria-label="Instagram" href="#">IG</a>
-                  <a aria-label="Facebook" href="#">FB</a>
-                  <a aria-label="Twitter" href="#">TW</a>
-                  <a aria-label="YouTube" href="#">YT</a>
-                </div>
               </div>
 
               <div className="footer-col footer-links">
