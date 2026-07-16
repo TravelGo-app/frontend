@@ -7,7 +7,6 @@ import Dashboard from "./pages/Dashboard";
 import SetPassword from "./pages/SetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
 import Exchange from "./pages/Exchange";
 import Deposit from "./pages/Deposit";
@@ -16,6 +15,7 @@ import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import ConfirmEmailChange from "./pages/ConfirmEmailChange";
 import History from "./pages/History";
+import AboutUs from "./pages/AboutUs";
 import ChatbotWidget from "./components/ChatbotWidget";
 import { ChatVisibilityProvider, useChatVisibility } from "./context/ChatVisibilityContext";
 
@@ -195,7 +195,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route path="/about-us" element={<Placeholder title="About Us" />} />
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
