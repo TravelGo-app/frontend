@@ -37,36 +37,44 @@ declare global {
   }
 }
 
+// Guard a nivel de módulo: compartido entre TODAS las instancias de
+// GoogleLoginButton, aunque haya más de una montada al mismo tiempo
+// (por ejemplo, Login y Register renderizados juntos en el panel deslizante).
+// Un useRef normal no sirve acá porque cada instancia tendría el suyo propio.
+let googleInitialized = false;
+
 export function GoogleLoginButton({ onAuthenticated, onLoadingChange }: GoogleLoginButtonProps) {
   const buttonRef = useRef<HTMLDivElement>(null);
-  const initialized = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialized.current) return
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) { setError("VITE_GOOGLE_CLIENT_ID no está configurada"); return }
 
     const renderGoogleButton = () => {
       if (!window.google || !buttonRef.current) { setError("No se pudo cargar Google Identity"); return }
-      initialized.current = true
       buttonRef.current.innerHTML = "";
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        ux_mode: "popup",
-        callback: async (response: CredentialResponse) => {
-          onLoadingChange?.(true)
-          try {
-            setError(null)
-            if (!response.credential) throw new Error("Google no devolvió una credencial")
-            const result = await loginWithGoogle(response.credential)
-            onAuthenticated(result)
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Error iniciando sesión")
-            onLoadingChange?.(false)
-          }
-        },
-      });
+
+      if (!googleInitialized) {
+        googleInitialized = true;
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          ux_mode: "popup",
+          callback: async (response: CredentialResponse) => {
+            onLoadingChange?.(true)
+            try {
+              setError(null)
+              if (!response.credential) throw new Error("Google no devolvió una credencial")
+              const result = await loginWithGoogle(response.credential)
+              onAuthenticated(result)
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Error iniciando sesión")
+              onLoadingChange?.(false)
+            }
+          },
+        });
+      }
+
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: "outline",
         size: "large",
