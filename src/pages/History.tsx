@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { sendDashboardSummaryEmail } from "../services/emailPreferences.service";
 import beachBg from "../assets/PlayaPrincipal.png";
 
 type Category = "AUTH" | "PROFILE" | "WALLET" | "EMAIL" | "SECURITY" | "SYSTEM";
@@ -118,8 +119,15 @@ export default function History() {
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [filter, setFilter] = useState<SimpleFilter>("all");
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const filterMenuRef = useRef<HTMLDivElement | null>(null);
+  const [summarySending, setSummarySending] = useState(false);
+  const [summaryToast, setSummaryToast] = useState<
+    { type: "success" | "error"; message: string } | null
+  >(null);
 
   const activeCategory = FILTERS.find((f) => f.value === filter)?.category;
+  const activeFilterLabel = FILTERS.find((f) => f.value === filter)?.label ?? "Todos";
 
   const buildQuery = useCallback(
     (cursor?: string | null) => {
@@ -159,7 +167,25 @@ export default function History() {
     loadInitial();
   }, [loadInitial]);
 
-  const handleLoadMore = () => {
+  useEffect(() => {
+    if (!summaryToast) return;
+    const timeout = window.setTimeout(() => setSummaryToast(null), 5000);
+    return () => window.clearTimeout(timeout);
+  }, [summaryToast]);
+
+  // Cierra el menú de filtros al hacer clic afuera
+  useEffect(() => {
+    if (!filterMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(e.target as Node)) {
+        setFilterMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterMenuOpen]);
+
+  const handleLoadMore = useCallback(() => {
     if (!nextCursor || loadingMore) return;
     setLoadingMore(true);
     api
@@ -173,6 +199,47 @@ export default function History() {
         console.error("Error cargando más historial:", err);
       })
       .finally(() => setLoadingMore(false));
+  }, [nextCursor, loadingMore, buildQuery]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight < 80 && hasMore && !loadingMore) {
+      handleLoadMore();
+    }
+  };
+
+  const handleSendHistoryEmail = async () => {
+    setSummaryToast(null);
+    setSummarySending(true);
+
+    try {
+      await sendDashboardSummaryEmail(30);
+      setSummaryToast({
+        type: "success",
+        message: "Historial programado. Revisá tu correo en los próximos minutos.",
+      });
+    } catch (err: any) {
+      console.error("Error enviando historial por email:", err);
+      const status = err.response?.status;
+      if (status === 429) {
+        setSummaryToast({
+          type: "error",
+          message: "Ya solicitaste un envío recientemente. Esperá unos minutos.",
+        });
+      } else if (status === 401) {
+        setSummaryToast({
+          type: "error",
+          message: "Tu sesión venció. Iniciá sesión nuevamente.",
+        });
+      } else {
+        setSummaryToast({
+          type: "error",
+          message: "No se pudo enviar el historial por email.",
+        });
+      }
+    } finally {
+      setSummarySending(false);
+    }
   };
 
   const displayedItems = items.filter((item) => {
@@ -194,7 +261,7 @@ export default function History() {
 
   return (
     <div
-      className="h-screen p-8 font-body relative overflow-hidden"
+      className="h-screen p-4 sm:p-8 font-body relative overflow-hidden"
       style={{
         backgroundImage: `url(${beachBg})`,
         backgroundSize: "cover",
@@ -203,46 +270,90 @@ export default function History() {
     >
       <div className="absolute inset-0 bg-black/25 pointer-events-none" />
 
+      {summaryToast && (
+        <div className="fixed top-4 right-4 left-4 sm:left-auto z-50 sm:w-full sm:max-w-sm">
+          <div
+            className={`rounded-2xl px-4 py-3 shadow-xl ring-1 ring-black/10 text-sm font-semibold transition-transform duration-300 ${
+              summaryToast.type === "success"
+                ? "bg-emerald-500 text-white"
+                : "bg-[#ff4242] text-white"
+            }`}
+          >
+            {summaryToast.message}
+          </div>
+        </div>
+      )}
+
       <div className="max-w-3xl mx-auto relative z-10 h-full flex flex-col">
         <button
           onClick={() => navigate("/dashboard")}
-          className="text-white/80 hover:text-white text-sm font-semibold mb-6 self-start"
+          className="text-white/80 hover:text-white text-sm font-semibold mb-3 sm:mb-6 self-start"
         >
           ← Ir a Billetera
         </button>
 
-        <div className="bg-[rgba(90,90,90,0.55)] backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg mb-6 flex-shrink-0">
+        <div className="bg-[rgba(90,90,90,0.55)] backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg mb-3 sm:mb-6 flex-shrink-0">
           <div className="flex h-1">
             <div className="flex-1 bg-[#ff4242]"></div>
             <div className="flex-1 bg-[#2391ae]"></div>
             <div className="flex-1 bg-[#ff7d60]"></div>
           </div>
-          <div className="p-5">
-            <h1 className="text-white font-bold text-3xl">Historial</h1>
-            <p className="text-white/80 text-sm mt-1">
-              Toda tu actividad en TravelGo, de la más reciente a la más antigua
-            </p>
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-white font-bold text-2xl sm:text-3xl">Historial</h1>
+              <p className="text-white/80 text-xs sm:text-sm mt-1">
+                Toda tu actividad en TravelGo, de la más reciente a la más antigua
+              </p>
+            </div>
+            <button
+              onClick={handleSendHistoryEmail}
+              disabled={summarySending}
+              className="inline-flex items-center justify-center rounded-full bg-[#2391ae] px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#1c7a98] transition disabled:cursor-not-allowed disabled:bg-slate-400 shrink-0 whitespace-nowrap self-start sm:self-auto"
+            >
+              {summarySending ? "Preparando..." : "Enviar resumen por mail ✉️"}
+            </button>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1 flex-shrink-0">
-          {FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`text-sm font-semibold px-4 py-2 rounded-full whitespace-nowrap transition ${
-                filter === f.value
-                  ? "bg-[#233446] text-white"
-                  : "bg-white text-grafito hover:brightness-95 shadow-sm"
-              }`}
+        <div className="relative mb-3 sm:mb-6 flex-shrink-0" ref={filterMenuRef}>
+          <button
+            onClick={() => setFilterMenuOpen((prev) => !prev)}
+            className="flex items-center gap-2 bg-white text-grafito text-sm font-semibold px-4 py-2.5 rounded-full shadow-sm hover:brightness-95 transition"
+          >
+            <span className="text-base leading-none">☰</span>
+            <span>{activeFilterLabel}</span>
+            <span
+              className="text-xs transition-transform"
+              style={{ transform: filterMenuOpen ? "rotate(180deg)" : "rotate(0deg)" }}
             >
-              {f.label}
-            </button>
-          ))}
+              ▾
+            </span>
+          </button>
+
+          {filterMenuOpen && (
+            <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl overflow-hidden z-20">
+              {FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => {
+                    setFilter(f.value);
+                    setFilterMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm font-semibold transition ${
+                    filter === f.value
+                      ? "bg-[#233446] text-white"
+                      : "text-grafito hover:bg-gray-100"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {error ? (
-          <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg text-center">
             <p className="text-sm text-[#ff4242] font-semibold mb-4">{error}</p>
             {error.includes("sesión") ? (
               <button
@@ -261,14 +372,17 @@ export default function History() {
             )}
           </div>
         ) : displayedItems.length === 0 ? (
-          <div className="bg-white rounded-2xl p-10 shadow-lg text-center">
+          <div className="bg-white rounded-2xl p-8 sm:p-10 shadow-lg text-center">
             <p className="text-base text-grafito/60">
               Todavía no hay actividad registrada.
             </p>
           </div>
         ) : (
           <div className="flex-1 min-h-0 flex flex-col">
-            <div className="bg-white rounded-2xl p-4 shadow-lg flex-1 overflow-y-auto">
+            <div
+              className="bg-white rounded-2xl p-3 sm:p-4 shadow-lg flex-1 overflow-y-auto"
+              onScroll={handleScroll}
+            >
               {displayedItems.map((item) => {
                 const { icon, bg } = getIconForItem(item);
                 const statusStyle = STATUS_STYLE[item.status];
@@ -276,21 +390,21 @@ export default function History() {
                 return (
                   <div
                     key={item.id}
-                    className="flex items-start gap-4 py-3 px-2 border-b border-gray-300 last:border-b-0"
+                    className="flex items-start gap-3 sm:gap-4 py-2.5 sm:py-3 px-1 sm:px-2 border-b border-gray-300 last:border-b-0"
                   >
                     <div
-                      className="w-11 h-11 rounded-full text-white flex items-center justify-center text-lg shrink-0"
+                      className="w-9 h-9 sm:w-11 sm:h-11 rounded-full text-white flex items-center justify-center text-base sm:text-lg shrink-0"
                       style={{ backgroundColor: bg }}
                     >
                       {icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-base font-bold text-grafito">
+                        <p className="text-sm sm:text-base font-bold text-grafito">
                           {item.title}
                         </p>
                         <span
-                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                          className="text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
                           style={{
                             backgroundColor: statusStyle.bg,
                             color: statusStyle.text,
@@ -299,34 +413,27 @@ export default function History() {
                           {statusStyle.label}
                         </span>
                       </div>
-                      <p className="text-sm text-grafito/60 mt-0.5">
+                      <p className="text-xs sm:text-sm text-grafito/60 mt-0.5">
                         {item.description}
                       </p>
                       {metadataLine && (
-                        <p className="text-xs text-oceano font-semibold mt-0.5 truncate">
+                        <p className="text-[11px] sm:text-xs text-oceano font-semibold mt-0.5 truncate">
                           {metadataLine}
                         </p>
                       )}
-                      <p className="text-xs text-grafito/40 mt-1">
+                      <p className="text-[11px] sm:text-xs text-grafito/40 mt-1">
                         {formatDateTime(item.createdAt)}
                       </p>
                     </div>
                   </div>
                 );
               })}
+              {loadingMore && (
+                <p className="text-center text-xs text-grafito/50 py-2">
+                  Cargando más...
+                </p>
+              )}
             </div>
-
-            {hasMore && (
-              <div className="text-center mt-4 flex-shrink-0">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  className="bg-white text-grafito text-sm font-semibold px-6 py-3 rounded-full shadow-lg hover:brightness-95 transition disabled:opacity-50"
-                >
-                  {loadingMore ? "Cargando..." : "Cargar más"}
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>
