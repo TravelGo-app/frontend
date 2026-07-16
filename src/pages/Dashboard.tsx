@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { sendDashboardSummaryEmail } from "../services/emailPreferences.service";
 import LoadingOverlay from "../components/LoadingOverlay";
 import beachBg from "../assets/PlayaPrincipal.png";
 import AnalyticsSection from "../components/AnalyticsSection";
@@ -103,6 +104,11 @@ export default function Dashboard() {
   const [dataLoading, setDataLoading] = useState(true);
   const [tipIndex, setTipIndex] = useState(0);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [summarySending, setSummarySending] = useState(false);
+  const [summaryToast, setSummaryToast] = useState<
+    | { type: "success" | "error"; message: string }
+    | null
+  >(null);
 
   const firstName = user?.name?.split(" ")[0];
 
@@ -118,6 +124,16 @@ export default function Dashboard() {
     }, 6000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!summaryToast) return;
+
+    const timeout = window.setTimeout(() => {
+      setSummaryToast(null);
+    }, 5000);
+
+    return () => window.clearTimeout(timeout);
+  }, [summaryToast]);
 
   useEffect(() => {
     const fetchData = async (isInitial = false) => {
@@ -246,6 +262,41 @@ export default function Dashboard() {
       second: "2-digit",
     });
 
+  const handleSendDashboardSummary = async () => {
+    setSummaryToast(null);
+    setSummarySending(true);
+
+    try {
+      await sendDashboardSummaryEmail(30);
+      setSummaryToast({
+        type: "success",
+        message: "Resumen programado. Revisá tu correo en los próximos minutos.",
+      });
+    } catch (err: any) {
+      console.error("Error enviando resumen de dashboard:", err);
+      const status = err.response?.status;
+      if (status === 429) {
+        setSummaryToast({
+          type: "error",
+          message:
+            "Ya solicitaste un resumen recientemente. Esperá unos minutos.",
+        });
+      } else if (status === 401) {
+        setSummaryToast({
+          type: "error",
+          message: "Tu sesión venció. Iniciá sesión nuevamente.",
+        });
+      } else {
+        setSummaryToast({
+          type: "error",
+          message: "No se pudo programar el resumen.",
+        });
+      }
+    } finally {
+      setSummarySending(false);
+    }
+  };
+
   if (dataLoading) {
     return <LoadingOverlay message="Cargando tu billetera..." />;
   }
@@ -263,6 +314,19 @@ export default function Dashboard() {
       <div className="absolute inset-0 bg-black/25 pointer-events-none" />
 
       <div className="max-w-4xl mx-auto relative z-10">
+        {summaryToast && (
+          <div className="fixed top-4 right-4 z-50 w-full max-w-sm">
+            <div
+              className={`rounded-2xl px-4 py-3 shadow-xl ring-1 ring-black/10 text-sm font-semibold transition-transform duration-300 ${
+                summaryToast.type === "success"
+                  ? "bg-emerald-500 text-white"
+                  : "bg-[#ff4242] text-white"
+              }`}
+            >
+              {summaryToast.message}
+            </div>
+          </div>
+        )}
         <div className="mb-4 bg-[#f1efe8] rounded-2xl overflow-hidden shadow-lg">
           <div className="flex h-1">
             <div className="flex-1 bg-[#ff4242]"></div>
@@ -452,9 +516,20 @@ export default function Dashboard() {
             </div>
 
             <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-              <h2 className="text-sm font-bold text-grafito mb-3">
-                Actividad reciente
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                <h2 className="text-sm font-bold text-grafito">
+                  Actividad
+                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <button
+                    onClick={handleSendDashboardSummary}
+                    disabled={summarySending}
+                    className="inline-flex items-center justify-center rounded-full bg-[#2391ae] px-4 py-2 text-sm font-bold text-white hover:bg-[#1c7a98] transition disabled:cursor-not-allowed disabled:bg-slate-400"
+                  >
+                    {summarySending ? "Preparando resumen..." : "Enviar resumen ✉️"}
+                  </button>
+                </div>
+              </div>
               {activityError ? (
                 <p className="text-sm text-[#ff4242] font-semibold">
                   {activityError}
