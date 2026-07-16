@@ -585,9 +585,11 @@ body {
   margin: 0 auto;
   padding: 96px 40px 56px;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(180px, 1fr));
+  gap: 32px;
+  align-items: start;
+  justify-items: stretch;
   min-height: 100%;
   background: transparent;
   border-radius: 0;
@@ -595,23 +597,16 @@ body {
   color: #f8fafc;
 }
 
-.footer-container {
+.footer-bottom {
+  grid-column: 1 / -1;
   position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(240px, 2fr) repeat(4, minmax(180px, 1fr));
-  gap: 32px;
-  align-items: start;
-  justify-items: stretch;
-  grid-auto-rows: minmax(min-content, max-content);
-  max-width: 1260px;
-  width: 100%;
   margin: 0 auto;
-  padding: 56px 0 0;
-  background: #ffffff;
-  border-radius: 32px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+  max-width: 1280px;
+  padding: 20px 0 10px;
+  color: rgba(15, 23, 42, 0.7);
+  text-align: center;
+  font-size: 0.88rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .footer-col {
@@ -650,7 +645,7 @@ body {
 }
 
 .footer-container .footer-logo {
-  width: 200px;
+  width: 150px;
   max-width: 100%;
   height: auto;
 }
