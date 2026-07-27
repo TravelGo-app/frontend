@@ -315,12 +315,12 @@ La aplicación implementa diversas prácticas para garantizar una experiencia se
 
 Proyecto desarrollado colaborativamente durante el **Bootcamp de Desarrollo Full Stack de Henry (FT73)**.
 
-| Integrante |
-|------------|
-| Nadia Starna |
-| Katy Tejada |
-| Emanuel Florez |
-| Joaquín Gonzalez |
+| Integrante | Rol |
+|------------|-----|
+| Nadia Starna | Frontend — Autenticación (login/registro) e Historial de transacciones |
+| Katy Tejada | Frontend — Dashboard |
+| Emanuel Florez | Frontend — Navbar y Landing |
+| Joaquín Gonzalez | Backend |
 
 ---
 
