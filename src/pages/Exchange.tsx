@@ -1,13 +1,41 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+
 import StepIndicator from "../components/StepIndicator";
+import TravelIcon from "../components/ui/TravelIcon";
+import api from "../services/api";
 
-const CURRENCIES = ["ARS", "USD", "EUR", "BRL", "CLP"];
-const STEPS = ["Ingresá datos", "Confirmá", "Procesando", "¡Listo!"];
-const ACCENT = "#ff4242";
+const CURRENCIES = [
+  "ARS",
+  "USD",
+  "EUR",
+  "BRL",
+  "CLP",
+];
 
-const generateIdempotencyKey = () => `exchange-${crypto.randomUUID()}`;
+const STEPS = [
+  "Datos",
+  "Confirmación",
+  "Procesando",
+  "Completado",
+];
+
+const ACCENT = "#ff6417";
+
+interface Balance {
+  currencyCode: string;
+  amount: string;
+}
+
+interface CurrencyMeta {
+  name: string;
+  flag: string;
+}
 
 interface ExchangeResult {
   fromAmount: string;
@@ -17,63 +45,329 @@ interface ExchangeResult {
   rate?: string;
 }
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string;
+    };
+  };
+}
+
+const CURRENCY_META: Record<
+  string,
+  CurrencyMeta
+> = {
+  ARS: {
+    name: "Peso argentino",
+    flag: "ar",
+  },
+
+  USD: {
+    name: "Dólar estadounidense",
+    flag: "us",
+  },
+
+  EUR: {
+    name: "Euro",
+    flag: "eu",
+  },
+
+  BRL: {
+    name: "Real brasileño",
+    flag: "br",
+  },
+
+  CLP: {
+    name: "Peso chileno",
+    flag: "cl",
+  },
+};
+
+function generateIdempotencyKey() {
+  return `exchange-${crypto.randomUUID()}`;
+}
+
+function formatMoney(
+  value: number,
+  currencyCode: string,
+) {
+  try {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString(
+      "es-AR",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    )} ${currencyCode}`;
+  }
+}
+
+function formatRate(value: number) {
+  return value.toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  });
+}
+
 export default function Exchange() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [fromCurrency, setFromCurrency] = useState("ARS");
-  const [toCurrency, setToCurrency] = useState("USD");
-  const [amount, setAmount] = useState("");
-  const [previewRate, setPreviewRate] = useState<number | null>(null);
-  const [idempotencyKey, setIdempotencyKey] = useState(generateIdempotencyKey);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ExchangeResult | null>(null);
 
-  const sameCurrency = fromCurrency === toCurrency;
+  const [step, setStep] = useState(0);
+
+  const [
+    fromCurrency,
+    setFromCurrency,
+  ] = useState("ARS");
+
+  const [
+    toCurrency,
+    setToCurrency,
+  ] = useState("USD");
+
+  const [amount, setAmount] =
+    useState("");
+
+  const [balances, setBalances] =
+    useState<Balance[]>([]);
+
+  const [
+    previewRate,
+    setPreviewRate,
+  ] = useState<number | null>(null);
+
+  const [rateLoading, setRateLoading] =
+    useState(false);
+
+  const [
+    idempotencyKey,
+    setIdempotencyKey,
+  ] = useState(generateIdempotencyKey);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [result, setResult] =
+    useState<ExchangeResult | null>(null);
+
+  const sameCurrency =
+    fromCurrency === toCurrency;
+
+  const fromMeta =
+    CURRENCY_META[fromCurrency];
+
+  const toMeta =
+    CURRENCY_META[toCurrency];
+
+  const parsedAmount = Number(amount);
+
+  useEffect(() => {
+    let mounted = true;
+
+    api
+      .get("/wallet/balances")
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
+
+        setBalances(
+          response.data?.balances ?? [],
+        );
+      })
+      .catch(() => {
+        if (mounted) {
+          setBalances([]);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (sameCurrency) {
       setPreviewRate(null);
+      setRateLoading(false);
+
       return;
     }
+
     let cancelled = false;
+
+    setRateLoading(true);
+
     api
-      .get(`/rates/${fromCurrency}/${toCurrency}`)
-      .then((res) => {
-        if (cancelled) return;
-        const rateValue = res.data?.rate ?? res.data?.data?.rate ?? null;
-        setPreviewRate(rateValue);
+      .get(
+        `/rates/${fromCurrency}/${toCurrency}`,
+      )
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+
+        const rawRate =
+          response.data?.rate ??
+          response.data?.data?.rate;
+
+        const numericRate =
+          Number(rawRate);
+
+        setPreviewRate(
+          Number.isFinite(numericRate)
+            ? numericRate
+            : null,
+        );
       })
-      .catch((err) => {
-        console.error("Error cargando tasa de cambio:", err);
-        if (!cancelled) setPreviewRate(null);
+      .catch(() => {
+        if (!cancelled) {
+          setPreviewRate(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setRateLoading(false);
+        }
       });
+
     return () => {
       cancelled = true;
     };
-  }, [fromCurrency, toCurrency, sameCurrency]);
+  }, [
+    fromCurrency,
+    toCurrency,
+    sameCurrency,
+  ]);
 
-  const convertedAmount =
-    previewRate && amount && !isNaN(parseFloat(amount))
-      ? (parseFloat(amount) * previewRate).toFixed(2)
-      : null;
+  const selectedBalance = useMemo(
+    () =>
+      balances.find(
+        (balance) =>
+          balance.currencyCode ===
+          fromCurrency,
+      ),
+    [balances, fromCurrency],
+  );
 
-  const formatAmount = (value: string) =>
-    parseFloat(value).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+  const availableAmount = Number(
+    selectedBalance?.amount ?? 0,
+  );
 
-  const handleContinue = (e: React.FormEvent) => {
-    e.preventDefault();
+  const convertedAmount = useMemo(() => {
+    if (
+      sameCurrency ||
+      !previewRate ||
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0
+    ) {
+      return null;
+    }
+
+    return parsedAmount * previewRate;
+  }, [
+    parsedAmount,
+    previewRate,
+    sameCurrency,
+  ]);
+
+  const resultFromAmount = Number(
+    result?.fromAmount ??
+      parsedAmount ??
+      0,
+  );
+
+  const resultToAmount = Number(
+    result?.toAmount ??
+      convertedAmount ??
+      0,
+  );
+
+  const resultRate = Number(
+    result?.rate ??
+      previewRate ??
+      0,
+  );
+
+  const receiptDate = useMemo(
+    () =>
+      new Date().toLocaleString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [step],
+  );
+
+  const operationReference = useMemo(
+    () =>
+      `EXC-${idempotencyKey
+        .replace("exchange-", "")
+        .slice(0, 8)
+        .toUpperCase()}`,
+    [idempotencyKey],
+  );
+
+  const swapCurrencies = () => {
+    setFromCurrency(toCurrency);
+    setToCurrency(fromCurrency);
     setError(null);
+  };
 
-    const parsedAmount = parseFloat(amount);
-    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
-      setError("Ingresá un monto válido mayor a 0.");
+  const setPercentage = (
+    percentage: number,
+  ) => {
+    if (availableAmount <= 0) {
       return;
     }
+
+    setAmount(
+      (
+        availableAmount * percentage
+      ).toFixed(2),
+    );
+  };
+
+  const handleContinue = (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    setError(null);
+
     if (sameCurrency) {
-      setError("Elegí dos monedas distintas para intercambiar.");
+      setError(
+        "Elegí dos monedas distintas para intercambiar.",
+      );
+
+      return;
+    }
+
+    if (
+      !amount ||
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0
+    ) {
+      setError(
+        "Ingresá un monto válido mayor a 0.",
+      );
+
+      return;
+    }
+
+    if (!previewRate) {
+      setError(
+        "No pudimos obtener la tasa de cambio. Intentá nuevamente.",
+      );
+
       return;
     }
 
@@ -85,29 +379,58 @@ export default function Exchange() {
     setStep(2);
 
     try {
-      const parsedAmount = parseFloat(amount);
-      const response = await api.post("/transactions/exchange", {
-        fromCurrency,
-        toCurrency,
-        amount: parsedAmount.toFixed(2),
-        idempotencyKey,
+      const response = await api.post(
+        "/transactions/exchange",
+        {
+          fromCurrency,
+          toCurrency,
+
+          amount:
+            parsedAmount.toFixed(2),
+
+          idempotencyKey,
+        },
+      );
+
+      const transaction =
+        response.data?.transaction ??
+        response.data;
+
+      setResult({
+        fromAmount:
+          transaction?.fromAmount ??
+          parsedAmount.toFixed(2),
+
+        toAmount:
+          transaction?.toAmount ??
+          convertedAmount?.toFixed(2) ??
+          "0.00",
+
+        fromCurrency:
+          transaction?.fromCurrency ??
+          fromCurrency,
+
+        toCurrency:
+          transaction?.toCurrency ??
+          toCurrency,
+
+        rate:
+          transaction?.rate ??
+          previewRate?.toString(),
       });
 
-      const tx = response.data?.transaction ?? response.data;
-      setResult({
-        fromAmount: tx?.fromAmount ?? parsedAmount.toFixed(2),
-        toAmount: tx?.toAmount,
-        fromCurrency: tx?.fromCurrency ?? fromCurrency,
-        toCurrency: tx?.toCurrency ?? toCurrency,
-        rate: tx?.rate,
-      });
       setStep(3);
-    } catch (err: any) {
+    } catch (caughtError: unknown) {
+      const apiError =
+        caughtError as ApiError;
+
       setError(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
+        apiError.response?.data?.error ||
+          apiError.response?.data
+            ?.message ||
           "No se pudo completar el intercambio. Intentá de nuevo.",
       );
+
       setStep(1);
     }
   };
@@ -116,188 +439,804 @@ export default function Exchange() {
     setAmount("");
     setResult(null);
     setError(null);
-    setIdempotencyKey(generateIdempotencyKey());
+
+    setIdempotencyKey(
+      generateIdempotencyKey(),
+    );
+
     setStep(0);
   };
 
   return (
-    <div className="min-h-screen bg-[#233446] p-8">
-      <div className="max-w-md mx-auto">
-        <button
-          onClick={() => navigate("/transactions")}
-          className="text-white/70 hover:text-white text-sm font-semibold mb-6"
-        >
-          ← Volver a Transacciones
-        </button>
+    <div className="tg-operation-page is-exchange">
+      <button
+        type="button"
+        className="tg-operation-back"
+        onClick={() =>
+          navigate("/transactions")
+        }
+      >
+        <span aria-hidden="true">
+          ←
+        </span>
 
-        <div className="bg-white rounded-3xl p-6 shadow-lg border border-[#155a70]">
-          <h1 className="text-2xl font-bold text-grafito mb-1">Intercambio</h1>
-          <p className="text-sm text-grafito/70 mb-6">
-            Convertí entre las monedas de tu billetera.
+        Volver a Transacciones
+      </button>
+
+      <section className="tg-operation-shell">
+        <aside className="tg-operation-aside">
+          <div className="tg-operation-aside__header">
+            <span className="tg-operation-aside__icon">
+              <TravelIcon
+                name="exchange"
+                size={25}
+              />
+            </span>
+
+            <div>
+              <p>CAMBIO DE MONEDAS</p>
+
+              <h1>Intercambiar</h1>
+            </div>
+          </div>
+
+          <p className="tg-operation-aside__description">
+            Convertí tus monedas utilizando
+            la tasa de cambio disponible en
+            TravelGo.
           </p>
 
-          {step === 0 && (
-            <form onSubmit={handleContinue}>
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Desde
-              </label>
-              <select
-                value={fromCurrency}
-                onChange={(e) => setFromCurrency(e.target.value)}
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-4 text-grafito font-semibold"
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+          <div
+            className="tg-operation-globe tg-operation-exchange-art"
+            aria-hidden="true"
+          >
+            <div className="tg-operation-globe__orbit orbit-one" />
 
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Hacia
-              </label>
-              <select
-                value={toCurrency}
-                onChange={(e) => setToCurrency(e.target.value)}
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-2 text-grafito font-semibold"
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              {sameCurrency && (
-                <p className="text-xs text-[#ff4242] font-semibold mb-4">
-                  Elegí dos monedas distintas.
-                </p>
-              )}
+            <div className="tg-operation-globe__orbit orbit-two" />
 
-              <label className="block text-sm font-bold text-grafito mb-1 mt-2">
-                Monto en {fromCurrency}
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-2 text-grafito font-semibold"
+            <div className="tg-operation-globe__planet">
+              <TravelIcon
+                name="exchange"
+                size={72}
               />
+            </div>
 
-              {convertedAmount && !sameCurrency && (
-                <p className="text-sm text-oceano font-semibold mb-4">
-                  ≈ {convertedAmount} {toCurrency} (estimado)
-                </p>
-              )}
+            <span className="tg-operation-exchange-art__currency currency-one">
+              {fromCurrency}
+            </span>
 
-              {error && (
-                <div className="flex items-start gap-2 bg-red-50 border border-[#ff4242] rounded-xl p-3 mb-4">
-                  <span className="text-[#ff4242] font-bold text-lg leading-none">
-                    ⚠
-                  </span>
-                  <p className="text-sm text-[#ff4242] font-semibold">{error}</p>
-                </div>
-              )}
+            <span className="tg-operation-exchange-art__currency currency-two">
+              {toCurrency}
+            </span>
 
-              <button
-                type="submit"
-                disabled={sameCurrency}
-                className="w-full bg-[#ff4242] text-white py-3 rounded-full font-bold hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Continuar
-              </button>
-            </form>
-          )}
+            <span className="tg-operation-exchange-art__arrow">
+              ⇄
+            </span>
+          </div>
 
-          {step === 1 && (
+          <div className="tg-operation-balance">
             <div>
-              <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                <p className="text-xs text-grafito/60 font-semibold mb-1">
-                  Vas a intercambiar
-                </p>
-                <p className="text-xl font-bold text-grafito">
-                  {parseFloat(amount || "0").toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}{" "}
-                  {fromCurrency}
-                </p>
-                {convertedAmount && (
-                  <p className="text-sm text-grafito/60 mt-1">
-                    Recibirás aproximadamente {convertedAmount} {toCurrency}
-                  </p>
-                )}
-              </div>
+              <span>
+                Saldo disponible
+              </span>
 
-              {error && (
-                <div className="flex items-start gap-2 bg-red-50 border border-[#ff4242] rounded-xl p-3 mb-4">
-                  <span className="text-[#ff4242] font-bold text-lg leading-none">
-                    ⚠
+              <strong>
+                {selectedBalance
+                  ? formatMoney(
+                      availableAmount,
+                      fromCurrency,
+                    )
+                  : "—"}
+              </strong>
+
+              <small>
+                {fromCurrency} ·{" "}
+                {fromMeta.name}
+              </small>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/dashboard")
+              }
+            >
+              Ver billetera
+
+              <TravelIcon
+                name="eye"
+                size={15}
+              />
+            </button>
+          </div>
+        </aside>
+
+        <main className="tg-operation-panel">
+          <StepIndicator
+            steps={STEPS}
+            currentStep={step}
+            accentColor={ACCENT}
+          />
+
+          <div className="tg-operation-content">
+            {step === 0 && (
+              <div className="tg-operation-view">
+                <header className="tg-operation-heading">
+                  <p>CONVERTIR MONEDAS</p>
+
+                  <h2>
+                    Elegí las monedas
+                  </h2>
+
+                  <span>
+                    Seleccioná una moneda de
+                    origen, otra de destino y
+                    el monto que querés
+                    convertir.
                   </span>
-                  <p className="text-sm text-[#ff4242] font-semibold">{error}</p>
+                </header>
+
+                <form
+                  className="tg-operation-form"
+                  onSubmit={
+                    handleContinue
+                  }
+                >
+                  <div className="tg-exchange-selector">
+                    <div className="tg-operation-field">
+                      <label htmlFor="exchange-from">
+                        Moneda de origen
+                      </label>
+
+                      <div className="tg-operation-select">
+                        <span
+                          className={`fi fi-${fromMeta.flag}`}
+                          aria-hidden="true"
+                        />
+
+                        <select
+                          id="exchange-from"
+                          value={fromCurrency}
+                          onChange={(event) =>
+                            setFromCurrency(
+                              event.target
+                                .value,
+                            )
+                          }
+                        >
+                          {CURRENCIES.map(
+                            (currency) => (
+                              <option
+                                key={currency}
+                                value={currency}
+                              >
+                                {currency} —{" "}
+                                {
+                                  CURRENCY_META[
+                                    currency
+                                  ].name
+                                }
+                              </option>
+                            ),
+                          )}
+                        </select>
+
+                        <span className="tg-operation-select__arrow">
+                          ▾
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="tg-exchange-swap"
+                      onClick={swapCurrencies}
+                      aria-label="Invertir monedas"
+                      title="Invertir monedas"
+                    >
+                      <TravelIcon
+                        name="exchange"
+                        size={21}
+                      />
+                    </button>
+
+                    <div className="tg-operation-field">
+                      <label htmlFor="exchange-to">
+                        Moneda de destino
+                      </label>
+
+                      <div className="tg-operation-select">
+                        <span
+                          className={`fi fi-${toMeta.flag}`}
+                          aria-hidden="true"
+                        />
+
+                        <select
+                          id="exchange-to"
+                          value={toCurrency}
+                          onChange={(event) =>
+                            setToCurrency(
+                              event.target
+                                .value,
+                            )
+                          }
+                        >
+                          {CURRENCIES.map(
+                            (currency) => (
+                              <option
+                                key={currency}
+                                value={currency}
+                              >
+                                {currency} —{" "}
+                                {
+                                  CURRENCY_META[
+                                    currency
+                                  ].name
+                                }
+                              </option>
+                            ),
+                          )}
+                        </select>
+
+                        <span className="tg-operation-select__arrow">
+                          ▾
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {sameCurrency && (
+                    <div className="tg-operation-alert">
+                      <span>!</span>
+
+                      <p>
+                        Elegí dos monedas
+                        distintas.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="tg-operation-field">
+                    <div className="tg-operation-field__row">
+                      <label htmlFor="exchange-amount">
+                        Monto a convertir
+                      </label>
+
+                      <span>
+                        Disponible:{" "}
+                        {selectedBalance
+                          ? formatMoney(
+                              availableAmount,
+                              fromCurrency,
+                            )
+                          : "—"}
+                      </span>
+                    </div>
+
+                    <div className="tg-operation-amount">
+                      <span>
+                        {fromCurrency}
+                      </span>
+
+                      <input
+                        id="exchange-amount"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={amount}
+                        onChange={(event) =>
+                          setAmount(
+                            event.target.value,
+                          )
+                        }
+                        placeholder="0,00"
+                      />
+                    </div>
+
+                    <div className="tg-operation-percentages">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(0.25)
+                        }
+                      >
+                        25%
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(0.5)
+                        }
+                      >
+                        50%
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(0.75)
+                        }
+                      >
+                        75%
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(1)
+                        }
+                      >
+                        Máximo
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="tg-exchange-rate-card">
+                    <div className="tg-exchange-rate-card__header">
+                      <span>
+                        Tasa estimada
+                      </span>
+
+                      <small
+                        className={
+                          rateLoading
+                            ? "is-loading"
+                            : ""
+                        }
+                      >
+                        {rateLoading
+                          ? "Actualizando..."
+                          : "Tasa disponible"}
+                      </small>
+                    </div>
+
+                    <strong>
+                      {previewRate &&
+                      !sameCurrency
+                        ? `1 ${fromCurrency} = ${formatRate(
+                            previewRate,
+                          )} ${toCurrency}`
+                        : "—"}
+                    </strong>
+
+                    <div className="tg-exchange-rate-card__result">
+                      <span>
+                        Recibirás aproximadamente
+                      </span>
+
+                      <strong>
+                        {convertedAmount !==
+                          null
+                          ? formatMoney(
+                              convertedAmount,
+                              toCurrency,
+                            )
+                          : "—"}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="tg-operation-information">
+                    <span>i</span>
+
+                    <p>
+                      El importe final se
+                      confirmará antes de
+                      procesar el intercambio.
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div
+                      className="tg-operation-alert"
+                      role="alert"
+                    >
+                      <span>!</span>
+
+                      <p>{error}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="tg-operation-primary"
+                    disabled={
+                      sameCurrency ||
+                      rateLoading ||
+                      !previewRate
+                    }
+                  >
+                    Continuar
+
+                    <span aria-hidden="true">
+                      →
+                    </span>
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="tg-operation-view">
+                <header className="tg-operation-heading">
+                  <p>REVISIÓN FINAL</p>
+
+                  <h2>
+                    Confirmá el intercambio
+                  </h2>
+
+                  <span>
+                    Revisá la tasa y los
+                    importes antes de continuar.
+                  </span>
+                </header>
+
+                <div className="tg-exchange-preview">
+                  <div className="tg-exchange-preview__currency">
+                    <span
+                      className={`fi fi-${fromMeta.flag}`}
+                    />
+
+                    <small>
+                      Entregás
+                    </small>
+
+                    <strong>
+                      {formatMoney(
+                        parsedAmount,
+                        fromCurrency,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="tg-exchange-preview__arrow">
+                    <TravelIcon
+                      name="exchange"
+                      size={24}
+                    />
+                  </div>
+
+                  <div className="tg-exchange-preview__currency">
+                    <span
+                      className={`fi fi-${toMeta.flag}`}
+                    />
+
+                    <small>
+                      Recibís aprox.
+                    </small>
+
+                    <strong>
+                      {formatMoney(
+                        convertedAmount ?? 0,
+                        toCurrency,
+                      )}
+                    </strong>
+                  </div>
                 </div>
-              )}
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setStep(0)}
-                  className="flex-1 bg-gray-200 text-grafito py-3 rounded-full font-bold hover:bg-gray-300 transition"
-                >
-                  Volver
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  className="flex-1 bg-[#ff4242] text-white py-3 rounded-full font-bold hover:bg-red-600 transition"
-                >
-                  Confirmar
-                </button>
+                <div className="tg-operation-summary">
+                  <div>
+                    <span>
+                      Moneda de origen
+                    </span>
+
+                    <strong>
+                      <span
+                        className={`fi fi-${fromMeta.flag}`}
+                      />
+
+                      {fromCurrency} —{" "}
+                      {fromMeta.name}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Moneda de destino
+                    </span>
+
+                    <strong>
+                      <span
+                        className={`fi fi-${toMeta.flag}`}
+                      />
+
+                      {toCurrency} —{" "}
+                      {toMeta.name}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Tasa aplicada
+                    </span>
+
+                    <strong>
+                      1 {fromCurrency} ={" "}
+                      {previewRate
+                        ? formatRate(
+                            previewRate,
+                          )
+                        : "—"}{" "}
+                      {toCurrency}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Comisión</span>
+
+                    <strong className="is-success">
+                      $ 0,00
+                    </strong>
+                  </div>
+
+                  <div className="is-total">
+                    <span>
+                      Total estimado
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        convertedAmount ?? 0,
+                        toCurrency,
+                      )}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="tg-operation-information">
+                  <span>i</span>
+
+                  <p>
+                    La conversión se realizará
+                    utilizando la tasa mostrada
+                    al confirmar.
+                  </p>
+                </div>
+
+                {error && (
+                  <div
+                    className="tg-operation-alert"
+                    role="alert"
+                  >
+                    <span>!</span>
+
+                    <p>{error}</p>
+                  </div>
+                )}
+
+                <div className="tg-operation-actions">
+                  <button
+                    type="button"
+                    className="tg-operation-secondary"
+                    onClick={() =>
+                      setStep(0)
+                    }
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="tg-operation-primary"
+                    onClick={
+                      handleConfirm
+                    }
+                  >
+                    Confirmar intercambio
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {step === 2 && (
-            <div className="text-center py-10">
-              <div className="w-12 h-12 border-4 border-[#ff4242] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-grafito font-semibold">Procesando...</p>
-            </div>
-          )}
+            {step === 2 && (
+              <div className="tg-operation-status">
+                <div className="tg-operation-status__animation">
+                  <div className="tg-operation-status__ring ring-one" />
 
-          {step === 3 && (
-            <div className="text-center py-6">
-              <div className="w-14 h-14 rounded-full bg-oceano text-white flex items-center justify-center mx-auto mb-4 text-2xl">
-                ✓
-              </div>
-              <p className="text-lg font-bold text-grafito mb-1">
-                ¡Intercambio realizado!
-              </p>
-              {result && (
-                <p className="text-sm text-grafito/70 mb-6">
-                  {formatAmount(result.fromAmount)} {result.fromCurrency} →{" "}
-                  {formatAmount(result.toAmount)} {result.toCurrency}
+                  <div className="tg-operation-status__ring ring-two" />
+
+                  <div className="tg-operation-status__plane">
+                    <TravelIcon
+                      name="exchange"
+                      size={55}
+                    />
+                  </div>
+                </div>
+
+                <h2>
+                  Convirtiendo monedas...
+                </h2>
+
+                <p>
+                  Estamos procesando tu
+                  intercambio y actualizando
+                  los saldos de tu billetera.
                 </p>
-              )}
-              <div className="flex gap-3">
+
+                <div className="tg-operation-information">
+                  <span>i</span>
+
+                  <p>
+                    No cierres esta ventana ni
+                    actualices la página.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="tg-operation-status is-success">
+                <div className="tg-operation-success is-exchange">
+                  <span>✓</span>
+                </div>
+
+                <h2>
+                  ¡Intercambio realizado!
+                </h2>
+
+                <p>
+                  Las monedas fueron
+                  convertidas correctamente.
+                </p>
+
+                <div className="tg-operation-receipt">
+                  <div>
+                    <span>
+                      Moneda entregada
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        resultFromAmount,
+                        result?.fromCurrency ??
+                          fromCurrency,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Moneda recibida
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        resultToAmount,
+                        result?.toCurrency ??
+                          toCurrency,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Tasa aplicada
+                    </span>
+
+                    <strong>
+                      1{" "}
+                      {result?.fromCurrency ??
+                        fromCurrency}{" "}
+                      ={" "}
+                      {resultRate
+                        ? formatRate(
+                            resultRate,
+                          )
+                        : "—"}{" "}
+                      {result?.toCurrency ??
+                        toCurrency}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Comisión</span>
+
+                    <strong>
+                      $ 0,00
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Fecha y hora
+                    </span>
+
+                    <strong>
+                      {receiptDate}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ID de operación
+                    </span>
+
+                    <strong>
+                      {operationReference}
+                    </strong>
+                  </div>
+                </div>
+
                 <button
-                  onClick={handleNewExchange}
-                  className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
+                  type="button"
+                  className="tg-operation-primary"
+                  onClick={() =>
+                    navigate("/dashboard")
+                  }
+                >
+                  Ver billetera
+                </button>
+
+                <button
+                  type="button"
+                  className="tg-operation-text-button"
+                  onClick={
+                    handleNewExchange
+                  }
                 >
                   Nuevo intercambio
                 </button>
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="flex-1 bg-[#ff4242] text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
-                >
-                  Volver a Billetera
-                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </main>
+      </section>
 
-          <StepIndicator steps={STEPS} currentStep={step} accentColor={ACCENT} />
-        </div>
-      </div>
+      <section className="tg-operation-benefits">
+        <article>
+          <TravelIcon
+            name="exchange"
+            size={24}
+          />
+
+          <div>
+            <strong>
+              Conversión inmediata
+            </strong>
+
+            <span>
+              Actualizamos tus saldos en
+              segundos.
+            </span>
+          </div>
+        </article>
+
+        <article>
+          <TravelIcon
+            name="percent"
+            size={24}
+          />
+
+          <div>
+            <strong>
+              Tasa transparente
+            </strong>
+
+            <span>
+              Conocés el resultado antes de
+              confirmar.
+            </span>
+          </div>
+        </article>
+
+        <article>
+          <TravelIcon
+            name="shield"
+            size={24}
+          />
+
+          <div>
+            <strong>
+              Operación segura
+            </strong>
+
+            <span>
+              Protegemos cada conversión.
+            </span>
+          </div>
+        </article>
+      </section>
     </div>
   );
 }

@@ -7,7 +7,11 @@ import { ThemeProvider } from "./context/ThemeContext";
 
 import "./index.css";
 import "./styles/private-shell.css";
+import "./styles/auth-shell.css";
+import "./styles/transactions-route.css";
 import "flag-icons/css/flag-icons.min.css";
+import "./styles/operation-flow.css";
+import "./styles/history-page.css";
 
 import App from "./App.tsx";
 

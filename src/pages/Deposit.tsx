@@ -1,29 +1,217 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+
 import StepIndicator from "../components/StepIndicator";
+import TravelIcon from "../components/ui/TravelIcon";
+import api from "../services/api";
 
-const CURRENCIES = ["ARS", "USD", "EUR", "BRL", "CLP"];
-const STEPS = ["Ingresá monto", "Confirmá", "Procesando", "¡Listo!"];
-const ACCENT = "#2391ae";
+const CURRENCIES = [
+  "ARS",
+  "USD",
+  "EUR",
+  "BRL",
+  "CLP",
+];
 
-const generateIdempotencyKey = () => `deposit-${crypto.randomUUID()}`;
+const STEPS = [
+  "Datos",
+  "Confirmación",
+  "Procesando",
+  "Completado",
+];
+
+const ACCENT = "#187de0";
+
+interface Balance {
+  currencyCode: string;
+  amount: string;
+}
+
+interface CurrencyMeta {
+  name: string;
+  flag: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string;
+    };
+  };
+}
+
+const CURRENCY_META: Record<
+  string,
+  CurrencyMeta
+> = {
+  ARS: {
+    name: "Peso argentino",
+    flag: "ar",
+  },
+
+  USD: {
+    name: "Dólar estadounidense",
+    flag: "us",
+  },
+
+  EUR: {
+    name: "Euro",
+    flag: "eu",
+  },
+
+  BRL: {
+    name: "Real brasileño",
+    flag: "br",
+  },
+
+  CLP: {
+    name: "Peso chileno",
+    flag: "cl",
+  },
+};
+
+function generateIdempotencyKey() {
+  return `deposit-${crypto.randomUUID()}`;
+}
+
+function formatMoney(
+  value: number,
+  currencyCode: string,
+) {
+  try {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString(
+      "es-AR",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    )} ${currencyCode}`;
+  }
+}
 
 export default function Deposit() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [currencyCode, setCurrencyCode] = useState("ARS");
-  const [amount, setAmount] = useState("");
-  const [idempotencyKey, setIdempotencyKey] = useState(generateIdempotencyKey);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleContinue = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [step, setStep] = useState(0);
+
+  const [
+    currencyCode,
+    setCurrencyCode,
+  ] = useState("ARS");
+
+  const [amount, setAmount] =
+    useState("");
+
+  const [balances, setBalances] =
+    useState<Balance[]>([]);
+
+  const [
+    idempotencyKey,
+    setIdempotencyKey,
+  ] = useState(generateIdempotencyKey);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    api
+      .get("/wallet/balances")
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
+
+        setBalances(
+          response.data?.balances ?? [],
+        );
+      })
+      .catch(() => {
+        if (mounted) {
+          setBalances([]);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const currencyMeta =
+    CURRENCY_META[currencyCode];
+
+  const selectedBalance = useMemo(
+    () =>
+      balances.find(
+        (balance) =>
+          balance.currencyCode ===
+          currencyCode,
+      ),
+    [balances, currencyCode],
+  );
+
+  const currentBalance = Number(
+    selectedBalance?.amount ?? 0,
+  );
+
+  const parsedAmount = Number(amount);
+
+  const projectedBalance =
+    currentBalance +
+    (Number.isFinite(parsedAmount)
+      ? parsedAmount
+      : 0);
+
+  const receiptDate = useMemo(
+    () =>
+      new Date().toLocaleString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [step],
+  );
+
+  const operationReference = useMemo(
+    () =>
+      `DEP-${idempotencyKey
+        .replace("deposit-", "")
+        .slice(0, 8)
+        .toUpperCase()}`,
+    [idempotencyKey],
+  );
+
+  const handleContinue = (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
     setError(null);
 
-    const parsedAmount = parseFloat(amount);
-    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
-      setError("Ingresá un monto válido mayor a 0.");
+    if (
+      !amount ||
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0
+    ) {
+      setError(
+        "Ingresá un monto válido mayor a 0.",
+      );
+
       return;
     }
 
@@ -35,19 +223,30 @@ export default function Deposit() {
     setStep(2);
 
     try {
-      const parsedAmount = parseFloat(amount);
-      await api.post("/transactions/deposit", {
-        currencyCode,
-        amount: parsedAmount.toFixed(2),
-        idempotencyKey,
-      });
+      await api.post(
+        "/transactions/deposit",
+        {
+          currencyCode,
+
+          amount:
+            parsedAmount.toFixed(2),
+
+          idempotencyKey,
+        },
+      );
+
       setStep(3);
-    } catch (err: any) {
+    } catch (caughtError: unknown) {
+      const apiError =
+        caughtError as ApiError;
+
       setError(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
+        apiError.response?.data?.error ||
+          apiError.response?.data
+            ?.message ||
           "No se pudo completar el depósito. Intentá de nuevo.",
       );
+
       setStep(1);
     }
   };
@@ -55,155 +254,663 @@ export default function Deposit() {
   const handleNewDeposit = () => {
     setAmount("");
     setError(null);
-    setIdempotencyKey(generateIdempotencyKey());
+
+    setIdempotencyKey(
+      generateIdempotencyKey(),
+    );
+
     setStep(0);
   };
 
-  return (
-    <div className="min-h-screen bg-[#233446] p-8">
-      <div className="max-w-md mx-auto">
-        <button
-          onClick={() => navigate("/transactions")}
-          className="text-white/70 hover:text-white text-sm font-semibold mb-6"
-        >
-          ← Volver a Transacciones
-        </button>
+  const setQuickAmount = (
+    value: number,
+  ) => {
+    setAmount(value.toFixed(2));
+  };
 
-        <div className="bg-white rounded-3xl p-6 shadow-lg border border-[#155a70]">
-          <h1 className="text-2xl font-bold text-grafito mb-1">
-            Agregar saldo simulado
-          </h1>
-          <p className="text-sm text-grafito/70 mb-6">
-            Sumá saldo de práctica a tu billetera TravelGo. No se procesa dinero real.
+  return (
+    <div className="tg-operation-page is-deposit">
+      <button
+        type="button"
+        className="tg-operation-back"
+        onClick={() =>
+          navigate("/transactions")
+        }
+      >
+        <span aria-hidden="true">
+          ←
+        </span>
+
+        Volver a Transacciones
+      </button>
+
+      <section className="tg-operation-shell">
+        <aside className="tg-operation-aside">
+          <div className="tg-operation-aside__header">
+            <span className="tg-operation-aside__icon">
+              <TravelIcon
+                name="plus"
+                size={25}
+              />
+            </span>
+
+            <div>
+              <p>SALDO DE PRÁCTICA</p>
+
+              <h1>Depositar</h1>
+            </div>
+          </div>
+
+          <p className="tg-operation-aside__description">
+            Agregá saldo simulado a tu
+            billetera TravelGo para probar
+            todas sus funciones.
           </p>
 
-          {step === 0 && (
-            <form onSubmit={handleContinue}>
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Moneda
-              </label>
-              <select
-                value={currencyCode}
-                onChange={(e) => setCurrencyCode(e.target.value)}
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-4 text-grafito font-semibold"
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+          <div
+            className="tg-operation-globe tg-operation-deposit-art"
+            aria-hidden="true"
+          >
+            <div className="tg-operation-globe__orbit orbit-one" />
 
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Monto
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-4 text-grafito font-semibold"
+            <div className="tg-operation-globe__orbit orbit-two" />
+
+            <div className="tg-operation-globe__planet">
+              <TravelIcon
+                name="wallet"
+                size={76}
               />
+            </div>
 
-              {error && (
-                <div className="flex items-start gap-2 bg-red-50 border border-[#ff4242] rounded-xl p-3 mb-4">
-                  <span className="text-[#ff4242] font-bold text-lg leading-none">
-                    ⚠
-                  </span>
-                  <p className="text-sm text-[#ff4242] font-semibold">{error}</p>
-                </div>
-              )}
+            <span className="tg-operation-deposit-art__coin coin-one">
+              $
+            </span>
 
-              <button
-                type="submit"
-                className="w-full bg-[#2391ae] text-white py-3 rounded-full font-bold hover:brightness-110 transition"
-              >
-                Continuar
-              </button>
-            </form>
-          )}
+            <span className="tg-operation-deposit-art__coin coin-two">
+              €
+            </span>
 
-          {step === 1 && (
+            <span className="tg-operation-deposit-art__coin coin-three">
+              R$
+            </span>
+
+            <span className="tg-operation-deposit-art__plus">
+              +
+            </span>
+          </div>
+
+          <div className="tg-operation-balance">
             <div>
-              <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                <p className="text-xs text-grafito/60 font-semibold mb-1">
-                  Vas a agregar
-                </p>
-                <p className="text-2xl font-bold text-grafito">
-                  {parseFloat(amount || "0").toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}{" "}
-                  {currencyCode}
-                </p>
-              </div>
+              <span>
+                Saldo actual
+              </span>
 
-              {error && (
-                <div className="flex items-start gap-2 bg-red-50 border border-[#ff4242] rounded-xl p-3 mb-4">
-                  <span className="text-[#ff4242] font-bold text-lg leading-none">
-                    ⚠
+              <strong>
+                {selectedBalance
+                  ? formatMoney(
+                      currentBalance,
+                      currencyCode,
+                    )
+                  : "—"}
+              </strong>
+
+              <small>
+                {currencyCode} ·{" "}
+                {currencyMeta.name}
+              </small>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/dashboard")
+              }
+            >
+              Ver billetera
+
+              <TravelIcon
+                name="eye"
+                size={15}
+              />
+            </button>
+          </div>
+        </aside>
+
+        <main className="tg-operation-panel">
+          <StepIndicator
+            steps={STEPS}
+            currentStep={step}
+            accentColor={ACCENT}
+          />
+
+          <div className="tg-operation-content">
+            {step === 0 && (
+              <div className="tg-operation-view">
+                <header className="tg-operation-heading">
+                  <p>AGREGAR SALDO</p>
+
+                  <h2>
+                    Elegí moneda y monto
+                  </h2>
+
+                  <span>
+                    Este depósito es simulado
+                    y no procesa dinero real.
                   </span>
-                  <p className="text-sm text-[#ff4242] font-semibold">{error}</p>
+                </header>
+
+                <form
+                  className="tg-operation-form"
+                  onSubmit={
+                    handleContinue
+                  }
+                >
+                  <div className="tg-operation-field">
+                    <label htmlFor="deposit-currency">
+                      Moneda
+                    </label>
+
+                    <div className="tg-operation-select">
+                      <span
+                        className={`fi fi-${currencyMeta.flag}`}
+                        aria-hidden="true"
+                      />
+
+                      <select
+                        id="deposit-currency"
+                        value={currencyCode}
+                        onChange={(event) =>
+                          setCurrencyCode(
+                            event.target.value,
+                          )
+                        }
+                      >
+                        {CURRENCIES.map(
+                          (currency) => (
+                            <option
+                              key={currency}
+                              value={currency}
+                            >
+                              {currency} —{" "}
+                              {
+                                CURRENCY_META[
+                                  currency
+                                ].name
+                              }
+                            </option>
+                          ),
+                        )}
+                      </select>
+
+                      <span
+                        className="tg-operation-select__arrow"
+                        aria-hidden="true"
+                      >
+                        ▾
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="tg-operation-field">
+                    <div className="tg-operation-field__row">
+                      <label htmlFor="deposit-amount">
+                        Monto a depositar
+                      </label>
+
+                      <span>
+                        Saldo actual:{" "}
+                        {selectedBalance
+                          ? formatMoney(
+                              currentBalance,
+                              currencyCode,
+                            )
+                          : "—"}
+                      </span>
+                    </div>
+
+                    <div className="tg-operation-amount">
+                      <span>
+                        {currencyCode}
+                      </span>
+
+                      <input
+                        id="deposit-amount"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={amount}
+                        onChange={(event) =>
+                          setAmount(
+                            event.target.value,
+                          )
+                        }
+                        placeholder="0,00"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="tg-operation-quick-amounts">
+                    <span>
+                      Montos rápidos
+                    </span>
+
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setQuickAmount(1000)
+                        }
+                      >
+                        +1.000
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setQuickAmount(5000)
+                        }
+                      >
+                        +5.000
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setQuickAmount(10000)
+                        }
+                      >
+                        +10.000
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setQuickAmount(50000)
+                        }
+                      >
+                        +50.000
+                      </button>
+                    </div>
+                  </div>
+
+                  {amount &&
+                    parsedAmount > 0 && (
+                      <div className="tg-operation-projection">
+                        <span>
+                          Saldo estimado
+                        </span>
+
+                        <strong>
+                          {formatMoney(
+                            projectedBalance,
+                            currencyCode,
+                          )}
+                        </strong>
+                      </div>
+                    )}
+
+                  <div className="tg-operation-information">
+                    <span>i</span>
+
+                    <p>
+                      Esta función agrega saldo
+                      de práctica. No realiza
+                      cargos ni transferencias
+                      bancarias.
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div
+                      className="tg-operation-alert"
+                      role="alert"
+                    >
+                      <span>!</span>
+
+                      <p>{error}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="tg-operation-primary"
+                  >
+                    Continuar
+
+                    <span aria-hidden="true">
+                      →
+                    </span>
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="tg-operation-view">
+                <header className="tg-operation-heading">
+                  <p>REVISIÓN FINAL</p>
+
+                  <h2>
+                    Confirmá el depósito
+                  </h2>
+
+                  <span>
+                    Revisá la moneda y el monto
+                    antes de continuar.
+                  </span>
+                </header>
+
+                <div className="tg-operation-deposit-preview">
+                  <div className="tg-operation-deposit-preview__icon">
+                    <TravelIcon
+                      name="plus"
+                      size={26}
+                    />
+                  </div>
+
+                  <div>
+                    <span>
+                      Vas a depositar
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        parsedAmount,
+                        currencyCode,
+                      )}
+                    </strong>
+
+                    <small>
+                      Saldo simulado TravelGo
+                    </small>
+                  </div>
                 </div>
-              )}
 
-              <div className="flex gap-3">
+                <div className="tg-operation-summary">
+                  <div>
+                    <span>Moneda</span>
+
+                    <strong>
+                      <span
+                        className={`fi fi-${currencyMeta.flag}`}
+                        aria-hidden="true"
+                      />
+
+                      {currencyCode} —{" "}
+                      {currencyMeta.name}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Saldo anterior
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        currentBalance,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Monto depositado
+                    </span>
+
+                    <strong className="is-success">
+                      +
+                      {formatMoney(
+                        parsedAmount,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div className="is-total">
+                    <span>
+                      Nuevo saldo
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        projectedBalance,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="tg-operation-information">
+                  <span>i</span>
+
+                  <p>
+                    El saldo estará disponible
+                    inmediatamente después de
+                    confirmar.
+                  </p>
+                </div>
+
+                {error && (
+                  <div
+                    className="tg-operation-alert"
+                    role="alert"
+                  >
+                    <span>!</span>
+
+                    <p>{error}</p>
+                  </div>
+                )}
+
+                <div className="tg-operation-actions">
+                  <button
+                    type="button"
+                    className="tg-operation-secondary"
+                    onClick={() =>
+                      setStep(0)
+                    }
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="tg-operation-primary"
+                    onClick={
+                      handleConfirm
+                    }
+                  >
+                    Confirmar depósito
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="tg-operation-status">
+                <div className="tg-operation-status__animation">
+                  <div className="tg-operation-status__ring ring-one" />
+
+                  <div className="tg-operation-status__ring ring-two" />
+
+                  <div className="tg-operation-status__plane">
+                    <TravelIcon
+                      name="plus"
+                      size={55}
+                    />
+                  </div>
+                </div>
+
+                <h2>
+                  Acreditando saldo...
+                </h2>
+
+                <p>
+                  Estamos agregando el saldo
+                  simulado a tu billetera.
+                </p>
+
+                <div className="tg-operation-information">
+                  <span>i</span>
+
+                  <p>
+                    No cierres esta ventana ni
+                    actualices la página.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="tg-operation-status is-success">
+                <div className="tg-operation-success">
+                  <span>✓</span>
+                </div>
+
+                <h2>
+                  ¡Depósito acreditado!
+                </h2>
+
+                <p>
+                  El nuevo saldo ya está
+                  disponible en tu billetera.
+                </p>
+
+                <div className="tg-operation-receipt">
+                  <div>
+                    <span>Moneda</span>
+
+                    <strong>
+                      {currencyCode} —{" "}
+                      {currencyMeta.name}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Monto depositado
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        parsedAmount,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Nuevo saldo estimado
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        projectedBalance,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Fecha y hora
+                    </span>
+
+                    <strong>
+                      {receiptDate}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ID de operación
+                    </span>
+
+                    <strong>
+                      {operationReference}
+                    </strong>
+                  </div>
+                </div>
+
                 <button
-                  onClick={() => setStep(0)}
-                  className="flex-1 bg-gray-200 text-grafito py-3 rounded-full font-bold hover:bg-gray-300 transition"
+                  type="button"
+                  className="tg-operation-primary"
+                  onClick={() =>
+                    navigate("/dashboard")
+                  }
                 >
-                  Volver
+                  Ver billetera
                 </button>
+
                 <button
-                  onClick={handleConfirm}
-                  className="flex-1 bg-[#2391ae] text-white py-3 rounded-full font-bold hover:brightness-110 transition"
+                  type="button"
+                  className="tg-operation-text-button"
+                  onClick={
+                    handleNewDeposit
+                  }
                 >
-                  Confirmar
+                  Agregar otro saldo
                 </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </main>
+      </section>
 
-          {step === 2 && (
-            <div className="text-center py-10">
-              <div className="w-12 h-12 border-4 border-[#2391ae] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-grafito font-semibold">Procesando...</p>
-            </div>
-          )}
+      <section className="tg-operation-benefits">
+        <article>
+          <TravelIcon
+            name="shield"
+            size={24}
+          />
 
-          {step === 3 && (
-            <div className="text-center py-6">
-              <div className="w-14 h-14 rounded-full bg-[#2391ae] text-white flex items-center justify-center mx-auto mb-4 text-2xl">
-                ✓
-              </div>
-              <p className="text-lg font-bold text-grafito mb-1">
-                ¡Saldo simulado agregado!
-              </p>
-              <p className="text-sm text-grafito/70 mb-6">
-                +{amount} {currencyCode}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={handleNewDeposit}
-                  className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
-                >
-                  Agregar otro
-                </button>
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="flex-1 bg-[#ff4242] text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
-                >
-                  Volver a Billetera
-                </button>
-              </div>
-            </div>
-          )}
+          <div>
+            <strong>
+              Entorno de práctica
+            </strong>
 
-          <StepIndicator steps={STEPS} currentStep={step} accentColor={ACCENT} />
-        </div>
-      </div>
+            <span>
+              No se procesa dinero real.
+            </span>
+          </div>
+        </article>
+
+        <article>
+          <TravelIcon
+            name="rocket"
+            size={24}
+          />
+
+          <div>
+            <strong>
+              Acreditación inmediata
+            </strong>
+
+            <span>
+              El saldo aparece en segundos.
+            </span>
+          </div>
+        </article>
+
+        <article>
+          <TravelIcon
+            name="wallet"
+            size={24}
+          />
+
+          <div>
+            <strong>
+              Billetera multimoneda
+            </strong>
+
+            <span>
+              Elegí entre cinco monedas.
+            </span>
+          </div>
+        </article>
+      </section>
     </div>
   );
 }

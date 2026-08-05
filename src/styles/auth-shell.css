@@ -1,0 +1,2862 @@
+/* =========================================================
+   TRAVELGO — LOGIN Y REGISTRO
+   Tema claro/oscuro, fondo de playa y diseño responsive
+   ========================================================= */
+
+:root {
+  --tg-auth-card: rgba(255, 255, 255, 0.95);
+  --tg-auth-card-solid: #ffffff;
+  --tg-auth-form-bg: rgba(255, 255, 255, 0.97);
+
+  --tg-auth-text: #071d39;
+  --tg-auth-text-soft: #53667a;
+  --tg-auth-text-muted: #8392a1;
+
+  --tg-auth-border: rgba(7, 29, 57, 0.12);
+  --tg-auth-border-strong: rgba(0, 167, 200, 0.34);
+
+  --tg-auth-input: rgba(246, 250, 252, 0.96);
+  --tg-auth-input-hover: #ffffff;
+
+  --tg-auth-cyan: #00a7c8;
+  --tg-auth-cyan-hover: #008ca9;
+  --tg-auth-cyan-soft: rgba(0, 167, 200, 0.12);
+
+  --tg-auth-orange: #ff5b0a;
+  --tg-auth-orange-hover: #df4b00;
+  --tg-auth-orange-soft: rgba(255, 91, 10, 0.13);
+
+  --tg-auth-success: #0caf60;
+  --tg-auth-danger: #ef4444;
+
+  --tg-auth-shadow:
+    0 34px 100px rgba(5, 37, 60, 0.2),
+    0 8px 24px rgba(5, 37, 60, 0.08);
+}
+
+:root[data-theme="dark"] {
+  --tg-auth-card: rgba(3, 28, 48, 0.95);
+  --tg-auth-card-solid: #041f35;
+  --tg-auth-form-bg: rgba(3, 29, 49, 0.98);
+
+  --tg-auth-text: #f4fbff;
+  --tg-auth-text-soft: #bfd0dd;
+  --tg-auth-text-muted: #8ea6b8;
+
+  --tg-auth-border: rgba(115, 200, 227, 0.17);
+  --tg-auth-border-strong: rgba(0, 184, 218, 0.4);
+
+  --tg-auth-input: rgba(8, 43, 69, 0.82);
+  --tg-auth-input-hover: rgba(10, 49, 78, 0.96);
+
+  --tg-auth-cyan: #00b8da;
+  --tg-auth-cyan-hover: #21cee9;
+  --tg-auth-cyan-soft: rgba(0, 184, 218, 0.16);
+
+  --tg-auth-orange: #ff6417;
+  --tg-auth-orange-hover: #ff7d39;
+  --tg-auth-orange-soft: rgba(255, 100, 23, 0.17);
+
+  --tg-auth-success: #2add7a;
+  --tg-auth-danger: #ff665d;
+
+  --tg-auth-shadow:
+    0 38px 110px rgba(0, 5, 13, 0.56),
+    0 10px 30px rgba(0, 5, 13, 0.3);
+}
+
+/* =========================================================
+   CONTENEDOR GENERAL
+   ========================================================= */
+
+.tg-auth-shell,
+.tg-auth-loading {
+  position: relative;
+
+  min-height: 100vh;
+
+  color: var(--tg-auth-text);
+
+  background-color: #08293e;
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+
+  font-family:
+    "Plus Jakarta Sans",
+    "Manrope",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  isolation: isolate;
+}
+
+.tg-auth-shell *,
+.tg-auth-loading * {
+  box-sizing: border-box;
+}
+
+.tg-auth-shell__overlay,
+.tg-auth-loading__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 29, 48, 0.76) 0%,
+      rgba(0, 39, 62, 0.37) 47%,
+      rgba(255, 248, 239, 0.18) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 18, 31, 0.18),
+      rgba(0, 18, 31, 0.36)
+    );
+
+  backdrop-filter:
+    saturate(1.05)
+    blur(1px);
+}
+
+:root[data-theme="dark"] .tg-auth-shell__overlay,
+:root[data-theme="dark"] .tg-auth-loading__overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 12, 24, 0.94) 0%,
+      rgba(0, 23, 40, 0.78) 52%,
+      rgba(0, 16, 30, 0.58) 100%
+    ),
+    rgba(0, 9, 18, 0.27);
+}
+
+/* =========================================================
+   BARRA SUPERIOR
+   ========================================================= */
+
+.tg-auth-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding:
+    20px
+    clamp(20px, 4vw, 56px);
+
+  pointer-events: none;
+}
+
+.tg-auth-toolbar button {
+  pointer-events: auto;
+}
+
+.tg-auth-toolbar__back,
+.tg-auth-toolbar__theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-height: 44px;
+
+  color: #ffffff;
+
+  background: rgba(0, 24, 41, 0.48);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.22);
+
+  border-radius: 999px;
+
+  box-shadow:
+    0 12px 30px
+    rgba(0, 12, 22, 0.2);
+
+  backdrop-filter: blur(18px);
+
+  cursor: pointer;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.tg-auth-toolbar__back {
+  padding: 0 17px;
+}
+
+.tg-auth-toolbar__back > span {
+  font-size: 1.05rem;
+}
+
+.tg-auth-toolbar__theme {
+  padding: 0 16px;
+}
+
+.tg-auth-toolbar__back:hover,
+.tg-auth-toolbar__theme:hover {
+  transform: translateY(-2px);
+
+  background: rgba(0, 34, 56, 0.68);
+
+  border-color:
+    rgba(255, 255, 255, 0.42);
+}
+
+/* =========================================================
+   ESCENARIO PRINCIPAL
+   ========================================================= */
+
+.tg-auth-stage {
+  display: grid;
+
+  min-height: 100vh;
+
+  place-items: center;
+
+  padding:
+    88px
+    clamp(18px, 4vw, 60px)
+    34px;
+}
+
+/* =========================================================
+   TARJETA PRINCIPAL
+   ========================================================= */
+
+.tg-auth-card {
+  display: grid;
+
+  grid-template-columns:
+    minmax(360px, 0.92fr)
+    minmax(430px, 1.08fr);
+
+  width: min(1080px, 100%);
+
+  min-height: 690px;
+
+  overflow: hidden;
+
+  background: var(--tg-auth-card);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.3);
+
+  border-radius: 32px;
+
+  box-shadow: var(--tg-auth-shadow);
+
+  backdrop-filter: blur(28px);
+}
+
+/* =========================================================
+   PANEL VISUAL
+   ========================================================= */
+
+.tg-auth-visual {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  padding: 42px;
+
+  color: #ffffff;
+
+  background:
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(31, 213, 235, 0.34),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(255, 100, 23, 0.42),
+      transparent 32%
+    ),
+    linear-gradient(
+      145deg,
+      #002943 0%,
+      #005d79 48%,
+      #00253d 100%
+    );
+}
+
+.tg-auth-visual::before {
+  position: absolute;
+  inset: 0;
+
+  content: "";
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04),
+      transparent 35%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 79px,
+      rgba(255, 255, 255, 0.025) 80px
+    );
+
+  pointer-events: none;
+}
+
+.tg-auth-visual__glow {
+  position: absolute;
+  top: -120px;
+  left: -80px;
+
+  width: 320px;
+  height: 320px;
+
+  background:
+    rgba(0, 209, 236, 0.18);
+
+  border-radius: 50%;
+
+  filter: blur(55px);
+
+  pointer-events: none;
+}
+
+.tg-auth-brand {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.tg-auth-brand img {
+  width: 66px;
+  height: 66px;
+
+  object-fit: contain;
+}
+
+.tg-auth-brand > div {
+  display: flex;
+  align-items: baseline;
+
+  font-size: 1.22rem;
+  letter-spacing: -0.045em;
+}
+
+.tg-auth-brand strong {
+  font-weight: 800;
+}
+
+.tg-auth-brand span {
+  color: var(--tg-auth-orange);
+  font-weight: 800;
+}
+
+.tg-auth-visual__copy {
+  position: relative;
+  z-index: 2;
+
+  margin-top: 68px;
+}
+
+.tg-auth-kicker {
+  margin: 0;
+
+  color: var(--tg-auth-cyan);
+
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.tg-auth-visual .tg-auth-kicker {
+  color: #5eeaff;
+}
+
+.tg-auth-visual__copy h1 {
+  margin: 15px 0 18px;
+
+  font-size:
+    clamp(2.15rem, 4vw, 3.5rem);
+
+  line-height: 0.98;
+  letter-spacing: -0.065em;
+}
+
+.tg-auth-visual__copy h1 span {
+  color: #ff7b35;
+}
+
+.tg-auth-visual__copy > p:last-child {
+  max-width: 420px;
+
+  margin: 0;
+
+  color:
+    rgba(255, 255, 255, 0.76);
+
+  font-size: 0.78rem;
+  line-height: 1.75;
+}
+
+.tg-auth-visual__features {
+  position: relative;
+  z-index: 2;
+
+  display: grid;
+  gap: 10px;
+
+  margin-top: 34px;
+}
+
+.tg-auth-visual__features > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color:
+    rgba(255, 255, 255, 0.88);
+
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.tg-auth-visual__features svg {
+  color: #45def1;
+}
+
+.tg-auth-visual__phone {
+  position: absolute;
+  right: -88px;
+  bottom: -72px;
+
+  width: 330px;
+  max-height: 340px;
+
+  object-fit: contain;
+
+  opacity: 0.82;
+
+  filter:
+    drop-shadow(
+      0 30px 42px
+      rgba(0, 8, 17, 0.48)
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   PANEL DEL FORMULARIO
+   ========================================================= */
+
+.tg-auth-form-panel {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  padding:
+    46px
+    clamp(34px, 5vw, 72px)
+    28px;
+
+  color: var(--tg-auth-text);
+
+  background: var(--tg-auth-form-bg);
+}
+
+.tg-auth-form-panel__close {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+
+  display: grid;
+
+  width: 42px;
+  height: 42px;
+
+  place-items: center;
+
+  color: var(--tg-auth-text-soft);
+
+  background: var(--tg-auth-input);
+
+  border:
+    1px solid
+    var(--tg-auth-border);
+
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.tg-auth-form-panel__close:hover {
+  color: var(--tg-auth-orange);
+
+  border-color:
+    rgba(255, 91, 10, 0.34);
+
+  transform: rotate(5deg);
+}
+
+.tg-auth-form-panel__header {
+  padding-right: 42px;
+}
+
+.tg-auth-form-panel__header h2 {
+  margin: 9px 0 8px;
+
+  color: var(--tg-auth-text);
+
+  font-size:
+    clamp(1.75rem, 3vw, 2.45rem);
+
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.tg-auth-form-panel__header > p:last-child {
+  max-width: 480px;
+
+  margin: 0;
+
+  color: var(--tg-auth-text-soft);
+
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   PESTAÑAS
+   ========================================================= */
+
+.tg-auth-tabs {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 5px;
+
+  margin-top: 26px;
+
+  padding: 5px;
+
+  background: var(--tg-auth-input);
+
+  border:
+    1px solid
+    var(--tg-auth-border);
+
+  border-radius: 15px;
+}
+
+.tg-auth-tabs button {
+  min-height: 42px;
+
+  color: var(--tg-auth-text-muted);
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 11px;
+
+  cursor: pointer;
+
+  font-size: 0.7rem;
+  font-weight: 800;
+
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.tg-auth-tabs button.is-active {
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--tg-auth-cyan),
+      #008aa8
+    );
+
+  box-shadow:
+    0 10px 22px
+    rgba(0, 167, 200, 0.22);
+}
+
+.tg-auth-tabs button:last-child.is-active {
+  background:
+    linear-gradient(
+      135deg,
+      var(--tg-auth-orange),
+      #e44900
+    );
+
+  box-shadow:
+    0 10px 22px
+    rgba(255, 91, 10, 0.22);
+}
+
+/* =========================================================
+   CONTENEDOR DEL FORMULARIO
+   ========================================================= */
+
+.tg-auth-form-container {
+  flex: 1;
+
+  min-height: 0;
+
+  margin-top: 22px;
+}
+
+.tg-auth-form-view {
+  width: 100%;
+
+  animation:
+    tg-auth-enter
+    280ms ease both;
+}
+
+@keyframes tg-auth-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   ESTILOS GENERALES PARA FORMULARIOS INTERNOS
+   Estos estilos también corrigen temporalmente las clases
+   Tailwind antiguas de LoginFormFields/RegisterFormFields.
+   ========================================================= */
+
+.tg-auth-form-view > img,
+.tg-auth-form-view > h1 {
+  display: none !important;
+}
+
+.tg-auth-form-view form {
+  display: grid !important;
+
+  width: 100% !important;
+
+  gap: 13px !important;
+}
+
+.tg-auth-form-view form > div {
+  position: relative;
+}
+
+.tg-auth-form-view input[type="text"],
+.tg-auth-form-view input[type="email"],
+.tg-auth-form-view input[type="password"],
+.tg-auth-form-view input[type="date"] {
+  width: 100% !important;
+
+  min-height: 48px !important;
+
+  padding:
+    11px
+    14px !important;
+
+  color:
+    var(--tg-auth-text) !important;
+
+  background:
+    var(--tg-auth-input) !important;
+
+  border:
+    1px solid
+    var(--tg-auth-border) !important;
+
+  border-radius:
+    13px !important;
+
+  outline: 0 !important;
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.tg-auth-form-view input[type="password"] {
+  padding-right: 44px !important;
+}
+
+.tg-auth-form-view input::placeholder {
+  color:
+    var(--tg-auth-text-muted) !important;
+}
+
+.tg-auth-form-view input:hover {
+  background:
+    var(--tg-auth-input-hover) !important;
+}
+
+.tg-auth-form-view input:focus {
+  background:
+    var(--tg-auth-input-hover) !important;
+
+  border-color:
+    var(--tg-auth-cyan) !important;
+
+  box-shadow:
+    0 0 0 3px
+    var(--tg-auth-cyan-soft) !important;
+}
+
+.tg-auth-form-view.is-register input:focus {
+  border-color:
+    var(--tg-auth-orange) !important;
+
+  box-shadow:
+    0 0 0 3px
+    var(--tg-auth-orange-soft) !important;
+}
+
+.tg-auth-form-view input[type="date"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"]
+  .tg-auth-form-view
+  input[type="date"] {
+  color-scheme: dark;
+}
+
+.tg-auth-form-view label {
+  color:
+    var(--tg-auth-text-soft) !important;
+
+  font-size:
+    0.68rem !important;
+}
+
+.tg-auth-form-view label.text-xs {
+  margin:
+    0 0 6px
+    2px !important;
+}
+
+.tg-auth-form-view input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+
+  accent-color:
+    var(--tg-auth-cyan) !important;
+
+  cursor: pointer;
+}
+
+.tg-auth-form-view.is-register
+  input[type="checkbox"] {
+  accent-color:
+    var(--tg-auth-orange) !important;
+}
+
+.tg-auth-form-view .relative > button {
+  top: 13px !important;
+  right: 13px !important;
+
+  color:
+    var(--tg-auth-text-muted) !important;
+
+  background: transparent !important;
+
+  border: 0 !important;
+
+  cursor: pointer;
+}
+
+.tg-auth-form-view .relative > button:hover {
+  color:
+    var(--tg-auth-cyan) !important;
+}
+
+.tg-auth-form-view p.text-red-500 {
+  min-height: 14px;
+
+  margin:
+    4px 2px 0 !important;
+
+  color:
+    var(--tg-auth-danger) !important;
+
+  font-size:
+    0.59rem !important;
+}
+
+.tg-auth-form-view p.text-green-600 {
+  color:
+    var(--tg-auth-success) !important;
+}
+
+.tg-auth-form-view p.text-gray-400 {
+  color:
+    var(--tg-auth-text-muted) !important;
+}
+
+/* Botón principal */
+
+.tg-auth-form-view form > button[type="submit"] {
+  min-height: 48px;
+
+  margin-top: 3px !important;
+
+  color: #ffffff !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--tg-auth-cyan),
+      #008ba8
+    ) !important;
+
+  border: 0 !important;
+  border-radius: 999px !important;
+
+  box-shadow:
+    0 13px 26px
+    rgba(0, 167, 200, 0.22);
+
+  cursor: pointer;
+
+  font-size: 0.7rem;
+  font-weight: 900;
+
+  letter-spacing: 0.035em;
+
+  transition:
+    transform 180ms ease,
+    filter 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.tg-auth-form-view.is-register
+  form
+  > button[type="submit"] {
+  background:
+    linear-gradient(
+      135deg,
+      var(--tg-auth-orange),
+      #df4900
+    ) !important;
+
+  box-shadow:
+    0 13px 26px
+    rgba(255, 91, 10, 0.23);
+}
+
+.tg-auth-form-view
+  form
+  > button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+
+  filter: brightness(1.07);
+}
+
+.tg-auth-form-view
+  form
+  > button[type="submit"]:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.52;
+}
+
+/* Recordarme y recuperar contraseña */
+
+.tg-auth-form-view
+  .flex.items-center.justify-between {
+  gap: 12px;
+}
+
+.tg-auth-form-view
+  .flex.items-center.justify-between
+  button {
+  color:
+    var(--tg-auth-cyan) !important;
+
+  background: transparent;
+
+  border: 0;
+
+  cursor: pointer;
+
+  font-size:
+    0.65rem !important;
+  font-weight: 800;
+}
+
+.tg-auth-form-view
+  .flex.items-center.justify-between
+  button:hover {
+  text-decoration: underline;
+}
+
+/* Términos */
+
+.tg-auth-form-view label button {
+  padding: 0;
+
+  color:
+    var(--tg-auth-orange) !important;
+
+  background: transparent;
+
+  border: 0;
+
+  cursor: pointer;
+
+  font-weight: 800;
+}
+
+/* =========================================================
+   BOTÓN DE GOOGLE
+   ========================================================= */
+
+.tg-auth-form-view form > button:not([type="submit"]),
+.tg-auth-form-view form > div + button {
+  color:
+    var(--tg-auth-text) !important;
+
+  background:
+    var(--tg-auth-input) !important;
+
+  border:
+    1px solid
+    var(--tg-auth-border) !important;
+
+  border-radius:
+    999px !important;
+}
+
+.tg-auth-form-view iframe {
+  max-width: 100%;
+}
+
+/* =========================================================
+   CAMBIO DE FORMULARIO EN MÓVIL
+   ========================================================= */
+
+.tg-auth-switch-mobile {
+  display: none;
+
+  margin:
+    18px 0 0;
+
+  color:
+    var(--tg-auth-text-soft);
+
+  text-align: center;
+
+  font-size: 0.68rem;
+}
+
+.tg-auth-switch-mobile button {
+  margin-left: 5px;
+
+  padding: 0;
+
+  color:
+    var(--tg-auth-cyan);
+
+  background: transparent;
+
+  border: 0;
+
+  cursor: pointer;
+
+  font-weight: 900;
+}
+
+.tg-auth-form-panel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  margin-top: 20px;
+
+  color:
+    var(--tg-auth-text-muted);
+
+  font-size: 0.59rem;
+}
+
+.tg-auth-form-panel__footer svg {
+  color:
+    var(--tg-auth-success);
+}
+
+/* =========================================================
+   PANTALLA DE CARGA GOOGLE
+   ========================================================= */
+
+.tg-auth-loading {
+  display: grid;
+
+  place-items: center;
+
+  padding: 24px;
+}
+
+.tg-auth-loading__content,
+.tg-auth-welcome {
+  display: grid;
+
+  width: min(470px, 100%);
+
+  justify-items: center;
+
+  padding:
+    42px
+    34px;
+
+  color:
+    var(--tg-auth-text);
+
+  text-align: center;
+
+  background:
+    var(--tg-auth-card);
+
+  border:
+    1px solid
+    var(--tg-auth-border);
+
+  border-radius: 28px;
+
+  box-shadow:
+    var(--tg-auth-shadow);
+
+  backdrop-filter:
+    blur(26px);
+}
+
+.tg-auth-loading__content img,
+.tg-auth-welcome img {
+  width: 80px;
+  height: 80px;
+
+  object-fit: contain;
+}
+
+.tg-auth-loading__content h1,
+.tg-auth-welcome h1 {
+  margin:
+    22px 0 8px;
+
+  color:
+    var(--tg-auth-text);
+
+  font-size:
+    1.7rem;
+  letter-spacing:
+    -0.045em;
+}
+
+.tg-auth-loading__content p,
+.tg-auth-welcome > p {
+  margin: 0;
+
+  color:
+    var(--tg-auth-text-soft);
+
+  font-size: 0.73rem;
+  line-height: 1.6;
+}
+
+.tg-auth-spinner {
+  display: inline-block;
+
+  width: 28px;
+  height: 28px;
+
+  margin-top: 22px;
+
+  border:
+    3px solid
+    var(--tg-auth-cyan-soft);
+
+  border-top-color:
+    var(--tg-auth-cyan);
+
+  border-radius: 50%;
+
+  animation:
+    tg-auth-spin
+    700ms linear infinite;
+}
+
+@keyframes tg-auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   BIENVENIDA
+   ========================================================= */
+
+.tg-auth-welcome__icon {
+  display: grid;
+
+  width: 64px;
+  height: 64px;
+
+  place-items: center;
+
+  margin-bottom: 8px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--tg-auth-success),
+      #07954f
+    );
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 18px 34px
+    rgba(11, 175, 96, 0.26);
+
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.tg-auth-welcome .tg-auth-kicker {
+  margin-top: 16px;
+}
+
+.tg-auth-welcome__redirect {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 22px;
+
+  color:
+    var(--tg-auth-text-muted);
+
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.tg-auth-welcome__redirect
+  .tg-auth-spinner {
+  width: 18px;
+  height: 18px;
+
+  margin: 0;
+
+  border-width: 2px;
+}
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 940px) {
+  .tg-auth-card {
+    grid-template-columns:
+      minmax(280px, 0.78fr)
+      minmax(400px, 1.22fr);
+  }
+
+  .tg-auth-visual {
+    padding:
+      34px
+      30px;
+  }
+
+  .tg-auth-visual__copy {
+    margin-top: 58px;
+  }
+
+  .tg-auth-visual__copy h1 {
+    font-size: 2.35rem;
+  }
+
+  .tg-auth-visual__phone {
+    right: -120px;
+
+    width: 290px;
+
+    opacity: 0.7;
+  }
+
+  .tg-auth-form-panel {
+    padding:
+      42px
+      34px
+      26px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE — MÓVIL
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .tg-auth-toolbar {
+    padding:
+      14px
+      14px;
+  }
+
+  .tg-auth-toolbar__back,
+  .tg-auth-toolbar__theme {
+    min-height: 40px;
+
+    padding: 0 12px;
+  }
+
+  .tg-auth-toolbar__theme > span {
+    display: none;
+  }
+
+  .tg-auth-toolbar__theme {
+    width: 40px;
+  }
+
+  .tg-auth-stage {
+    align-items: start;
+
+    padding:
+      76px
+      12px
+      20px;
+  }
+
+  .tg-auth-card {
+    display: block;
+
+    width: 100%;
+
+    min-height: auto;
+
+    border-radius: 24px;
+  }
+
+  .tg-auth-visual {
+    min-height: 245px;
+
+    padding:
+      26px
+      24px;
+  }
+
+  .tg-auth-brand img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .tg-auth-brand > div {
+    font-size: 1rem;
+  }
+
+  .tg-auth-visual__copy {
+    margin-top: 26px;
+  }
+
+  .tg-auth-visual__copy h1 {
+    margin:
+      10px 0 8px;
+
+    font-size: 2rem;
+  }
+
+  .tg-auth-visual__copy > p:last-child {
+    display: none;
+  }
+
+  .tg-auth-visual__features {
+    display: none;
+  }
+
+  .tg-auth-visual__phone {
+    right: -55px;
+    bottom: -60px;
+
+    width: 220px;
+
+    opacity: 0.56;
+  }
+
+  .tg-auth-form-panel {
+    padding:
+      28px
+      22px
+      24px;
+  }
+
+  .tg-auth-form-panel__close {
+    display: none;
+  }
+
+  .tg-auth-form-panel__header {
+    padding-right: 0;
+  }
+
+  .tg-auth-form-panel__header h2 {
+    font-size: 1.7rem;
+  }
+
+  .tg-auth-tabs {
+    margin-top: 20px;
+  }
+
+  .tg-auth-form-container {
+    margin-top: 18px;
+  }
+
+  .tg-auth-switch-mobile {
+    display: block;
+  }
+
+  .tg-auth-form-panel__footer {
+    margin-top: 15px;
+  }
+}
+
+/* =========================================================
+   TELÉFONOS PEQUEÑOS
+   ========================================================= */
+
+@media (max-width: 420px) {
+  .tg-auth-visual {
+    min-height: 218px;
+  }
+
+  .tg-auth-visual__copy h1 {
+    font-size: 1.72rem;
+  }
+
+  .tg-auth-form-panel {
+    padding:
+      24px
+      16px
+      22px;
+  }
+
+  .tg-auth-form-view
+    .flex.items-center.justify-between {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .tg-auth-loading__content,
+  .tg-auth-welcome {
+    padding:
+      34px
+      22px;
+  }
+}
+
+/* =========================================================
+   ACCESIBILIDAD
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-auth-form-view,
+  .tg-auth-spinner,
+  .tg-auth-toolbar button,
+  .tg-auth-form-panel__close,
+  .tg-auth-form-view input,
+  .tg-auth-form-view button {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* =========================================================
+   FORMULARIOS DE AUTENTICACIÓN DEFINITIVOS
+   ========================================================= */
+
+.tg-auth-fields {
+  display: grid;
+
+  width: 100%;
+
+  gap: 14px;
+}
+
+.tg-auth-fields--register {
+  gap: 11px;
+}
+
+.tg-auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+
+  margin-bottom: 15px;
+
+  padding: 11px 13px;
+
+  color: var(--tg-auth-danger);
+  background:
+    rgba(239, 68, 68, 0.09);
+
+  border:
+    1px solid
+    rgba(239, 68, 68, 0.22);
+
+  border-radius: 12px;
+
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.tg-auth-alert__icon {
+  display: grid;
+
+  width: 18px;
+  height: 18px;
+
+  place-items: center;
+  flex: 0 0 18px;
+
+  color: #ffffff;
+  background: var(--tg-auth-danger);
+
+  border-radius: 50%;
+
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.tg-auth-field {
+  display: grid;
+
+  gap: 6px;
+}
+
+.tg-auth-field__label {
+  margin-left: 2px;
+
+  color:
+    var(--tg-auth-text-soft) !important;
+
+  font-size: 0.65rem !important;
+  font-weight: 800;
+}
+
+.tg-auth-field__control {
+  position: relative;
+}
+
+.tg-auth-field__control input {
+  display: block;
+
+  width: 100%;
+
+  margin: 0;
+}
+
+.tg-auth-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+
+  display: grid;
+
+  width: 28px;
+  height: 28px;
+
+  place-items: center;
+
+  padding: 0;
+
+  color:
+    var(--tg-auth-text-muted);
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  transform: translateY(-50%);
+
+  transition:
+    color 180ms ease,
+    background-color 180ms ease;
+}
+
+.tg-auth-field__toggle:hover {
+  color: var(--tg-auth-cyan);
+
+  background:
+    var(--tg-auth-cyan-soft);
+}
+
+.tg-auth-fields--register
+  .tg-auth-field__toggle:hover {
+  color: var(--tg-auth-orange);
+
+  background:
+    var(--tg-auth-orange-soft);
+}
+
+.tg-auth-field__message {
+  min-height: 14px;
+
+  margin: 0 2px;
+
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.tg-auth-field__message.is-error,
+.tg-auth-field__message.is-danger {
+  color: var(--tg-auth-danger);
+}
+
+.tg-auth-field__message.is-success {
+  color: var(--tg-auth-success);
+}
+
+.tg-auth-field__message.is-muted {
+  color: var(--tg-auth-text-muted);
+}
+
+.tg-auth-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  min-height: 26px;
+}
+
+.tg-auth-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color:
+    var(--tg-auth-text-soft);
+
+  font-size: 0.65rem;
+}
+
+.tg-auth-check input {
+  flex: 0 0 16px;
+
+  margin: 0;
+}
+
+.tg-auth-check label,
+.tg-auth-check span {
+  color:
+    var(--tg-auth-text-soft) !important;
+
+  cursor: pointer;
+
+  font-size: 0.65rem !important;
+}
+
+.tg-auth-link {
+  padding: 0;
+
+  color:
+    var(--tg-auth-cyan) !important;
+
+  background: transparent !important;
+
+  border: 0 !important;
+
+  cursor: pointer;
+
+  font-size: 0.64rem;
+  font-weight: 800;
+
+  text-decoration: none;
+
+  transition:
+    color 180ms ease;
+}
+
+.tg-auth-link:hover {
+  color:
+    var(--tg-auth-cyan-hover) !important;
+
+  text-decoration: underline;
+}
+
+.tg-auth-fields--register
+  .tg-auth-link {
+  color:
+    var(--tg-auth-orange) !important;
+}
+
+.tg-auth-fields--register
+  .tg-auth-link:hover {
+  color:
+    var(--tg-auth-orange-hover) !important;
+}
+
+.tg-auth-terms {
+  display: grid;
+  gap: 5px;
+}
+
+.tg-auth-terms .tg-auth-check {
+  flex-wrap: wrap;
+}
+
+.tg-auth-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  width: 100%;
+  min-height: 48px;
+
+  margin-top: 2px;
+
+  padding: 0 18px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--tg-auth-cyan),
+      #008ba8
+    );
+
+  border: 0;
+  border-radius: 999px;
+
+  box-shadow:
+    0 13px 27px
+    rgba(0, 167, 200, 0.23);
+
+  cursor: pointer;
+
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+
+  transition:
+    filter 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.tg-auth-fields--register
+  .tg-auth-submit {
+  background:
+    linear-gradient(
+      135deg,
+      var(--tg-auth-orange),
+      #df4900
+    );
+
+  box-shadow:
+    0 13px 27px
+    rgba(255, 91, 10, 0.23);
+}
+
+.tg-auth-submit:hover:not(:disabled) {
+  filter: brightness(1.07);
+
+  transform: translateY(-2px);
+}
+
+.tg-auth-submit:focus-visible {
+  outline:
+    3px solid
+    var(--tg-auth-cyan-soft);
+
+  outline-offset: 3px;
+}
+
+.tg-auth-fields--register
+  .tg-auth-submit:focus-visible {
+  outline-color:
+    var(--tg-auth-orange-soft);
+}
+
+.tg-auth-submit:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.53;
+
+  transform: none;
+}
+
+.tg-auth-submit__spinner {
+  width: 17px;
+  height: 17px;
+
+  border:
+    2px solid
+    rgba(255, 255, 255, 0.38);
+
+  border-top-color: #ffffff;
+  border-radius: 50%;
+
+  animation:
+    tg-auth-spin
+    700ms linear infinite;
+}
+
+/* Google */
+
+.tg-auth-google {
+  display: grid;
+
+  gap: 13px;
+
+  margin-top: 2px;
+}
+
+.tg-auth-google__divider {
+  display: grid;
+
+  grid-template-columns:
+    minmax(20px, 1fr)
+    auto
+    minmax(20px, 1fr);
+
+  align-items: center;
+  gap: 11px;
+}
+
+.tg-auth-google__divider span {
+  height: 1px;
+
+  background:
+    var(--tg-auth-border);
+}
+
+.tg-auth-google__divider small {
+  color:
+    var(--tg-auth-text-muted);
+
+  font-size: 0.58rem;
+}
+
+.tg-auth-google__button {
+  display: grid;
+
+  width: 100%;
+
+  place-items: center;
+
+  overflow: hidden;
+}
+
+.tg-auth-google__button > div {
+  width: 100%;
+  max-width: none;
+}
+
+.tg-auth-google__button iframe {
+  max-width: 100% !important;
+}
+
+/* Estados del navegador */
+
+.tg-auth-field input:-webkit-autofill,
+.tg-auth-field input:-webkit-autofill:hover,
+.tg-auth-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color:
+    var(--tg-auth-text);
+
+  box-shadow:
+    0 0 0 1000px
+    var(--tg-auth-input)
+    inset;
+
+  transition:
+    background-color
+    9999s ease-in-out 0s;
+}
+
+/* Responsive */
+
+@media (max-width: 420px) {
+  .tg-auth-options {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 9px;
+  }
+
+  .tg-auth-fields--register {
+    gap: 10px;
+  }
+
+  .tg-auth-field__label {
+    font-size: 0.62rem !important;
+  }
+}
+/* =========================================================
+   BOTÓN OFICIAL DE GOOGLE ADAPTATIVO
+   ========================================================= */
+
+.tg-google-button {
+  display: grid;
+
+  width: 100%;
+
+  justify-items: center;
+  gap: 7px;
+}
+
+.tg-google-buttonrender {
+  display: flex;
+
+  width: 100%;
+  min-height: 44px;
+
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+}
+
+.tg-google-buttonrender > div {
+  max-width: 100% !important;
+}
+
+.tg-google-buttonrender iframe {
+  display: block;
+
+  max-width: 100% !important;
+
+  border-radius: 999px !important;
+}
+
+.tg-google-buttonerror {
+  margin: 0;
+
+  color: var(--tg-auth-danger);
+
+  text-align: center;
+
+  font-size: 0.59rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+:root[data-theme="dark"]
+  .tg-google-buttonrender {
+  box-shadow:
+    0 10px 24px
+    rgba(0, 5, 13, 0.22);
+}
+
+@media (max-width: 420px) {
+  .tg-google-buttonrender {
+    min-height: 42px;
+  }
+}
+/* =========================================================
+   CORRECCIÓN GOOGLE — ANCHO COMPLETO
+   ========================================================= */
+
+.tg-auth-google,
+.tg-auth-googlebutton,
+.tg-auth-googlebutton > div,
+.tg-google-button {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.tg-google-buttonrender {
+  display: flex;
+
+  width: 100% !important;
+  min-height: 44px;
+
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+}
+
+.tg-google-buttonrender > div {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.tg-google-button__render iframe {
+  display: block;
+
+  width: 100% !important;
+  max-width: 100% !important;
+
+  border-radius: 999px !important;
+}
+/* =========================================================
+   LOGIN Y REGISTRO SIN SCROLL DE PÁGINA
+   ========================================================= */
+
+.tg-auth-shell,
+.tg-auth-loading {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+
+  overflow: hidden;
+}
+
+.tg-auth-stage {
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+
+  padding:
+    74px
+    clamp(16px, 4vw, 50px)
+    14px;
+
+  overflow: hidden;
+}
+
+.tg-auth-card {
+  height:
+    min(
+      690px,
+      calc(100dvh - 88px)
+    );
+
+  min-height: 0;
+  max-height: calc(100dvh - 88px);
+}
+
+.tg-auth-visual,
+.tg-auth-form-panel {
+  min-height: 0;
+}
+
+.tg-auth-form-panel {
+  overflow: hidden;
+}
+
+.tg-auth-form-container {
+  min-height: 0;
+  overflow: hidden;
+}
+@media (max-width: 760px) {
+  .tg-auth-stage {
+    height: 100dvh;
+
+    padding:
+      64px
+      10px
+      8px;
+  }
+
+  .tg-auth-card {
+    height:
+      calc(100dvh - 72px);
+
+    max-height:
+      calc(100dvh - 72px);
+
+    overflow: hidden;
+  }
+
+  .tg-auth-visual {
+    display: none;
+  }
+
+  .tg-auth-form-panel {
+    height: 100%;
+
+    padding:
+      20px
+      18px
+      14px;
+  }
+
+  .tg-auth-form-panelheader
+p:last-child {
+    display: none;
+  }
+
+  .tg-auth-form-panelheader h2 {
+    margin: 5px 0;
+
+    font-size: 1.55rem;
+  }
+
+  .tg-auth-tabs {
+    margin-top: 12px;
+  }
+
+  .tg-auth-tabs button {
+    min-height: 37px;
+  }
+
+  .tg-auth-form-container {
+    margin-top: 11px;
+  }
+
+  .tg-auth-fields {
+    gap: 8px;
+  }
+
+  .tg-auth-fields--register {
+    gap: 6px;
+  }
+
+  .tg-auth-field {
+    gap: 3px;
+  }
+
+  .tg-auth-fieldcontrol input {
+    min-height:
+      39px !important;
+
+    padding:
+      7px
+      12px !important;
+  }
+
+  .tg-auth-fieldmessage {
+    min-height: 0;
+  }
+
+  .tg-auth-submit {
+    min-height: 41px;
+  }
+
+  .tg-auth-google {
+    gap: 7px;
+  }
+
+  .tg-auth-switch-mobile,
+  .tg-auth-form-panel__footer {
+    display: none;
+  }
+}
+/* =========================================================
+   AJUSTE FINAL AUTH
+   Centrado completo, sin scroll y registro compacto
+   ========================================================= */
+
+html:has(.tg-auth-shell),
+body:has(.tg-auth-shell),
+html:has(.tg-auth-loading),
+body:has(.tg-auth-loading) {
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+}
+
+.tg-auth-shell,
+.tg-auth-loading {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+
+  overflow: hidden !important;
+}
+
+/* =========================================================
+   CENTRADO DEL CONTENIDO
+   ========================================================= */
+
+.tg-auth-stage {
+  display: grid;
+
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+
+  place-items: center;
+
+  padding:
+    64px
+    20px
+    12px;
+
+  overflow: hidden !important;
+}
+
+/* =========================================================
+   TAMAÑO FINAL DE LA TARJETA
+   ========================================================= */
+
+.tg-auth-card {
+  display: grid;
+
+  grid-template-columns:
+    minmax(340px, 46%)
+    minmax(420px, 54%);
+
+  width:
+    min(
+      972px,
+      calc(100vw - 44px)
+    );
+
+  height:
+    min(
+      554px,
+      calc(100dvh - 78px)
+    );
+
+  min-height: 0;
+  max-height:
+    calc(100dvh - 78px);
+
+  margin: auto;
+
+  overflow: hidden;
+
+  border-radius: 28px;
+}
+
+/* =========================================================
+   PANEL IZQUIERDO
+   ========================================================= */
+
+.tg-auth-visual {
+  position: relative;
+
+  display: flex;
+  height: 100%;
+  min-height: 0;
+
+  flex-direction: column;
+  justify-content: center;
+
+  padding:
+    82px
+    38px
+    30px;
+
+  overflow: hidden;
+}
+
+.tg-auth-brand {
+  position: absolute;
+  top: 28px;
+  left: 38px;
+}
+
+.tg-auth-brand img {
+  width: 54px;
+  height: 54px;
+}
+
+.tg-auth-brand > div {
+  font-size: 1rem;
+}
+
+.tg-auth-visual__copy {
+  position: relative;
+  z-index: 3;
+
+  width: 100%;
+  max-width: 390px;
+
+  margin: 0;
+}
+
+.tg-auth-visual__copy h1 {
+  margin:
+    11px
+    0
+    13px;
+
+  font-size:
+    clamp(
+      2.1rem,
+      3.25vw,
+      3rem
+    );
+
+  line-height: 0.98;
+}
+
+.tg-auth-visual__copy > p:last-child {
+  max-width: 370px;
+
+  font-size: 0.67rem;
+  line-height: 1.55;
+}
+
+.tg-auth-visual__features {
+  position: relative;
+  z-index: 4;
+
+  gap: 7px;
+
+  margin-top: 20px;
+}
+
+.tg-auth-visual__features > span {
+  font-size: 0.62rem;
+}
+
+.tg-auth-visual__phone {
+  right: -22px;
+  bottom: -42px;
+
+  width: 205px;
+  max-height: 250px;
+
+  opacity: 0.72;
+}
+
+/* =========================================================
+   PANEL DERECHO
+   ========================================================= */
+
+.tg-auth-form-panel {
+  display: flex;
+
+  height: 100%;
+  min-height: 0;
+
+  flex-direction: column;
+
+  padding:
+    27px
+    34px
+    14px;
+
+  overflow: hidden !important;
+}
+
+.tg-auth-form-panel__close {
+  top: 18px;
+  right: 18px;
+
+  width: 38px;
+  height: 38px;
+}
+
+.tg-auth-form-panel__header {
+  flex: 0 0 auto;
+
+  padding-right: 42px;
+}
+
+.tg-auth-form-panel__header h2 {
+  margin:
+    5px
+    0;
+
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.tg-auth-form-panel__header > p:last-child {
+  font-size: 0.61rem;
+  line-height: 1.4;
+}
+
+.tg-auth-kicker {
+  font-size: 0.56rem;
+}
+
+/* =========================================================
+   PESTAÑAS
+   ========================================================= */
+
+.tg-auth-tabs {
+  flex: 0 0 auto;
+
+  margin-top: 13px;
+
+  padding: 4px;
+
+  border-radius: 13px;
+}
+
+.tg-auth-tabs button {
+  min-height: 36px;
+
+  font-size: 0.62rem;
+}
+
+/* =========================================================
+   CONTENEDOR DEL FORMULARIO
+   ========================================================= */
+
+.tg-auth-form-container {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  margin-top: 12px;
+
+  overflow: hidden !important;
+}
+
+.tg-auth-form-view {
+  height: 100%;
+
+  overflow: hidden !important;
+}
+
+.tg-auth-fields {
+  width: 100%;
+  height: auto;
+
+  gap: 8px;
+}
+
+.tg-auth-field {
+  gap: 3px;
+}
+
+.tg-auth-field__label {
+  margin-left: 2px;
+
+  font-size:
+    0.57rem !important;
+}
+
+.tg-auth-field__control input {
+  min-height:
+    39px !important;
+
+  padding:
+    7px
+    12px !important;
+
+  border-radius:
+    11px !important;
+
+  font-size:
+    0.72rem !important;
+}
+
+.tg-auth-field__control
+  input[type="password"] {
+  padding-right:
+    42px !important;
+}
+
+.tg-auth-field__toggle {
+  right: 9px;
+
+  width: 25px;
+  height: 25px;
+}
+
+.tg-auth-field__message {
+  min-height: 0;
+
+  margin-top: 1px;
+
+  font-size: 0.51rem;
+  line-height: 1.2;
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.tg-auth-form-view.is-login
+  .tg-auth-fields {
+  display: grid;
+
+  gap: 9px;
+}
+
+.tg-auth-options {
+  min-height: 21px;
+
+  font-size: 0.58rem;
+}
+
+.tg-auth-check,
+.tg-auth-check label,
+.tg-auth-check span,
+.tg-auth-link {
+  font-size:
+    0.57rem !important;
+}
+
+.tg-auth-submit {
+  min-height: 39px;
+
+  margin-top: 0;
+
+  font-size: 0.6rem;
+}
+
+.tg-auth-google {
+  gap: 6px;
+
+  margin-top: 0;
+}
+
+.tg-auth-google__divider {
+  gap: 8px;
+}
+
+.tg-auth-google__divider small {
+  font-size: 0.51rem;
+}
+
+.tg-auth-google__button,
+.tg-google-button__render {
+  min-height: 39px;
+}
+
+/* =========================================================
+   REGISTRO EN DOS COLUMNAS
+   ========================================================= */
+
+.tg-auth-form-view.is-register
+  .tg-auth-fields--register {
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  align-items: end;
+
+  column-gap: 11px;
+  row-gap: 7px;
+}
+
+/* Nombre */
+
+.tg-auth-form-view.is-register
+  .tg-auth-fields--register
+  > .tg-auth-field:nth-child(1) {
+  grid-column: 1;
+}
+
+/* Correo */
+
+.tg-auth-form-view.is-register
+  .tg-auth-fields--register
+  > .tg-auth-field:nth-child(2) {
+  grid-column: 2;
+}
+
+/* Fecha */
+
+.tg-auth-form-view.is-register
+  .tg-auth-fields--register
+  > .tg-auth-field:nth-child(3) {
+  grid-column: 1;
+}
+
+/* Contraseña */
+
+.tg-auth-form-view.is-register
+  .tg-auth-fields--register
+  > .tg-auth-field:nth-child(4) {
+  grid-column: 2;
+}
+
+/* Confirmación */
+
+.tg-auth-form-view.is-register
+  .tg-auth-fields--register
+  > .tg-auth-field:nth-child(5) {
+  grid-column: 1;
+}
+
+/* Términos */
+
+.tg-auth-form-view.is-register
+  .tg-auth-terms {
+  grid-column: 2;
+
+  align-self: center;
+
+  padding-top: 12px;
+}
+
+/* Botón registrarse */
+
+.tg-auth-form-view.is-register
+  .tg-auth-submit {
+  grid-column: 1 / -1;
+
+  min-height: 39px;
+}
+
+/* =========================================================
+   PIE DE SEGURIDAD
+   ========================================================= */
+
+.tg-auth-switch-mobile {
+  margin-top: 6px;
+}
+
+.tg-auth-form-panel__footer {
+  flex: 0 0 auto;
+
+  min-height: 17px;
+
+  margin-top: 6px;
+
+  font-size: 0.51rem;
+}
+
+/* =========================================================
+   PANTALLAS DE ALTURA REDUCIDA
+   ========================================================= */
+
+@media
+  (min-width: 761px)
+  and (max-height: 680px) {
+
+  .tg-auth-stage {
+    padding:
+      58px
+      14px
+      8px;
+  }
+
+  .tg-auth-card {
+    width:
+      min(
+        972px,
+        calc(100vw - 28px)
+      );
+
+    height:
+      calc(100dvh - 66px);
+
+    max-height:
+      calc(100dvh - 66px);
+  }
+
+  .tg-auth-toolbar {
+    padding:
+      12px
+      28px;
+  }
+
+  .tg-auth-toolbar__back,
+  .tg-auth-toolbar__theme {
+    min-height: 38px;
+  }
+
+  .tg-auth-visual {
+    padding:
+      75px
+      36px
+      22px;
+  }
+
+  .tg-auth-visual__copy h1 {
+    font-size: 2.55rem;
+  }
+
+  .tg-auth-form-panel {
+    padding:
+      22px
+      32px
+      10px;
+  }
+
+  .tg-auth-form-panel__header h2 {
+    font-size: 1.7rem;
+  }
+
+  .tg-auth-form-panel__header
+    > p:last-child {
+    display: none;
+  }
+
+  .tg-auth-tabs {
+    margin-top: 9px;
+  }
+
+  .tg-auth-form-container {
+    margin-top: 8px;
+  }
+
+  .tg-auth-form-panel__footer {
+    margin-top: 3px;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media
+  (max-width: 900px)
+  and (min-width: 761px) {
+
+  .tg-auth-card {
+    grid-template-columns:
+      40%
+      60%;
+  }
+
+  .tg-auth-visual {
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+
+  .tg-auth-brand {
+    left: 26px;
+  }
+
+  .tg-auth-visual__copy h1 {
+    font-size: 2.15rem;
+  }
+
+  .tg-auth-visual__copy
+    > p:last-child {
+    display: none;
+  }
+
+  .tg-auth-visual__phone {
+    width: 180px;
+  }
+
+  .tg-auth-form-panel {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+}
+
+/* =========================================================
+   MÓVIL SIN SCROLL
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .tg-auth-stage {
+    height: 100dvh;
+
+    padding:
+      62px
+      8px
+      8px;
+
+    place-items: center;
+  }
+
+  .tg-auth-card {
+    display: block;
+
+    width:
+      calc(100vw - 16px);
+
+    height:
+      calc(100dvh - 70px);
+
+    max-height:
+      calc(100dvh - 70px);
+
+    border-radius: 21px;
+  }
+
+  .tg-auth-visual {
+    display: none;
+  }
+
+  .tg-auth-form-panel {
+    height: 100%;
+
+    padding:
+      18px
+      17px
+      10px;
+  }
+
+  .tg-auth-form-panel__header {
+    padding-right: 0;
+  }
+
+  .tg-auth-form-panel__header
+    > p:last-child {
+    display: none;
+  }
+
+  .tg-auth-form-panel__header h2 {
+    margin:
+      4px
+      0;
+
+    font-size: 1.45rem;
+  }
+
+  .tg-auth-tabs {
+    margin-top: 9px;
+  }
+
+  .tg-auth-tabs button {
+    min-height: 34px;
+  }
+
+  .tg-auth-form-container {
+    margin-top: 8px;
+  }
+
+  .tg-auth-fields,
+  .tg-auth-fields--register {
+    gap: 6px;
+  }
+
+  .tg-auth-field__control input {
+    min-height:
+      36px !important;
+
+    padding:
+      6px
+      11px !important;
+  }
+
+  .tg-auth-submit {
+    min-height: 37px;
+  }
+
+  .tg-auth-switch-mobile,
+  .tg-auth-form-panel__footer {
+    display: none;
+  }
+
+  /*
+   * En móvil el registro vuelve a una sola columna.
+   */
+
+  .tg-auth-form-view.is-register
+    .tg-auth-fields--register {
+    grid-template-columns:
+      1fr !important;
+
+    row-gap: 5px;
+  }
+
+  .tg-auth-form-view.is-register
+    .tg-auth-fields--register
+    > .tg-auth-field,
+  .tg-auth-form-view.is-register
+    .tg-auth-terms,
+  .tg-auth-form-view.is-register
+    .tg-auth-submit {
+    grid-column:
+      1 !important;
+  }
+
+  .tg-auth-form-view.is-register
+    .tg-auth-terms {
+    padding-top: 0;
+  }
+}
+
+/* =========================================================
+   MÓVILES BAJOS
+   ========================================================= */
+
+@media
+  (max-width: 760px)
+  and (max-height: 650px) {
+
+  .tg-auth-stage {
+    padding-top: 56px;
+  }
+
+  .tg-auth-card {
+    height:
+      calc(100dvh - 62px);
+
+    max-height:
+      calc(100dvh - 62px);
+  }
+
+  .tg-auth-form-panel {
+    padding:
+      13px
+      15px
+      7px;
+  }
+
+  .tg-auth-form-panel__header h2 {
+    font-size: 1.25rem;
+  }
+
+  .tg-auth-kicker {
+    font-size: 0.49rem;
+  }
+
+  .tg-auth-tabs {
+    margin-top: 6px;
+  }
+
+  .tg-auth-tabs button {
+    min-height: 31px;
+  }
+
+  .tg-auth-form-container {
+    margin-top: 6px;
+  }
+
+  .tg-auth-field__control input {
+    min-height:
+      33px !important;
+  }
+
+  .tg-auth-submit {
+    min-height: 34px;
+  }
+
+  .tg-auth-google__divider {
+    display: none;
+  }
+}
