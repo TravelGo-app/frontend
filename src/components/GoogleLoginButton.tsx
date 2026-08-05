@@ -1,14 +1,54 @@
-import { useEffect, useRef, useState } from "react";
-import { loginWithGoogle, type GoogleAuthResponse } from "../services/auth.service";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { useTheme } from "../context/ThemeContext";
+
+import {
+  loginWithGoogle,
+  type GoogleAuthResponse,
+} from "../services/auth.service";
 
 type CredentialResponse = {
   credential?: string;
 };
 
+type GoogleButtonTheme =
+  | "outline"
+  | "filled_blue"
+  | "filled_black";
+
+type GoogleButtonShape =
+  | "rectangular"
+  | "pill"
+  | "circle"
+  | "square";
+
 type GoogleLoginButtonProps = {
-  onAuthenticated: (result: GoogleAuthResponse) => void;
-  onLoadingChange?: (loading: boolean) => void;
+  onAuthenticated: (
+    result: GoogleAuthResponse,
+  ) => void;
+
+  onLoadingChange?: (
+    loading: boolean,
+  ) => void;
 };
+
+interface ActiveGoogleHandlers {
+  onAuthenticated: (
+    result: GoogleAuthResponse,
+  ) => void;
+
+  onLoadingChange?: (
+    loading: boolean,
+  ) => void;
+
+  setError: (
+    message: string | null,
+  ) => void;
+}
 
 declare global {
   interface Window {
@@ -17,19 +57,40 @@ declare global {
         id: {
           initialize: (config: {
             client_id: string;
-            callback: (response: CredentialResponse) => void;
+
+            callback: (
+              response: CredentialResponse,
+            ) => void;
+
             ux_mode?: "popup" | "redirect";
           }) => void;
+
           renderButton: (
             element: HTMLElement,
             options: {
-              theme?: string;
-              size?: string;
-              text?: string;
-              shape?: string;
+              type?: "standard" | "icon";
+
+              theme?: GoogleButtonTheme;
+
+              size?:
+                | "large"
+                | "medium"
+                | "small";
+
+              text?:
+                | "signin_with"
+                | "signup_with"
+                | "continue_with"
+                | "signin";
+
+              shape?: GoogleButtonShape;
+
               width?: number;
-              logo_alignment?: string;
-            }
+
+              logo_alignment?:
+                | "left"
+                | "center";
+            },
           ) => void;
         };
       };
@@ -37,99 +98,276 @@ declare global {
   }
 }
 
-// Guard a nivel de módulo: garantiza que window.google.accounts.id.initialize()
-// se llame UNA SOLA VEZ en toda la app, sin importar cuántas veces se monte
-// este componente.
 let googleInitialized = false;
+let googleProcessing = false;
 
-// El callback que window.google guarda internamente es el que existía en el
-// momento de initialize(). Si esa función usa directamente las props
-// (onAuthenticated, onLoadingChange) capturadas por closure, queda "pegada"
-// a los valores del primer render para siempre — por eso en vez de eso,
-// el callback real llama a esta referencia a nivel de módulo, que cada
-// instancia de GoogleLoginButton actualiza en cada uno de sus renders.
-// Así el callback SIEMPRE ejecuta la lógica más reciente.
-let activeHandlers: {
-  onAuthenticated: (result: GoogleAuthResponse) => void;
-  onLoadingChange?: (loading: boolean) => void;
-} | null = null;
+let activeHandlers:
+  | ActiveGoogleHandlers
+  | null = null;
 
-export function GoogleLoginButton({ onAuthenticated, onLoadingChange }: GoogleLoginButtonProps) {
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const processingRef = useRef(false);
-  const [error, setError] = useState<string | null>(null);
+async function processGoogleCredential(
+  response: CredentialResponse,
+) {
+  if (googleProcessing) {
+    return;
+  }
 
-  // Actualiza los handlers activos en cada render, para que el callback de
-  // Google (que solo existe una vez) siempre invoque la versión más
-  // reciente de onAuthenticated/onLoadingChange de la instancia que está
-  // realmente montada y visible.
+  googleProcessing = true;
+
+  const handlers = activeHandlers;
+
+  handlers?.onLoadingChange?.(true);
+  handlers?.setError(null);
+
+  try {
+    if (!response.credential) {
+      throw new Error(
+        "Google no devolvió una credencial.",
+      );
+    }
+
+    const result =
+      await loginWithGoogle(
+        response.credential,
+      );
+
+    handlers?.onAuthenticated(result);
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No se pudo iniciar sesión con Google.";
+
+    handlers?.setError(message);
+    handlers?.onLoadingChange?.(false);
+  } finally {
+    googleProcessing = false;
+  }
+}
+
+export function GoogleLoginButton({
+  onAuthenticated,
+  onLoadingChange,
+}: GoogleLoginButtonProps) {
+  const { isDark } = useTheme();
+
+  const wrapperRef =
+    useRef<HTMLDivElement>(null);
+
+  const buttonRef =
+    useRef<HTMLDivElement>(null);
+
+  const [buttonWidth, setButtonWidth] =
+    useState(320);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
   useEffect(() => {
-    activeHandlers = { onAuthenticated, onLoadingChange };
-  });
-
-  useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) { setError("VITE_GOOGLE_CLIENT_ID no está configurada"); return }
-
-    const handleCredential = async (response: CredentialResponse) => {
-      // Bloquea que la misma credencial (o clicks rápidos duplicados) se
-      // procese más de una vez en simultáneo.
-      if (processingRef.current) return;
-      processingRef.current = true;
-
-      const handlers = activeHandlers;
-      handlers?.onLoadingChange?.(true);
-
-      try {
-        setError(null);
-        if (!response.credential) throw new Error("Google no devolvió una credencial");
-        const result = await loginWithGoogle(response.credential);
-        handlers?.onAuthenticated(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error iniciando sesión");
-        handlers?.onLoadingChange?.(false);
-      } finally {
-        processingRef.current = false;
-      }
+    activeHandlers = {
+      onAuthenticated,
+      onLoadingChange,
+      setError,
     };
 
+    return () => {
+      if (
+        activeHandlers?.onAuthenticated ===
+        onAuthenticated
+      ) {
+        activeHandlers = null;
+      }
+    };
+  }, [
+    onAuthenticated,
+    onLoadingChange,
+  ]);
+
+  useEffect(() => {
+    const updateButtonWidth = () => {
+      const measuredWidth =
+        wrapperRef.current?.clientWidth;
+
+      if (
+        !measuredWidth ||
+        measuredWidth <= 0
+      ) {
+        return;
+      }
+
+      const nextWidth = Math.floor(
+        Math.min(
+          480,
+          Math.max(
+            200,
+            measuredWidth,
+          ),
+        ),
+      );
+
+      setButtonWidth(
+        (currentWidth) =>
+          currentWidth === nextWidth
+            ? currentWidth
+            : nextWidth,
+      );
+    };
+
+    const animationFrame =
+      window.requestAnimationFrame(
+        updateButtonWidth,
+      );
+
+    if (
+      typeof ResizeObserver !==
+      "undefined"
+    ) {
+      const observer =
+        new ResizeObserver(() => {
+          updateButtonWidth();
+        });
+
+      if (wrapperRef.current) {
+        observer.observe(
+          wrapperRef.current,
+        );
+      }
+
+      return () => {
+        window.cancelAnimationFrame(
+          animationFrame,
+        );
+
+        observer.disconnect();
+      };
+    }
+
+    window.addEventListener(
+      "resize",
+      updateButtonWidth,
+    );
+
+    return () => {
+      window.cancelAnimationFrame(
+        animationFrame,
+      );
+
+      window.removeEventListener(
+        "resize",
+        updateButtonWidth,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    const clientId =
+      import.meta.env
+        .VITE_GOOGLE_CLIENT_ID;
+
+    if (!clientId) {
+      setError(
+        "VITE_GOOGLE_CLIENT_ID no está configurada.",
+      );
+
+      return;
+    }
+
     const renderGoogleButton = () => {
-      if (!window.google || !buttonRef.current) { setError("No se pudo cargar Google Identity"); return }
+      if (
+        !window.google ||
+        !buttonRef.current
+      ) {
+        return false;
+      }
+
       buttonRef.current.innerHTML = "";
 
       if (!googleInitialized) {
-        googleInitialized = true;
         window.google.accounts.id.initialize({
           client_id: clientId,
           ux_mode: "popup",
-          callback: handleCredential,
+          callback:
+            processGoogleCredential,
         });
+
+        googleInitialized = true;
       }
 
-      window.google.accounts.id.renderButton(buttonRef.current, {
-        theme: "outline",
-        size: "large",
-        text: "continue_with",
-        shape: "rectangular",
-        width: 320,
-      });
+      window.google.accounts.id.renderButton(
+        buttonRef.current,
+        {
+          type: "standard",
+
+          theme: isDark
+            ? "filled_black"
+            : "outline",
+
+          size: "large",
+          text: "continue_with",
+          shape: "pill",
+          width: buttonWidth,
+          logo_alignment: "left",
+        },
+      );
+
+      setError(null);
+
+      return true;
     };
 
-    if (window.google) { renderGoogleButton(); return }
-    const interval = window.setInterval(() => {
-      if (window.google) { window.clearInterval(interval); renderGoogleButton() }
-    }, 100);
-    const timeout = window.setTimeout(() => {
-      window.clearInterval(interval)
-      if (!window.google) setError("No se pudo cargar Google Identity")
-    }, 10000);
-    return () => { window.clearInterval(interval); window.clearTimeout(timeout) }
-  }, [])
+    if (renderGoogleButton()) {
+      return;
+    }
+
+    const intervalId =
+      window.setInterval(() => {
+        if (renderGoogleButton()) {
+          window.clearInterval(
+            intervalId,
+          );
+        }
+      }, 100);
+
+    const timeoutId =
+      window.setTimeout(() => {
+        window.clearInterval(
+          intervalId,
+        );
+
+        if (!window.google) {
+          setError(
+            "No se pudo cargar Google Identity.",
+          );
+        }
+      }, 10_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [
+    buttonWidth,
+    isDark,
+  ]);
 
   return (
-    <div>
-      <div ref={buttonRef} />
-      {error && <p style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{error}</p>}
+    <div
+      ref={wrapperRef}
+      className="tg-google-button"
+    >
+      <div
+        ref={buttonRef}
+        className="tg-google-button__render"
+      />
+
+      {error && (
+        <p
+          className="tg-google-button__error"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
     </div>
-  )
+  );
 }

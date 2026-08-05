@@ -1,33 +1,81 @@
-import { useState } from 'react'
-import { EyeIcon, EyeOffIcon } from './AuthIcons'
-import TermsModal from './TermsModal'
-import logoImg from '../../assets/PosibleLogo.png'
-import type { RegisterData, RegisterErrors, EmailCheckStatus } from '../../hooks/useRegisterForm'
+import {
+  useId,
+  useState,
+  type FormEvent,
+} from "react";
+
+import {
+  EyeIcon,
+  EyeOffIcon,
+} from "./AuthIcons";
+import TermsModal from "./TermsModal";
+
+import type {
+  EmailCheckStatus,
+  RegisterData,
+  RegisterErrors,
+} from "../../hooks/useRegisterForm";
 
 interface RegisterFormFieldsProps {
-  data: RegisterData
-  errors: RegisterErrors
-  serverError: string
-  loading: boolean
-  acceptedTerms: boolean
-  emailCheckStatus: EmailCheckStatus
-  isSubmitDisabled: boolean
-  onNameChange: (value: string) => void
-  onEmailChange: (value: string) => void
-  onPasswordChange: (value: string) => void
-  onConfirmChange: (value: string) => void
-  onBirthDateChange: (value: string) => void
-  onTermsChange: (checked: boolean) => void
-  onSubmit: (e: React.FormEvent) => void
+  data: RegisterData;
+  errors: RegisterErrors;
+  serverError: string;
+  loading: boolean;
+  acceptedTerms: boolean;
+  emailCheckStatus: EmailCheckStatus;
+  isSubmitDisabled: boolean;
+
+  onNameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onPasswordChange: (
+    value: string,
+  ) => void;
+  onConfirmChange: (
+    value: string,
+  ) => void;
+  onBirthDateChange: (
+    value: string,
+  ) => void;
+  onTermsChange: (
+    checked: boolean,
+  ) => void;
+
+  onSubmit: (
+    event: FormEvent<HTMLFormElement>,
+  ) => void;
 }
 
-const EMAIL_STATUS_TEXT: Record<EmailCheckStatus, { text: string; color: string } | null> = {
-  idle: null,
-  checking: { text: 'Comprobando disponibilidad...', color: 'text-gray-400' },
-  available: { text: 'Correo disponible.', color: 'text-green-600' },
-  taken: { text: 'Este correo ya está registrado.', color: 'text-red-500' },
-  error: { text: 'No se pudo comprobar el correo.', color: 'text-gray-400' },
+interface EmailStatusPresentation {
+  text: string;
+  tone: "muted" | "success" | "danger";
 }
+
+const EMAIL_STATUS: Record<
+  EmailCheckStatus,
+  EmailStatusPresentation | null
+> = {
+  idle: null,
+
+  checking: {
+    text: "Comprobando disponibilidad...",
+    tone: "muted",
+  },
+
+  available: {
+    text: "Correo disponible.",
+    tone: "success",
+  },
+
+  taken: {
+    text: "Este correo ya está registrado.",
+    tone: "danger",
+  },
+
+  error: {
+    text: "No se pudo comprobar el correo.",
+    tone: "muted",
+  },
+};
 
 export default function RegisterFormFields({
   data,
@@ -45,112 +93,340 @@ export default function RegisterFormFields({
   onTermsChange,
   onSubmit,
 }: RegisterFormFieldsProps) {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [showTerms, setShowTerms] = useState(false)
+  const [showPassword, setShowPassword] =
+    useState(false);
 
-  const emailStatus = EMAIL_STATUS_TEXT[emailCheckStatus]
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword,
+  ] = useState(false);
+
+  const [showTerms, setShowTerms] =
+    useState(false);
+
+  const nameId = useId();
+  const emailId = useId();
+  const birthDateId = useId();
+  const passwordId = useId();
+  const confirmPasswordId = useId();
+  const termsId = useId();
+
+  const emailStatus =
+    EMAIL_STATUS[emailCheckStatus];
 
   return (
     <>
-      <img src={logoImg} alt="TravelGo" className="w-14 h-14 mb-1 object-contain" />
-      <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-3 italic">Crea tu Cuenta</h1>
-      {serverError && <p className="text-red-500 text-sm mb-1 -mt-2">{serverError}</p>}
-      <form onSubmit={onSubmit} className="w-full flex flex-col gap-3">
-        <div>
-          <input
-            type="text"
-            placeholder="Nombre"
-            autoComplete="name"
-            value={data.name}
-            onChange={(e) => onNameChange(e.target.value)}
-            className="w-full border-b border-gray-300 px-2 py-2.5 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
-          />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+      {serverError && (
+        <div
+          className="tg-auth-alert"
+          role="alert"
+        >
+          <span
+            className="tg-auth-alert__icon"
+            aria-hidden="true"
+          >
+            !
+          </span>
+
+          <span>{serverError}</span>
         </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Email"
-            autoComplete="email"
-            value={data.email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            className="w-full border-b border-gray-300 px-2 py-2.5 focus:outline-none focus:border-[#2A9BB5] bg-transparent"
-          />
+      )}
+
+      <form
+        onSubmit={onSubmit}
+        className="tg-auth-fields tg-auth-fields--register"
+      >
+        <div className="tg-auth-field">
+          <label
+            htmlFor={nameId}
+            className="tg-auth-field__label"
+          >
+            Nombre completo
+          </label>
+
+          <div className="tg-auth-field__control">
+            <input
+              id={nameId}
+              type="text"
+              placeholder="Tu nombre"
+              autoComplete="name"
+              value={data.name}
+              onChange={(event) =>
+                onNameChange(
+                  event.target.value,
+                )
+              }
+              aria-invalid={
+                Boolean(errors.name)
+              }
+            />
+          </div>
+
+          {errors.name && (
+            <p className="tg-auth-field__message is-error">
+              {errors.name}
+            </p>
+          )}
+        </div>
+
+        <div className="tg-auth-field">
+          <label
+            htmlFor={emailId}
+            className="tg-auth-field__label"
+          >
+            Correo electrónico
+          </label>
+
+          <div className="tg-auth-field__control">
+            <input
+              id={emailId}
+              type="email"
+              placeholder="nombre@correo.com"
+              autoComplete="email"
+              value={data.email}
+              onChange={(event) =>
+                onEmailChange(
+                  event.target.value,
+                )
+              }
+              aria-invalid={
+                Boolean(
+                  errors.email ||
+                    emailCheckStatus ===
+                      "taken",
+                )
+              }
+            />
+          </div>
+
           {errors.email && !emailStatus ? (
-            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            <p className="tg-auth-field__message is-error">
+              {errors.email}
+            </p>
           ) : emailStatus ? (
-            <p className={`text-xs mt-1 ${emailStatus.color}`}>{emailStatus.text}</p>
+            <p
+              className={`tg-auth-field__message is-${emailStatus.tone}`}
+            >
+              {emailStatus.text}
+            </p>
           ) : null}
         </div>
-        <div>
-          <label className="text-xs text-gray-400 block mb-1">Fecha de nacimiento</label>
-          <input
-            type="date"
-            autoComplete="bday"
-            value={data.birthDate}
-            onChange={(e) => onBirthDateChange(e.target.value)}
-            className="w-full border-b border-gray-300 px-2 py-2.5 focus:outline-none focus:border-[#2A9BB5] bg-transparent text-gray-700"
-          />
-          {errors.birthDate && <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>}
-        </div>
-        <div className="relative">
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Contraseña"
-            autoComplete="new-password"
-            value={data.password}
-            onChange={(e) => onPasswordChange(e.target.value)}
-            className="w-full border-b border-gray-300 px-2 py-2.5 focus:outline-none focus:border-[#2A9BB5] bg-transparent pr-9"
-          />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-1 top-2.5 text-gray-400 hover:text-gray-600">
-            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-          </button>
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-        </div>
-        <div className="relative">
-          <input
-            type={showConfirmPassword ? 'text' : 'password'}
-            placeholder="Confirmar contraseña"
-            autoComplete="new-password"
-            value={data.confirmPassword}
-            onChange={(e) => onConfirmChange(e.target.value)}
-            className="w-full border-b border-gray-300 px-2 py-2.5 focus:outline-none focus:border-[#2A9BB5] bg-transparent pr-9"
-          />
-          <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-1 top-2.5 text-gray-400 hover:text-gray-600">
-            {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
-          </button>
-          {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
-        </div>
-        <div>
-          <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+
+        <div className="tg-auth-field">
+          <label
+            htmlFor={birthDateId}
+            className="tg-auth-field__label"
+          >
+            Fecha de nacimiento
+          </label>
+
+          <div className="tg-auth-field__control">
             <input
-              type="checkbox"
-              checked={acceptedTerms}
-              onChange={(e) => onTermsChange(e.target.checked)}
-              className="w-4 h-4 accent-[#2A9BB5]"
+              id={birthDateId}
+              type="date"
+              autoComplete="bday"
+              value={data.birthDate}
+              onChange={(event) =>
+                onBirthDateChange(
+                  event.target.value,
+                )
+              }
+              aria-invalid={
+                Boolean(errors.birthDate)
+              }
             />
-            Acepto los{' '}
+          </div>
+
+          {errors.birthDate && (
+            <p className="tg-auth-field__message is-error">
+              {errors.birthDate}
+            </p>
+          )}
+        </div>
+
+        <div className="tg-auth-field">
+          <label
+            htmlFor={passwordId}
+            className="tg-auth-field__label"
+          >
+            Contraseña
+          </label>
+
+          <div className="tg-auth-field__control">
+            <input
+              id={passwordId}
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="Creá una contraseña"
+              autoComplete="new-password"
+              value={data.password}
+              onChange={(event) =>
+                onPasswordChange(
+                  event.target.value,
+                )
+              }
+              aria-invalid={
+                Boolean(errors.password)
+              }
+            />
+
             <button
               type="button"
-              onClick={() => setShowTerms(true)}
-              className="text-[#2A9BB5] hover:underline"
+              className="tg-auth-field__toggle"
+              onClick={() =>
+                setShowPassword(
+                  (current) => !current,
+                )
+              }
+              aria-label={
+                showPassword
+                  ? "Ocultar contraseña"
+                  : "Mostrar contraseña"
+              }
+              aria-pressed={showPassword}
+            >
+              {showPassword ? (
+                <EyeOffIcon />
+              ) : (
+                <EyeIcon />
+              )}
+            </button>
+          </div>
+
+          {errors.password && (
+            <p className="tg-auth-field__message is-error">
+              {errors.password}
+            </p>
+          )}
+        </div>
+
+        <div className="tg-auth-field">
+          <label
+            htmlFor={confirmPasswordId}
+            className="tg-auth-field__label"
+          >
+            Confirmar contraseña
+          </label>
+
+          <div className="tg-auth-field__control">
+            <input
+              id={confirmPasswordId}
+              type={
+                showConfirmPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="Repetí tu contraseña"
+              autoComplete="new-password"
+              value={data.confirmPassword}
+              onChange={(event) =>
+                onConfirmChange(
+                  event.target.value,
+                )
+              }
+              aria-invalid={
+                Boolean(
+                  errors.confirmPassword,
+                )
+              }
+            />
+
+            <button
+              type="button"
+              className="tg-auth-field__toggle"
+              onClick={() =>
+                setShowConfirmPassword(
+                  (current) => !current,
+                )
+              }
+              aria-label={
+                showConfirmPassword
+                  ? "Ocultar contraseña"
+                  : "Mostrar contraseña"
+              }
+              aria-pressed={
+                showConfirmPassword
+              }
+            >
+              {showConfirmPassword ? (
+                <EyeOffIcon />
+              ) : (
+                <EyeIcon />
+              )}
+            </button>
+          </div>
+
+          {errors.confirmPassword && (
+            <p className="tg-auth-field__message is-error">
+              {errors.confirmPassword}
+            </p>
+          )}
+        </div>
+
+        <div className="tg-auth-terms">
+          <div className="tg-auth-check">
+            <input
+              id={termsId}
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(event) =>
+                onTermsChange(
+                  event.target.checked,
+                )
+              }
+            />
+
+            <label htmlFor={termsId}>
+              Acepto los
+            </label>
+
+            <button
+              type="button"
+              className="tg-auth-link"
+              onClick={() =>
+                setShowTerms(true)
+              }
             >
               términos y condiciones
             </button>
-          </label>
-          {errors.terms && <p className="text-red-500 text-xs mt-1">{errors.terms}</p>}
+          </div>
+
+          {errors.terms && (
+            <p className="tg-auth-field__message is-error">
+              {errors.terms}
+            </p>
+          )}
         </div>
+
         <button
           type="submit"
+          className="tg-auth-submit"
           disabled={isSubmitDisabled}
-          className="bg-[#2A9BB5] text-white py-2.5 rounded-full font-bold hover:bg-teal-600 transition mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Cargando...' : 'REGISTRARSE'}
+          {loading && (
+            <span
+              className="tg-auth-submit__spinner"
+              aria-hidden="true"
+            />
+          )}
+
+          <span>
+            {loading
+              ? "Creando cuenta..."
+              : "REGISTRARSE"}
+          </span>
         </button>
       </form>
 
-      <TermsModal open={showTerms} onClose={() => setShowTerms(false)} />
+      <TermsModal
+        open={showTerms}
+        onClose={() =>
+          setShowTerms(false)
+        }
+      />
     </>
-  )
+  );
 }

@@ -159,7 +159,7 @@ export default function Profile() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#233446] p-8">
+      <div className="tg-profile-page tg-profile-page--state">
         <p className="text-white text-center">
           {error || "No pudimos cargar tu perfil."}
         </p>
@@ -168,13 +168,13 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#233446] p-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="tg-profile-page">
+       <div className="tg-profile-content max-w-2xl mx-auto">
         <button
           onClick={() => navigate("/dashboard")}
           className="text-white/70 hover:text-white text-sm font-semibold mb-6"
         >
-          ← Ir a Billetera
+          ← Ir a Inicio
         </button>
 
         <div className="bg-white rounded-3xl overflow-hidden shadow-lg mb-4">

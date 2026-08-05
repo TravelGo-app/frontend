@@ -1,96 +1,481 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import beachBg from "../assets/PlayaPrincipal.png";
 
-const OPTIONS = [
+import { useAuth } from "../context/AuthContext";
+
+type ActionTone = "cyan" | "orange";
+type StatTone =
+  | "cyan"
+  | "orange"
+  | "purple"
+  | "blue";
+
+interface ActionCard {
+  step: string;
+  title: string;
+  description: string;
+  cta: string;
+  icon: string;
+  tone: ActionTone;
+  path: string;
+}
+
+interface StatCard {
+  title: string;
+  value: string;
+  change: string;
+  spark: number[];
+  icon: string;
+  tone: StatTone;
+}
+
+interface JourneyItem {
+  title: string;
+  value: string;
+  subtitle: string;
+  icon: string;
+  tone: ActionTone;
+}
+
+interface TrustItem {
+  title: string;
+  text: string;
+  icon: string;
+}
+
+const ROUTE_PATH =
+  "M 95 118 C 260 24, 390 22, 500 88 S 720 154, 905 48";
+
+const actionCards: ActionCard[] = [
   {
-    label: "Intercambio",
-    description: "Convertí entre las monedas de tu billetera.",
-    icon: "↔",
-    color: "#ff4242",
-    path: "/exchange",
-  },
-  {
-    label: "Depositar",
-    description: "Agregá dinero a tu billetera TravelGo.",
+    step: "01",
+    title: "Depositar",
+    description:
+      "Agregá dinero a tu billetera TravelGo de forma rápida y segura.",
+    cta: "Depositar ahora",
     icon: "+",
-    color: "#2391ae",
+    tone: "cyan",
     path: "/deposit",
   },
   {
-    label: "Transferir",
-    description: "Enviá dinero a otro usuario de TravelGo.",
+    step: "02",
+    title: "Intercambiar",
+    description:
+      "Convertí tus monedas y aprovechá mejores tasas para tu próximo destino.",
+    cta: "Intercambiar ahora",
+    icon: "⇄",
+    tone: "orange",
+    path: "/exchange",
+  },
+  {
+    step: "03",
+    title: "Transferir",
+    description:
+      "Enviá dinero a otros usuarios o contactos en segundos, donde sea que estén.",
+    cta: "Transferir ahora",
     icon: "↑",
-    color: "#ff7d60",
+    tone: "cyan",
     path: "/transfer",
   },
 ];
 
-export default function Transactions() {
-  const navigate = useNavigate();
+const statCards: StatCard[] = [
+  {
+    title: "Total de transacciones",
+    value: "128",
+    change: "↑ 18% vs. mes pasado",
+    spark: [
+      16, 22, 14, 19, 13, 17, 15, 23, 18,
+      21,
+    ],
+    icon: "⇄",
+    tone: "cyan",
+  },
+  {
+    title: "Volumen total",
+    value: "$ 3.245.780 ARS",
+    change: "↑ 12% vs. mes pasado",
+    spark: [
+      12, 15, 14, 17, 13, 16, 14, 18, 15,
+      17,
+    ],
+    icon: "⇅",
+    tone: "orange",
+  },
+  {
+    title: "Ticket promedio",
+    value: "$ 25.357 ARS",
+    change: "↑ 5% vs. mes pasado",
+    spark: [
+      8, 10, 9, 12, 10, 8, 11, 9, 12, 13,
+    ],
+    icon: "▮▮",
+    tone: "purple",
+  },
+  {
+    title: "Operación más usada",
+    value: "Transferir",
+    change: "42% del total de transacciones",
+    spark: [
+      10, 10, 12, 12, 14, 15, 16, 16, 17,
+      18,
+    ],
+    icon: "★",
+    tone: "blue",
+  },
+];
+
+const journeyItems: JourneyItem[] = [
+  {
+    title: "Depositar",
+    value: "+ $1.250.000",
+    subtitle: "12 operaciones",
+    icon: "+",
+    tone: "cyan",
+  },
+  {
+    title: "Intercambiar",
+    value: "$2.120.500",
+    subtitle: "28 operaciones",
+    icon: "⇄",
+    tone: "orange",
+  },
+  {
+    title: "Transferir",
+    value: "$1.980.750",
+    subtitle: "58 operaciones",
+    icon: "↑",
+    tone: "cyan",
+  },
+  {
+    title: "Próximo destino",
+    value: "¡Seguí viajando!",
+    subtitle: "",
+    icon: "◎",
+    tone: "cyan",
+  },
+];
+
+const trustItems: TrustItem[] = [
+  {
+    title: "Transacciones seguras",
+    text: "Protegemos tu dinero con tecnología de nivel bancario.",
+    icon: "🛡",
+  },
+  {
+    title: "Sin comisiones ocultas",
+    text: "Transparencia total en cada operación que realices.",
+    icon: "⚡",
+  },
+  {
+    title: "Soporte 24/7",
+    text: "Estamos para ayudarte en cada paso de tu viaje.",
+    icon: "◉",
+  },
+];
+
+function Sparkline({
+  values,
+  tone,
+}: {
+  values: number[];
+  tone: StatTone;
+}) {
+  const maximum = Math.max(...values);
+  const minimum = Math.min(...values);
+  const difference = Math.max(
+    maximum - minimum,
+    1,
+  );
+
+  const points = values
+    .map((value, index) => {
+      const x =
+        values.length <= 1
+          ? 0
+          : (index /
+              (values.length - 1)) *
+            100;
+
+      const y =
+        100 -
+        ((value - minimum) / difference) *
+          100;
+
+      return `${x},${y}`;
+    })
+    .join(" ");
 
   return (
-    <div
-      className="min-h-screen p-8 relative"
-      style={{
-        backgroundImage: `url(${beachBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className={`tg-transactions-sparkline is-${tone}`}
+      aria-hidden="true"
     >
-      <div className="absolute inset-0 bg-black/25 pointer-events-none" />
+      <polyline points={points} />
+    </svg>
+  );
+}
 
-      <div className="max-w-3xl mx-auto relative z-10">
+function FinancialRoute() {
+  return (
+    <svg
+      className="tg-transactions-route__map"
+      viewBox="0 0 1000 170"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        className="tg-transactions-route__path"
+        pathLength={100}
+        d={ROUTE_PATH}
+      />
+
+      <path
+        className="tg-transactions-route__path-accent"
+        pathLength={100}
+        d={ROUTE_PATH}
+      />
+
+      <g className="tg-transactions-route__moving-plane">
+        <path
+          d="
+            M -14 2
+            L -4 -1
+            L 3 -13
+            L 7 -13
+            L 5 -1
+            L 16 4
+            L 16 7
+            L 5 5
+            L 1 15
+            L -3 15
+            L -2 5
+            L -14 7
+            Z
+          "
+        />
+
+        <animateMotion
+          dur="8s"
+          repeatCount="indefinite"
+          rotate="auto"
+          path={ROUTE_PATH}
+        />
+      </g>
+    </svg>
+  );
+}
+
+export default function Transactions() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const firstName = useMemo(() => {
+    const name = user?.name?.trim();
+
+    return name
+      ? name.split(/\s+/)[0]
+      : "Viajero";
+  }, [user?.name]);
+
+  return (
+    <div className="tg-transactions-page">
+      <section className="tg-transactions-hero">
         <button
-          onClick={() => navigate("/dashboard")}
-          className="text-white/80 hover:text-white text-sm font-semibold mb-3 sm:mb-6 self-start"
+          type="button"
+          className="tg-transactions-back"
+          onClick={() =>
+            navigate("/dashboard")
+          }
         >
-          ← Ir a Billetera
+          <span aria-hidden="true">←</span>
+          Ir a Inicio
         </button>
 
-        <div className="mb-6 bg-[#233446]/50 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-lg">
-          <div className="flex h-1">
-            <div className="flex-1 bg-[#ff4242]"></div>
-            <div className="flex-1 bg-[#2391ae]"></div>
-            <div className="flex-1 bg-[#ff7d60]"></div>
-          </div>
-          <div className="p-5">
-            <h1 className="text-3xl font-bold text-white">Transacciones</h1>
-            <p className="text-white/80 mt-1">
-              Elegí qué querés hacer con tu billetera TravelGo.
-            </p>
-          </div>
+        <div className="tg-transactions-hero__heading">
+          <h1>Transacciones</h1>
+
+          <p>
+            Tu ruta{" "}
+            <span>financiera</span> para
+            viajar con claridad.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {OPTIONS.map((option) => (
-            <button
-              key={option.path}
-              onClick={() => navigate(option.path)}
-              className="bg-white rounded-b-2xl p-6 text-center shadow-lg hover:brightness-95 transition cursor-pointer group"
-              style={{ borderTop: `3px solid ${option.color}` }}
-            >
+        <div className="tg-transactions-route">
+          <FinancialRoute />
+
+          {actionCards.map(
+            (card, index) => (
               <div
-                className="w-14 h-14 rounded-full text-white flex items-center justify-center mx-auto mb-3 text-2xl"
-                style={{ backgroundColor: option.color }}
+                key={card.path}
+                className={[
+                  "tg-route-stop",
+                  `is-${card.tone}`,
+                  `is-stop-${index + 1}`,
+                ].join(" ")}
               >
-                {option.icon}
+                <div className="tg-route-stop__pin">
+                  <span>{card.icon}</span>
+                </div>
+
+                <article
+                  className={`tg-action-card is-${card.tone}`}
+                >
+                  <span className="tg-action-card__step">
+                    {card.step}
+                  </span>
+
+                  <div className="tg-action-card__icon">
+                    {card.icon}
+                  </div>
+
+                  <h2>{card.title}</h2>
+
+                  <p>
+                    {card.description}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(card.path)
+                    }
+                  >
+                    {card.cta}
+
+                    <span aria-hidden="true">
+                      →
+                    </span>
+                  </button>
+                </article>
               </div>
-              <p className="text-lg font-bold text-grafito mb-1">
-                {option.label}
-              </p>
-              <p className="text-sm text-grafito/60 mb-3">
-                {option.description}
-              </p>
-              <span
-                className="text-sm font-semibold group-hover:underline"
-                style={{ color: option.color }}
-              >
-                Empezar →
-              </span>
-            </button>
+            ),
+          )}
+        </div>
+      </section>
+
+      <section className="tg-transactions-stats">
+        {statCards.map((stat) => (
+          <article
+            key={stat.title}
+            className={`tg-stat-card is-${stat.tone}`}
+          >
+            <div className="tg-stat-card__icon">
+              {stat.icon}
+            </div>
+
+            <div className="tg-stat-card__body">
+              <span>{stat.title}</span>
+
+              <strong>{stat.value}</strong>
+
+              <small>{stat.change}</small>
+
+              <Sparkline
+                values={stat.spark}
+                tone={stat.tone}
+              />
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="tg-transactions-journey">
+        <div className="tg-transactions-journey__header">
+          <div>
+            <h2>
+              Tus viajes financieros
+            </h2>
+
+            <p>
+              Así se movió tu dinero
+              este mes.
+            </p>
+          </div>
+
+          <button type="button">
+            Este mes
+            <span aria-hidden="true">
+              ▾
+            </span>
+          </button>
+        </div>
+
+        <div className="tg-transactions-journey__line" />
+
+        <div
+          className="tg-transactions-journey__plane"
+          aria-hidden="true"
+        >
+          ✈
+        </div>
+
+        <div className="tg-journey-grid">
+          {journeyItems.map((item) => (
+            <div
+              key={item.title}
+              className={`tg-journey-node is-${item.tone}`}
+            >
+              <div className="tg-journey-node__icon">
+                {item.icon}
+              </div>
+
+              <strong>{item.value}</strong>
+
+              <h3>{item.title}</h3>
+
+              {item.subtitle && (
+                <small>
+                  {item.subtitle}
+                </small>
+              )}
+            </div>
           ))}
         </div>
-      </div>
+      </section>
+
+      <section className="tg-transactions-trust">
+        {trustItems.map((item) => (
+          <article
+            key={item.title}
+            className="tg-trust-card"
+          >
+            <div className="tg-trust-card__icon">
+              {item.icon}
+            </div>
+
+            <div>
+              <h3>{item.title}</h3>
+
+              <p>{item.text}</p>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="tg-transactions-welcome">
+        <div className="tg-transactions-welcome__badge">
+          TravelGo
+        </div>
+
+        <div>
+          <h2>
+            {firstName}, seguí moviendo
+            tu dinero con total control.
+          </h2>
+
+          <p>
+            Depositá, intercambiá y
+            transferí desde una misma
+            experiencia visual, clara y
+            pensada para viajar.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

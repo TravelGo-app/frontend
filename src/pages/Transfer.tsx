@@ -1,35 +1,250 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+
 import StepIndicator from "../components/StepIndicator";
+import TravelIcon from "../components/ui/TravelIcon";
+import api from "../services/api";
 
-const CURRENCIES = ["ARS", "USD", "EUR", "BRL", "CLP"];
-const STEPS = ["Ingresá datos", "Confirmá", "Procesando", "¡Listo!"];
-const ACCENT = "#ff7d60";
+const CURRENCIES = [
+  "ARS",
+  "USD",
+  "EUR",
+  "BRL",
+  "CLP",
+];
 
-const generateIdempotencyKey = () => `transfer-${crypto.randomUUID()}`;
+const STEPS = [
+  "Datos",
+  "Confirmación",
+  "Procesando",
+  "Completado",
+];
+
+const ACCENT = "#00b8da";
+
+interface Balance {
+  currencyCode: string;
+  amount: string;
+}
+
+interface CurrencyMeta {
+  name: string;
+  flag: string;
+}
+
+const CURRENCY_META: Record<
+  string,
+  CurrencyMeta
+> = {
+  ARS: {
+    name: "Peso argentino",
+    flag: "ar",
+  },
+
+  USD: {
+    name: "Dólar estadounidense",
+    flag: "us",
+  },
+
+  EUR: {
+    name: "Euro",
+    flag: "eu",
+  },
+
+  BRL: {
+    name: "Real brasileño",
+    flag: "br",
+  },
+
+  CLP: {
+    name: "Peso chileno",
+    flag: "cl",
+  },
+};
+
+type ApiError = {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string;
+    };
+  };
+};
+
+function generateIdempotencyKey() {
+  return `transfer-${crypto.randomUUID()}`;
+}
+
+function formatMoney(
+  value: number,
+  currencyCode: string,
+) {
+  try {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString(
+      "es-AR",
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    )} ${currencyCode}`;
+  }
+}
+
+function getRecipientInitials(
+  identifier: string,
+) {
+  const normalized = identifier
+    .split("@")[0]
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim();
+
+  if (!normalized) {
+    return "TG";
+  }
+
+  return normalized
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) =>
+      part.charAt(0).toUpperCase(),
+    )
+    .join("");
+}
 
 export default function Transfer() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [recipientIdentifier, setRecipientIdentifier] = useState("");
-  const [currencyCode, setCurrencyCode] = useState("ARS");
-  const [amount, setAmount] = useState("");
-  const [idempotencyKey, setIdempotencyKey] = useState(generateIdempotencyKey);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleContinue = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [step, setStep] = useState(0);
+
+  const [
+    recipientIdentifier,
+    setRecipientIdentifier,
+  ] = useState("");
+
+  const [
+    currencyCode,
+    setCurrencyCode,
+  ] = useState("ARS");
+
+  const [amount, setAmount] =
+    useState("");
+
+  const [balances, setBalances] =
+    useState<Balance[]>([]);
+
+  const [
+    idempotencyKey,
+    setIdempotencyKey,
+  ] = useState(generateIdempotencyKey);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    api
+      .get("/wallet/balances")
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
+
+        setBalances(
+          response.data?.balances ?? [],
+        );
+      })
+      .catch(() => {
+        if (mounted) {
+          setBalances([]);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const currencyMeta =
+    CURRENCY_META[currencyCode];
+
+  const selectedBalance = useMemo(
+    () =>
+      balances.find(
+        (balance) =>
+          balance.currencyCode ===
+          currencyCode,
+      ),
+    [balances, currencyCode],
+  );
+
+  const availableAmount = Number(
+    selectedBalance?.amount ?? 0,
+  );
+
+  const parsedAmount = Number(amount);
+
+  const recipientInitials =
+    getRecipientInitials(
+      recipientIdentifier,
+    );
+
+  const receiptDate = useMemo(
+    () =>
+      new Date().toLocaleString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [step],
+  );
+
+  const operationReference = useMemo(
+    () =>
+      `TRF-${idempotencyKey
+        .replace("transfer-", "")
+        .slice(0, 8)
+        .toUpperCase()}`,
+    [idempotencyKey],
+  );
+
+  const handleContinue = (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
     setError(null);
 
     if (!recipientIdentifier.trim()) {
-      setError("Ingresá el email, alias o CVU del destinatario.");
+      setError(
+        "Ingresá el email, alias o CVU del destinatario.",
+      );
+
       return;
     }
 
-    const parsedAmount = parseFloat(amount);
-    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
-      setError("Ingresá un monto válido mayor a 0.");
+    if (
+      !amount ||
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0
+    ) {
+      setError(
+        "Ingresá un monto válido mayor a 0.",
+      );
+
       return;
     }
 
@@ -41,20 +256,33 @@ export default function Transfer() {
     setStep(2);
 
     try {
-      const parsedAmount = parseFloat(amount);
-      await api.post("/transactions/transfer", {
-        recipientIdentifier,
-        currencyCode,
-        amount: parsedAmount.toFixed(2),
-        idempotencyKey,
-      });
+      await api.post(
+        "/transactions/transfer",
+        {
+          recipientIdentifier:
+            recipientIdentifier.trim(),
+
+          currencyCode,
+
+          amount:
+            parsedAmount.toFixed(2),
+
+          idempotencyKey,
+        },
+      );
+
       setStep(3);
-    } catch (err: any) {
+    } catch (caughtError: unknown) {
+      const apiError =
+        caughtError as ApiError;
+
       setError(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
+        apiError.response?.data?.error ||
+          apiError.response?.data
+            ?.message ||
           "No se pudo completar la transferencia. Intentá de nuevo.",
       );
+
       setStep(1);
     }
   };
@@ -63,167 +291,648 @@ export default function Transfer() {
     setRecipientIdentifier("");
     setAmount("");
     setError(null);
-    setIdempotencyKey(generateIdempotencyKey());
+
+    setIdempotencyKey(
+      generateIdempotencyKey(),
+    );
+
     setStep(0);
   };
 
-  return (
-    <div className="min-h-screen bg-[#233446] p-8">
-      <div className="max-w-md mx-auto">
-        <button
-          onClick={() => navigate("/transactions")}
-          className="text-white/70 hover:text-white text-sm font-semibold mb-6"
-        >
-          ← Volver a Transacciones
-        </button>
+  const setPercentage = (
+    percentage: number,
+  ) => {
+    if (availableAmount <= 0) {
+      return;
+    }
 
-        <div className="bg-white rounded-3xl p-6 shadow-lg border border-[#155a70]">
-          <h1 className="text-2xl font-bold text-grafito mb-1">Transferir</h1>
-          <p className="text-sm text-grafito/70 mb-6">
-            Enviá dinero a otro usuario de TravelGo.
+    const calculatedAmount =
+      availableAmount * percentage;
+
+    setAmount(
+      calculatedAmount.toFixed(2),
+    );
+  };
+
+  return (
+    <div className="tg-operation-page is-transfer">
+      <button
+        type="button"
+        className="tg-operation-back"
+        onClick={() =>
+          navigate("/transactions")
+        }
+      >
+        <span aria-hidden="true">
+          ←
+        </span>
+
+        Volver a Billetera
+      </button>
+
+      <section className="tg-operation-shell">
+        <aside className="tg-operation-aside">
+          <div className="tg-operation-aside__header">
+            <span className="tg-operation-aside__icon">
+              <TravelIcon
+                name="send"
+                size={25}
+              />
+            </span>
+
+            <div>
+              <p>OPERACIÓN SEGURA</p>
+              <h1>Transferir</h1>
+            </div>
+          </div>
+
+          <p className="tg-operation-aside__description">
+            Enviá dinero de forma rápida y
+            segura a otro usuario de
+            TravelGo.
           </p>
 
-          {step === 0 && (
-            <form onSubmit={handleContinue}>
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Email, alias o CVU del destinatario
-              </label>
-              <input
-                type="text"
-                value={recipientIdentifier}
-                onChange={(e) => setRecipientIdentifier(e.target.value)}
-                placeholder="email@ejemplo.com, alias o CVU"
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-4 text-grafito font-semibold"
+          <div
+            className="tg-operation-globe"
+            aria-hidden="true"
+          >
+            <div className="tg-operation-globe__orbit orbit-one" />
+            <div className="tg-operation-globe__orbit orbit-two" />
+
+            <div className="tg-operation-globe__planet">
+              <TravelIcon
+                name="globe"
+                size={76}
               />
+            </div>
 
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Moneda
-              </label>
-              <select
-                value={currencyCode}
-                onChange={(e) => setCurrencyCode(e.target.value)}
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-4 text-grafito font-semibold"
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+            <span className="tg-operation-globe__person person-one">
+              {recipientInitials}
+            </span>
 
-              <label className="block text-sm font-bold text-grafito mb-1">
-                Monto
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full border border-[#155a70] rounded-xl p-3 mb-4 text-grafito font-semibold"
-              />
+            <span className="tg-operation-globe__person person-two">
+              TG
+            </span>
 
-              {error && (
-                <div className="flex items-start gap-2 bg-red-50 border border-[#ff4242] rounded-xl p-3 mb-4">
-                  <span className="text-[#ff4242] font-bold text-lg leading-none">
-                    ⚠
-                  </span>
-                  <p className="text-sm text-[#ff4242] font-semibold">{error}</p>
-                </div>
-              )}
+            <span className="tg-operation-globe__plane">
+              ➤
+            </span>
+          </div>
 
-              <button
-                type="submit"
-                className="w-full bg-[#ff7d60] text-white py-3 rounded-full font-bold hover:brightness-110 transition"
-              >
-                Continuar
-              </button>
-            </form>
-          )}
-
-          {step === 1 && (
+          <div className="tg-operation-balance">
             <div>
-              <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                <p className="text-xs text-grafito/60 font-semibold mb-1">
-                  Vas a transferir
-                </p>
-                <p className="text-xl font-bold text-grafito">
-                  {parseFloat(amount || "0").toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}{" "}
-                  {currencyCode}
-                </p>
-                <p className="text-sm text-grafito/60 mt-1">
-                  A: {recipientIdentifier}
-                </p>
-              </div>
+              <span>
+                Saldo disponible
+              </span>
 
-              {error && (
-                <div className="flex items-start gap-2 bg-red-50 border border-[#ff4242] rounded-xl p-3 mb-4">
-                  <span className="text-[#ff4242] font-bold text-lg leading-none">
-                    ⚠
+              <strong>
+                {selectedBalance
+                  ? formatMoney(
+                      availableAmount,
+                      currencyCode,
+                    )
+                  : "—"}
+              </strong>
+
+              <small>
+                {currencyCode} ·{" "}
+                {currencyMeta.name}
+              </small>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/dashboard")
+              }
+            >
+              Ver billetera
+
+              <TravelIcon
+                name="eye"
+                size={15}
+              />
+            </button>
+          </div>
+        </aside>
+
+        <main className="tg-operation-panel">
+          <StepIndicator
+            steps={STEPS}
+            currentStep={step}
+            accentColor={ACCENT}
+          />
+
+          <div className="tg-operation-content">
+            {step === 0 && (
+              <div className="tg-operation-view">
+                <header className="tg-operation-heading">
+                  <p>ENVIAR DINERO</p>
+
+                  <h2>
+                    Completá los datos
+                  </h2>
+
+                  <span>
+                    Ingresá el destinatario,
+                    la moneda y el monto que
+                    querés transferir.
                   </span>
-                  <p className="text-sm text-[#ff4242] font-semibold">{error}</p>
+                </header>
+
+                <form
+                  className="tg-operation-form"
+                  onSubmit={
+                    handleContinue
+                  }
+                >
+                  <div className="tg-operation-field">
+                    <label htmlFor="transfer-recipient">
+                      Destinatario
+                    </label>
+
+                    <div className="tg-operation-input">
+                      <span className="tg-operation-input__icon">
+                        <TravelIcon
+                          name="users"
+                          size={18}
+                        />
+                      </span>
+
+                      <input
+                        id="transfer-recipient"
+                        type="text"
+                        value={
+                          recipientIdentifier
+                        }
+                        onChange={(event) =>
+                          setRecipientIdentifier(
+                            event.target.value,
+                          )
+                        }
+                        placeholder="Email, alias o CVU"
+                        autoComplete="off"
+                      />
+                    </div>
+
+                    <small>
+                      Debe pertenecer a un
+                      destinatario válido.
+                    </small>
+                  </div>
+
+                  <div className="tg-operation-field">
+                    <label htmlFor="transfer-currency">
+                      Moneda
+                    </label>
+
+                    <div className="tg-operation-select">
+                      <span
+                        className={`fi fi-${currencyMeta.flag}`}
+                        aria-hidden="true"
+                      />
+
+                      <select
+                        id="transfer-currency"
+                        value={currencyCode}
+                        onChange={(event) =>
+                          setCurrencyCode(
+                            event.target.value,
+                          )
+                        }
+                      >
+                        {CURRENCIES.map(
+                          (currency) => (
+                            <option
+                              key={currency}
+                              value={currency}
+                            >
+                              {currency} —{" "}
+                              {
+                                CURRENCY_META[
+                                  currency
+                                ].name
+                              }
+                            </option>
+                          ),
+                        )}
+                      </select>
+
+                      <span
+                        className="tg-operation-select__arrow"
+                        aria-hidden="true"
+                      >
+                        ▾
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="tg-operation-field">
+                    <div className="tg-operation-field__row">
+                      <label htmlFor="transfer-amount">
+                        Monto
+                      </label>
+
+                      <span>
+                        Disponible:{" "}
+                        {selectedBalance
+                          ? formatMoney(
+                              availableAmount,
+                              currencyCode,
+                            )
+                          : "—"}
+                      </span>
+                    </div>
+
+                    <div className="tg-operation-amount">
+                      <span>
+                        {currencyCode}
+                      </span>
+
+                      <input
+                        id="transfer-amount"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={amount}
+                        onChange={(event) =>
+                          setAmount(
+                            event.target.value,
+                          )
+                        }
+                        placeholder="0,00"
+                      />
+                    </div>
+
+                    <div className="tg-operation-percentages">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(0.25)
+                        }
+                      >
+                        25%
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(0.5)
+                        }
+                      >
+                        50%
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(0.75)
+                        }
+                      >
+                        75%
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPercentage(1)
+                        }
+                      >
+                        Máximo
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div
+                      className="tg-operation-alert"
+                      role="alert"
+                    >
+                      <span>!</span>
+
+                      <p>{error}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="tg-operation-primary"
+                  >
+                    Continuar
+
+                    <span aria-hidden="true">
+                      →
+                    </span>
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="tg-operation-view">
+                <header className="tg-operation-heading">
+                  <p>REVISIÓN FINAL</p>
+
+                  <h2>
+                    Confirmá los datos
+                  </h2>
+
+                  <span>
+                    Revisá la información
+                    antes de enviar el dinero.
+                  </span>
+                </header>
+
+                <div className="tg-operation-recipient">
+                  <div className="tg-operation-recipient__avatar">
+                    {recipientInitials}
+                  </div>
+
+                  <div>
+                    <strong>
+                      Destinatario
+                    </strong>
+
+                    <span>
+                      {recipientIdentifier}
+                    </span>
+                  </div>
+
+                  <span className="tg-operation-recipient__status">
+                    Verificado
+                  </span>
                 </div>
-              )}
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setStep(0)}
-                  className="flex-1 bg-gray-200 text-grafito py-3 rounded-full font-bold hover:bg-gray-300 transition"
-                >
-                  Volver
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  className="flex-1 bg-[#ff7d60] text-white py-3 rounded-full font-bold hover:brightness-110 transition"
-                >
-                  Confirmar
-                </button>
+                <div className="tg-operation-summary">
+                  <div>
+                    <span>Moneda</span>
+
+                    <strong>
+                      <span
+                        className={`fi fi-${currencyMeta.flag}`}
+                        aria-hidden="true"
+                      />
+
+                      {currencyCode} —{" "}
+                      {currencyMeta.name}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Monto a enviar
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        parsedAmount,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Comisión</span>
+
+                    <strong className="is-success">
+                      $ 0,00
+                    </strong>
+                  </div>
+
+                  <div className="is-total">
+                    <span>
+                      Total a debitar
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        parsedAmount,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="tg-operation-information">
+                  <span>i</span>
+
+                  <p>
+                    La transferencia se
+                    procesará inmediatamente.
+                  </p>
+                </div>
+
+                {error && (
+                  <div
+                    className="tg-operation-alert"
+                    role="alert"
+                  >
+                    <span>!</span>
+                    <p>{error}</p>
+                  </div>
+                )}
+
+                <div className="tg-operation-actions">
+                  <button
+                    type="button"
+                    className="tg-operation-secondary"
+                    onClick={() =>
+                      setStep(0)
+                    }
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="tg-operation-primary"
+                    onClick={
+                      handleConfirm
+                    }
+                  >
+                    Confirmar transferencia
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {step === 2 && (
-            <div className="text-center py-10">
-              <div className="w-12 h-12 border-4 border-[#ff7d60] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-grafito font-semibold">Procesando...</p>
-            </div>
-          )}
+            {step === 2 && (
+              <div className="tg-operation-status">
+                <div className="tg-operation-status__animation">
+                  <div className="tg-operation-status__ring ring-one" />
+                  <div className="tg-operation-status__ring ring-two" />
 
-          {step === 3 && (
-            <div className="text-center py-6">
-              <div className="w-14 h-14 rounded-full bg-oceano text-white flex items-center justify-center mx-auto mb-4 text-2xl">
-                ✓
+                  <div className="tg-operation-status__plane">
+                    <TravelIcon
+                      name="send"
+                      size={55}
+                    />
+                  </div>
+                </div>
+
+                <h2>Enviando dinero...</h2>
+
+                <p>
+                  Tu transferencia está siendo
+                  procesada. Esto puede tardar
+                  unos segundos.
+                </p>
+
+                <div className="tg-operation-information">
+                  <span>i</span>
+
+                  <p>
+                    No cierres esta ventana ni
+                    actualices la página.
+                  </p>
+                </div>
               </div>
-              <p className="text-lg font-bold text-grafito mb-1">
-                ¡Transferencia realizada!
-              </p>
-              <p className="text-sm text-grafito/70 mb-6">
-                {amount} {currencyCode} → {recipientIdentifier}
-              </p>
-              <div className="flex gap-3">
+            )}
+
+            {step === 3 && (
+              <div className="tg-operation-status is-success">
+                <div className="tg-operation-success">
+                  <span>✓</span>
+                </div>
+
+                <h2>
+                  ¡Transferencia realizada!
+                </h2>
+
+                <p>
+                  El dinero fue enviado
+                  correctamente.
+                </p>
+
+                <div className="tg-operation-receipt">
+                  <div>
+                    <span>
+                      Destinatario
+                    </span>
+
+                    <strong>
+                      {recipientIdentifier}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Monto enviado
+                    </span>
+
+                    <strong>
+                      {formatMoney(
+                        parsedAmount,
+                        currencyCode,
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Comisión</span>
+
+                    <strong>
+                      $ 0,00
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Fecha y hora
+                    </span>
+
+                    <strong>
+                      {receiptDate}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      ID de operación
+                    </span>
+
+                    <strong>
+                      {operationReference}
+                    </strong>
+                  </div>
+                </div>
+
                 <button
-                  onClick={handleNewTransfer}
-                  className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
+                  type="button"
+                  className="tg-operation-primary"
+                  onClick={() =>
+                    navigate("/history")
+                  }
+                >
+                  Ver movimientos
+                </button>
+
+                <button
+                  type="button"
+                  className="tg-operation-text-button"
+                  onClick={
+                    handleNewTransfer
+                  }
                 >
                   Nueva transferencia
                 </button>
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="flex-1 bg-[#ff4242] text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
-                >
-                  Volver a Billetera
-                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </main>
+      </section>
 
-          <StepIndicator steps={STEPS} currentStep={step} accentColor={ACCENT} />
-        </div>
-      </div>
+      <section className="tg-operation-benefits">
+        <article>
+          <TravelIcon
+            name="shield"
+            size={24}
+          />
+
+          <div>
+            <strong>
+              Transferencia segura
+            </strong>
+
+            <span>
+              Tus operaciones están
+              protegidas.
+            </span>
+          </div>
+        </article>
+
+        <article>
+          <TravelIcon
+            name="rocket"
+            size={24}
+          />
+
+          <div>
+            <strong>Envío inmediato</strong>
+
+            <span>
+              El dinero se procesa en
+              segundos.
+            </span>
+          </div>
+        </article>
+
+        <article>
+          <TravelIcon
+            name="headset"
+            size={24}
+          />
+
+          <div>
+            <strong>Soporte 24/7</strong>
+
+            <span>
+              Estamos disponibles para
+              ayudarte.
+            </span>
+          </div>
+        </article>
+      </section>
     </div>
   );
 }

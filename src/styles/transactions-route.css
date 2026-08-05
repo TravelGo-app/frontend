@@ -1,0 +1,1927 @@
+/* =========================================================
+   TRAVELGO — TRANSACCIONES / RUTA FINANCIERA
+   Compatible con modo claro y oscuro
+   ========================================================= */
+
+:root {
+  --tg-tx-panel: rgba(255, 255, 255, 0.9);
+  --tg-tx-panel-strong: rgba(255, 255, 255, 0.97);
+  --tg-tx-panel-soft: rgba(245, 252, 255, 0.82);
+
+  --tg-tx-text: #071d39;
+  --tg-tx-text-soft: #52677c;
+  --tg-tx-text-muted: #8293a3;
+
+  --tg-tx-border: rgba(7, 29, 57, 0.12);
+  --tg-tx-border-cyan: rgba(0, 174, 210, 0.42);
+  --tg-tx-border-orange: rgba(255, 91, 10, 0.42);
+
+  --tg-tx-cyan: #00aeca;
+  --tg-tx-cyan-bright: #20d0e8;
+  --tg-tx-cyan-soft: rgba(0, 174, 202, 0.13);
+
+  --tg-tx-orange: #ff5b0a;
+  --tg-tx-orange-bright: #ff8035;
+  --tg-tx-orange-soft: rgba(255, 91, 10, 0.13);
+
+  --tg-tx-purple: #7959e8;
+  --tg-tx-blue: #187de0;
+  --tg-tx-success: #11bd67;
+
+  --tg-tx-shadow:
+    0 20px 55px rgba(8, 44, 68, 0.1),
+    0 3px 10px rgba(8, 44, 68, 0.04);
+
+  --tg-tx-shadow-strong:
+    0 32px 85px rgba(5, 36, 59, 0.2);
+}
+
+:root[data-theme="dark"] {
+  --tg-tx-panel: rgba(3, 31, 52, 0.91);
+  --tg-tx-panel-strong: rgba(4, 35, 58, 0.98);
+  --tg-tx-panel-soft: rgba(4, 38, 63, 0.8);
+
+  --tg-tx-text: #f5fbff;
+  --tg-tx-text-soft: #bfd1de;
+  --tg-tx-text-muted: #89a3b5;
+
+  --tg-tx-border: rgba(111, 200, 228, 0.17);
+  --tg-tx-border-cyan: rgba(0, 205, 236, 0.46);
+  --tg-tx-border-orange: rgba(255, 105, 31, 0.48);
+
+  --tg-tx-cyan: #00c1df;
+  --tg-tx-cyan-bright: #47e3f3;
+  --tg-tx-cyan-soft: rgba(0, 193, 223, 0.15);
+
+  --tg-tx-orange: #ff6417;
+  --tg-tx-orange-bright: #ff8b4b;
+  --tg-tx-orange-soft: rgba(255, 100, 23, 0.16);
+
+  --tg-tx-purple: #9d78ff;
+  --tg-tx-blue: #42a0ff;
+  --tg-tx-success: #2add7a;
+
+  --tg-tx-shadow:
+    0 24px 65px rgba(0, 7, 16, 0.3),
+    0 3px 12px rgba(0, 7, 16, 0.2);
+
+  --tg-tx-shadow-strong:
+    0 36px 100px rgba(0, 6, 15, 0.52);
+}
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.tg-transactions-page,
+.tg-transactions-page * {
+  box-sizing: border-box;
+}
+
+.tg-transactions-page {
+  display: grid;
+  gap: 18px;
+
+  width: 100%;
+
+  padding-bottom: 12px;
+
+  color: var(--tg-tx-text);
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.tg-transactions-hero {
+  position: relative;
+
+  min-height: 600px;
+
+  overflow: hidden;
+
+  padding:
+    28px
+    clamp(22px, 4vw, 44px)
+    36px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(242, 252, 255, 0.64) 0%,
+      rgba(235, 249, 253, 0.82) 100%
+    ),
+    url("../assets/PlayaPrincipal.png")
+    center / cover no-repeat;
+
+  border:
+    1px solid
+    var(--tg-tx-border);
+
+  border-radius: 28px;
+
+  box-shadow: var(--tg-tx-shadow-strong);
+
+  isolation: isolate;
+}
+
+.tg-transactions-hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  content: "";
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(255, 130, 49, 0.22),
+      transparent 27%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(238, 251, 254, 0.25)
+    );
+}
+
+:root[data-theme="dark"]
+  .tg-transactions-hero {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 20, 36, 0.5) 0%,
+      rgba(0, 21, 38, 0.9) 100%
+    ),
+    url("../assets/PlayaPrincipal.png")
+    center / cover no-repeat;
+}
+
+:root[data-theme="dark"]
+  .tg-transactions-hero::before {
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(255, 100, 23, 0.16),
+      transparent 27%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 17, 30, 0.08),
+      rgba(0, 17, 30, 0.44)
+    );
+}
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.tg-transactions-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 0;
+
+  color: var(--tg-tx-text-soft);
+  background: transparent;
+
+  border: 0;
+
+  cursor: pointer;
+
+  font-size: 0.68rem;
+  font-weight: 800;
+
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.tg-transactions-back:hover {
+  color: var(--tg-tx-cyan);
+
+  transform: translateX(-2px);
+}
+
+.tg-transactions-back span {
+  font-size: 1rem;
+}
+
+.tg-transactions-hero__heading {
+  position: relative;
+  z-index: 4;
+
+  margin-top: 23px;
+}
+
+.tg-transactions-hero__heading h1 {
+  position: relative;
+
+  width: fit-content;
+
+  margin: 0;
+
+  color: var(--tg-tx-text);
+
+  font-size:
+    clamp(2rem, 4vw, 3.25rem);
+
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.tg-transactions-hero__heading h1::after {
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+
+  width: 42px;
+  height: 3px;
+
+  content: "";
+
+  background: var(--tg-tx-orange);
+
+  border-radius: 999px;
+}
+
+.tg-transactions-hero__heading p {
+  margin: 25px 0 0;
+
+  color: var(--tg-tx-text-soft);
+
+  font-size: 0.83rem;
+}
+
+.tg-transactions-hero__heading p span {
+  color: var(--tg-tx-cyan);
+
+  font-weight: 800;
+}
+
+/* =========================================================
+   RUTA PRINCIPAL
+   ========================================================= */
+
+.tg-transactions-route {
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  align-items: end;
+  gap: 24px;
+
+  min-height: 410px;
+
+  margin-top: 14px;
+  padding-top: 82px;
+}
+
+.tg-transactions-route__line {
+  position: absolute;
+  top: 71px;
+  left: 13%;
+  right: 13%;
+
+  height: 74px;
+
+  border-top:
+    2px dashed
+    var(--tg-tx-cyan);
+
+  border-radius: 50%;
+
+  opacity: 0.8;
+}
+
+.tg-transactions-route__line::before {
+  position: absolute;
+  top: -3px;
+  left: 34%;
+
+  width: 32%;
+  height: 4px;
+
+  content: "";
+
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--tg-tx-orange) 0 6px,
+      transparent 6px 12px
+    );
+
+  border-radius: 999px;
+
+  transform: rotate(2deg);
+}
+
+.tg-transactions-route__plane {
+  position: absolute;
+  top: 30px;
+  left: 61%;
+  z-index: 2;
+
+  color: var(--tg-tx-orange);
+
+  font-size: 2.2rem;
+
+  text-shadow:
+    0 8px 18px
+    rgba(255, 91, 10, 0.34);
+
+  transform: rotate(-18deg);
+
+  animation:
+    tg-route-plane
+    5.5s ease-in-out infinite;
+}
+
+@keyframes tg-route-plane {
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      rotate(-18deg);
+  }
+
+  50% {
+    transform:
+      translateY(-8px)
+      rotate(-13deg);
+  }
+}
+
+/* =========================================================
+   PARADAS
+   ========================================================= */
+
+.tg-route-stop {
+  position: relative;
+
+  display: grid;
+  justify-items: center;
+
+  min-width: 0;
+}
+
+.tg-route-stop.is-stop-2 {
+  transform: translateY(16px);
+}
+
+.tg-route-stop__pin {
+  position: relative;
+  z-index: 6;
+
+  display: grid;
+
+  width: 66px;
+  height: 78px;
+
+  place-items: start center;
+
+  margin-bottom: -16px;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--tg-tx-cyan-bright),
+      var(--tg-tx-cyan)
+    );
+
+  clip-path:
+    polygon(
+      50% 100%,
+      12% 53%,
+      8% 42%,
+      9% 30%,
+      15% 18%,
+      25% 9%,
+      38% 3%,
+      50% 1%,
+      62% 3%,
+      75% 9%,
+      85% 18%,
+      91% 30%,
+      92% 42%,
+      88% 53%
+    );
+
+  filter:
+    drop-shadow(
+      0 12px 20px
+      rgba(0, 174, 202, 0.28)
+    );
+}
+
+.tg-route-stop.is-orange
+  .tg-route-stop__pin {
+  background:
+    linear-gradient(
+      145deg,
+      var(--tg-tx-orange-bright),
+      var(--tg-tx-orange)
+    );
+
+  filter:
+    drop-shadow(
+      0 12px 20px
+      rgba(255, 91, 10, 0.3)
+    );
+}
+
+.tg-route-stop__pin > span {
+  display: grid;
+
+  width: 44px;
+  height: 44px;
+
+  margin-top: 8px;
+
+  place-items: center;
+
+  background:
+    rgba(0, 23, 40, 0.25);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.3);
+
+  border-radius: 50%;
+
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+/* =========================================================
+   TARJETAS DE ACCIÓN
+   ========================================================= */
+
+.tg-action-card {
+  position: relative;
+
+  display: flex;
+
+  width: 100%;
+  min-height: 262px;
+
+  flex-direction: column;
+  align-items: center;
+
+  overflow: hidden;
+
+  padding:
+    40px
+    22px
+    23px;
+
+  color: var(--tg-tx-text);
+  text-align: center;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--tg-tx-panel-strong),
+      var(--tg-tx-panel)
+    );
+
+  border:
+    1px solid
+    var(--tg-tx-border-cyan);
+
+  border-radius: 22px;
+
+  box-shadow: var(--tg-tx-shadow);
+
+  backdrop-filter: blur(22px);
+
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.tg-action-card::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 5px;
+
+  content: "";
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--tg-tx-cyan),
+      transparent
+    );
+
+  opacity: 0.8;
+}
+
+.tg-action-card.is-orange {
+  border-color:
+    var(--tg-tx-border-orange);
+}
+
+.tg-action-card.is-orange::after {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--tg-tx-orange),
+      transparent
+    );
+}
+
+.tg-action-card:hover {
+  transform: translateY(-7px);
+
+  border-color: var(--tg-tx-cyan);
+
+  box-shadow:
+    0 28px 65px
+    rgba(0, 174, 202, 0.18);
+}
+
+.tg-action-card.is-orange:hover {
+  border-color: var(--tg-tx-orange);
+
+  box-shadow:
+    0 28px 65px
+    rgba(255, 91, 10, 0.2);
+}
+
+.tg-action-card__step {
+  position: absolute;
+  top: 14px;
+  left: 15px;
+
+  color: var(--tg-tx-text-muted);
+
+  font-size: 2rem;
+  font-weight: 900;
+
+  opacity: 0.12;
+}
+
+.tg-action-card__icon {
+  display: grid;
+
+  width: 56px;
+  height: 56px;
+
+  place-items: center;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--tg-tx-cyan-bright),
+      var(--tg-tx-cyan)
+    );
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 13px 28px
+    rgba(0, 174, 202, 0.27);
+
+  font-size: 1.65rem;
+  font-weight: 800;
+}
+
+.tg-action-card.is-orange
+  .tg-action-card__icon {
+  background:
+    linear-gradient(
+      145deg,
+      var(--tg-tx-orange-bright),
+      var(--tg-tx-orange)
+    );
+
+  box-shadow:
+    0 13px 28px
+    rgba(255, 91, 10, 0.28);
+}
+
+.tg-action-card h2 {
+  margin: 15px 0 8px;
+
+  color: var(--tg-tx-text);
+
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+}
+
+.tg-action-card p {
+  max-width: 235px;
+
+  margin: 0;
+
+  color: var(--tg-tx-text-soft);
+
+  font-size: 0.66rem;
+  line-height: 1.6;
+}
+
+.tg-action-card button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: auto;
+  padding: 13px 0 0;
+
+  color: var(--tg-tx-cyan);
+  background: transparent;
+
+  border: 0;
+
+  cursor: pointer;
+
+  font-size: 0.68rem;
+  font-weight: 900;
+
+  transition:
+    color 180ms ease,
+    gap 180ms ease;
+}
+
+.tg-action-card.is-orange button {
+  color: var(--tg-tx-orange);
+}
+
+.tg-action-card button:hover {
+  gap: 12px;
+
+  color: var(--tg-tx-cyan-bright);
+}
+
+.tg-action-card.is-orange
+  button:hover {
+  color: var(--tg-tx-orange-bright);
+}
+
+/* =========================================================
+   MÉTRICAS
+   ========================================================= */
+
+.tg-transactions-stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  overflow: hidden;
+
+  padding: 20px;
+
+  background: var(--tg-tx-panel);
+
+  border:
+    1px solid
+    var(--tg-tx-border);
+
+  border-radius: 22px;
+
+  box-shadow: var(--tg-tx-shadow);
+
+  backdrop-filter: blur(20px);
+}
+
+.tg-stat-card {
+  display: grid;
+
+  grid-template-columns:
+    48px minmax(0, 1fr);
+
+  align-items: start;
+  gap: 12px;
+
+  min-width: 0;
+
+  padding:
+    5px
+    18px;
+
+  border-left:
+    1px solid
+    var(--tg-tx-border);
+}
+
+.tg-stat-card:first-child {
+  border-left: 0;
+}
+
+.tg-stat-card__icon {
+  display: grid;
+
+  width: 46px;
+  height: 46px;
+
+  place-items: center;
+
+  color: #ffffff;
+
+  background: var(--tg-tx-cyan);
+
+  border-radius: 50%;
+
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.tg-stat-card.is-orange
+  .tg-stat-card__icon {
+  background: var(--tg-tx-orange);
+}
+
+.tg-stat-card.is-purple
+  .tg-stat-card__icon {
+  background: var(--tg-tx-purple);
+}
+
+.tg-stat-card.is-blue
+  .tg-stat-card__icon {
+  background: var(--tg-tx-blue);
+}
+
+.tg-stat-card__body {
+  display: grid;
+
+  min-width: 0;
+}
+
+.tg-stat-card__body > span {
+  color: var(--tg-tx-text-soft);
+
+  font-size: 0.56rem;
+  font-weight: 700;
+}
+
+.tg-stat-card__body > strong {
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  color: var(--tg-tx-text);
+
+  font-size: 1rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-stat-card__body > small {
+  margin-top: 5px;
+
+  color: var(--tg-tx-success);
+
+  font-size: 0.5rem;
+  font-weight: 800;
+}
+
+.tg-stat-card:last-child
+  .tg-stat-card__body > small {
+  color: var(--tg-tx-text-muted);
+}
+
+.tg-transactions-sparkline {
+  width: 100%;
+  height: 28px;
+
+  margin-top: 8px;
+
+  overflow: visible;
+
+  color: var(--tg-tx-cyan);
+}
+
+.tg-transactions-sparkline.is-orange {
+  color: var(--tg-tx-orange);
+}
+
+.tg-transactions-sparkline.is-purple {
+  color: var(--tg-tx-purple);
+}
+
+.tg-transactions-sparkline.is-blue {
+  color: var(--tg-tx-blue);
+}
+
+.tg-transactions-sparkline polyline {
+  fill: none;
+
+  stroke: currentColor;
+  stroke-width: 5;
+
+  vector-effect: non-scaling-stroke;
+}
+
+/* =========================================================
+   VIAJES FINANCIEROS
+   ========================================================= */
+
+.tg-transactions-journey {
+  position: relative;
+
+  min-height: 258px;
+
+  overflow: hidden;
+
+  padding: 21px;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--tg-tx-panel),
+      var(--tg-tx-panel-soft)
+    );
+
+  border:
+    1px solid
+    var(--tg-tx-border);
+
+  border-radius: 22px;
+
+  box-shadow: var(--tg-tx-shadow);
+
+  backdrop-filter: blur(20px);
+}
+
+.tg-transactions-journey::before {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 50%;
+
+  content: "";
+
+  background:
+    radial-gradient(
+      ellipse at center bottom,
+      rgba(0, 174, 202, 0.16),
+      transparent 60%
+    );
+
+  pointer-events: none;
+}
+
+.tg-transactions-journey__header {
+  position: relative;
+  z-index: 3;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tg-transactions-journey__header h2 {
+  margin: 0;
+
+  color: var(--tg-tx-text);
+
+  font-size: 0.95rem;
+}
+
+.tg-transactions-journey__header p {
+  margin: 5px 0 0;
+
+  color: var(--tg-tx-text-muted);
+
+  font-size: 0.61rem;
+}
+
+.tg-transactions-journey__header button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  min-height: 36px;
+
+  padding: 0 12px;
+
+  color: var(--tg-tx-text);
+  background: var(--tg-tx-panel-soft);
+
+  border:
+    1px solid
+    var(--tg-tx-border);
+
+  border-radius: 11px;
+
+  cursor: pointer;
+
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.tg-transactions-journey__line {
+  position: absolute;
+  top: 122px;
+  left: 8%;
+  right: 8%;
+
+  height: 65px;
+
+  border-top:
+    2px dashed
+    var(--tg-tx-cyan);
+
+  border-radius: 50%;
+
+  opacity: 0.55;
+}
+
+.tg-transactions-journey__plane {
+  position: absolute;
+  top: 99px;
+  right: 18%;
+
+  color: var(--tg-tx-orange);
+
+  font-size: 1.45rem;
+
+  transform: rotate(-16deg);
+}
+
+.tg-journey-grid {
+  position: relative;
+  z-index: 3;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-top: 35px;
+}
+
+.tg-journey-node {
+  display: grid;
+  justify-items: center;
+
+  min-width: 0;
+
+  text-align: center;
+}
+
+.tg-journey-node__icon {
+  display: grid;
+
+  width: 54px;
+  height: 54px;
+
+  place-items: center;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--tg-tx-cyan-bright),
+      var(--tg-tx-cyan)
+    );
+
+  border:
+    5px solid
+    var(--tg-tx-panel-strong);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 2px
+    var(--tg-tx-cyan),
+    0 12px 26px
+    rgba(0, 174, 202, 0.22);
+
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.tg-journey-node.is-orange
+  .tg-journey-node__icon {
+  background:
+    linear-gradient(
+      145deg,
+      var(--tg-tx-orange-bright),
+      var(--tg-tx-orange)
+    );
+
+  box-shadow:
+    0 0 0 2px
+    var(--tg-tx-orange),
+    0 12px 26px
+    rgba(255, 91, 10, 0.22);
+}
+
+.tg-journey-node > strong {
+  margin-top: 13px;
+
+  color: var(--tg-tx-text);
+
+  font-size: 0.78rem;
+}
+
+.tg-journey-node > h3 {
+  margin: 4px 0 0;
+
+  color: var(--tg-tx-text-soft);
+
+  font-size: 0.61rem;
+}
+
+.tg-journey-node > small {
+  margin-top: 4px;
+
+  color: var(--tg-tx-cyan);
+
+  font-size: 0.53rem;
+  font-weight: 800;
+}
+
+.tg-journey-node.is-orange > small {
+  color: var(--tg-tx-orange);
+}
+
+/* =========================================================
+   CONFIANZA
+   ========================================================= */
+
+.tg-transactions-trust {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  padding: 20px;
+
+  background: var(--tg-tx-panel);
+
+  border:
+    1px solid
+    var(--tg-tx-border);
+
+  border-radius: 22px;
+
+  box-shadow: var(--tg-tx-shadow);
+
+  backdrop-filter: blur(20px);
+}
+
+.tg-trust-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  min-width: 0;
+
+  padding:
+    5px
+    20px;
+
+  border-left:
+    1px solid
+    var(--tg-tx-border);
+}
+
+.tg-trust-card:first-child {
+  border-left: 0;
+}
+
+.tg-trust-card__icon {
+  display: grid;
+
+  width: 46px;
+  height: 46px;
+
+  place-items: center;
+  flex: 0 0 46px;
+
+  color: var(--tg-tx-cyan);
+
+  background: var(--tg-tx-cyan-soft);
+
+  border-radius: 50%;
+
+  font-size: 1.25rem;
+}
+
+.tg-trust-card h3 {
+  margin: 0;
+
+  color: var(--tg-tx-text);
+
+  font-size: 0.68rem;
+}
+
+.tg-trust-card p {
+  margin: 5px 0 0;
+
+  color: var(--tg-tx-text-muted);
+
+  font-size: 0.55rem;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   MENSAJE FINAL
+   ========================================================= */
+
+.tg-transactions-welcome {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  padding: 20px 24px;
+
+  color: #ffffff;
+
+  background:
+    radial-gradient(
+      circle at 85% 40%,
+      rgba(0, 218, 239, 0.28),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #003d59,
+      #006b83,
+      #00283f
+    );
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.16);
+
+  border-radius: 22px;
+
+  box-shadow: var(--tg-tx-shadow);
+}
+
+.tg-transactions-welcome__badge {
+  display: grid;
+
+  width: 70px;
+  height: 70px;
+
+  place-items: center;
+  flex: 0 0 70px;
+
+  background:
+    rgba(255, 255, 255, 0.09);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.16);
+
+  border-radius: 50%;
+
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.tg-transactions-welcome h2 {
+  margin: 0;
+
+  font-size: 0.9rem;
+}
+
+.tg-transactions-welcome p {
+  max-width: 650px;
+
+  margin: 7px 0 0;
+
+  color:
+    rgba(255, 255, 255, 0.72);
+
+  font-size: 0.61rem;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .tg-transactions-hero {
+    min-height: auto;
+  }
+
+  .tg-transactions-route {
+    gap: 14px;
+  }
+
+  .tg-action-card {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .tg-transactions-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+  }
+
+  .tg-stat-card {
+    border-left: 0;
+  }
+
+  .tg-stat-card:nth-child(even) {
+    border-left:
+      1px solid
+      var(--tg-tx-border);
+  }
+
+  .tg-stat-card:nth-child(n + 3) {
+    padding-top: 18px;
+
+    border-top:
+      1px solid
+      var(--tg-tx-border);
+  }
+
+  .tg-transactions-trust {
+    gap: 12px;
+  }
+
+  .tg-trust-card {
+    align-items: flex-start;
+
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .tg-transactions-page {
+    gap: 13px;
+  }
+
+  .tg-transactions-hero {
+    min-height: auto;
+
+    padding:
+      20px
+      15px
+      22px;
+
+    border-radius: 20px;
+  }
+
+  .tg-transactions-hero__heading {
+    margin-top: 18px;
+  }
+
+  .tg-transactions-hero__heading h1 {
+    font-size: 2rem;
+  }
+
+  .tg-transactions-hero__heading p {
+    margin-top: 20px;
+
+    font-size: 0.69rem;
+  }
+
+  .tg-transactions-route {
+    display: grid;
+
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+
+    min-height: auto;
+
+    margin-top: 22px;
+    padding-top: 0;
+  }
+
+  .tg-transactions-route__line,
+  .tg-transactions-route__plane,
+  .tg-route-stop__pin {
+    display: none;
+  }
+
+  .tg-route-stop.is-stop-2 {
+    transform: none;
+  }
+
+  .tg-action-card {
+    min-height: 190px;
+
+    align-items: flex-start;
+
+    padding:
+      23px
+      20px;
+
+    text-align: left;
+  }
+
+  .tg-action-card__step {
+    top: 12px;
+    right: 15px;
+    left: auto;
+  }
+
+  .tg-action-card__icon {
+    width: 46px;
+    height: 46px;
+
+    font-size: 1.25rem;
+  }
+
+  .tg-action-card h2 {
+    margin-top: 12px;
+
+    font-size: 1.05rem;
+  }
+
+  .tg-action-card p {
+    max-width: none;
+  }
+
+  .tg-action-card button {
+    padding-top: 12px;
+  }
+
+  .tg-transactions-stats {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+
+    padding: 14px;
+  }
+
+  .tg-stat-card,
+  .tg-stat-card:nth-child(even),
+  .tg-stat-card:nth-child(n + 3) {
+    padding:
+      15px
+      6px;
+
+    border-top:
+      1px solid
+      var(--tg-tx-border);
+
+    border-left: 0;
+  }
+
+  .tg-stat-card:first-child {
+    border-top: 0;
+  }
+
+  .tg-transactions-journey {
+    min-height: auto;
+
+    padding: 17px;
+  }
+
+  .tg-transactions-journey__line,
+  .tg-transactions-journey__plane {
+    display: none;
+  }
+
+  .tg-journey-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 22px 12px;
+
+    margin-top: 28px;
+  }
+
+  .tg-transactions-trust {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+
+    padding: 13px;
+  }
+
+  .tg-trust-card,
+  .tg-trust-card:first-child {
+    padding:
+      15px
+      7px;
+
+    border-top:
+      1px solid
+      var(--tg-tx-border);
+
+    border-left: 0;
+  }
+
+  .tg-trust-card:first-child {
+    border-top: 0;
+  }
+
+  .tg-transactions-welcome {
+    align-items: flex-start;
+
+    padding: 18px;
+  }
+
+  .tg-transactions-welcome__badge {
+    width: 52px;
+    height: 52px;
+
+    flex-basis: 52px;
+
+    font-size: 0.58rem;
+  }
+
+  .tg-transactions-welcome h2 {
+    font-size: 0.78rem;
+  }
+}
+
+/* =========================================================
+   TELÉFONOS PEQUEÑOS
+   ========================================================= */
+
+@media (max-width: 420px) {
+  .tg-transactions-journey__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tg-journey-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tg-transactions-welcome__badge {
+    display: none;
+  }
+}
+
+/* =========================================================
+   ACCESIBILIDAD
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-transactions-route__plane {
+    animation: none;
+  }
+
+  .tg-action-card,
+  .tg-transactions-back,
+  .tg-action-card button {
+    transition: none;
+  }
+}
+/* =========================================================
+   AJUSTE FINAL — HERO DE TRANSACCIONES
+   Más grande, legible y con scroll normal
+   ========================================================= */
+
+html:has(.tg-transactions-page),
+body:has(.tg-transactions-page) {
+  min-height: 100%;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.tg-private-shell:has(.tg-transactions-page)
+  .tg-private-main,
+.tg-private-shell:has(.tg-transactions-page)
+  .tg-private-content {
+  min-height: 100vh;
+
+  overflow: visible !important;
+}
+
+/* Hero menos comprimido */
+
+.tg-transactions-hero {
+  min-height: 670px;
+
+  padding:
+    32px
+    clamp(28px, 4vw, 52px)
+    45px;
+
+  background-position: center 58%;
+}
+
+/* Fondo oscuro con más contraste */
+
+:root[data-theme="dark"]
+  .tg-transactions-hero {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 18, 33, 0.43) 0%,
+      rgba(0, 24, 43, 0.68) 43%,
+      rgba(0, 19, 35, 0.97) 100%
+    ),
+    url("../assets/PlayaPrincipal.png")
+    center 58% / cover no-repeat;
+}
+
+:root[data-theme="light"]
+  .tg-transactions-hero {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(234, 249, 253, 0.28) 0%,
+      rgba(238, 250, 253, 0.59) 45%,
+      rgba(245, 252, 254, 0.96) 100%
+    ),
+    url("../assets/PlayaPrincipal.png")
+    center 58% / cover no-repeat;
+}
+
+/* Encabezado más visible */
+
+.tg-transactions-back {
+  font-size: 0.76rem;
+}
+
+.tg-transactions-hero__heading {
+  margin-top: 27px;
+}
+
+.tg-transactions-hero__heading h1 {
+  font-size:
+    clamp(
+      2.55rem,
+      4.6vw,
+      4rem
+    );
+}
+
+.tg-transactions-hero__heading p {
+  margin-top: 28px;
+
+  font-size: 0.93rem;
+}
+
+/* Ruta principal */
+
+.tg-transactions-route {
+  min-height: 440px;
+
+  margin-top: 12px;
+  padding-top: 105px;
+
+  gap: 28px;
+}
+
+.tg-transactions-route__line {
+  top: 88px;
+  left: 12%;
+  right: 12%;
+
+  height: 83px;
+
+  border-top-width: 3px;
+}
+
+.tg-transactions-route__plane {
+  top: 39px;
+
+  font-size: 2.6rem;
+}
+
+/* Pines más grandes */
+
+.tg-route-stop__pin {
+  width: 74px;
+  height: 88px;
+
+  margin-bottom: -19px;
+}
+
+.tg-route-stop__pin > span {
+  width: 49px;
+  height: 49px;
+
+  font-size: 1.65rem;
+}
+
+/* Tarjetas más legibles */
+
+.tg-action-card {
+  min-height: 292px;
+
+  padding:
+    46px
+    27px
+    28px;
+
+  border-width: 1.5px;
+}
+
+.tg-action-card__step {
+  top: 15px;
+  left: 18px;
+
+  font-size: 2.35rem;
+}
+
+.tg-action-card__icon {
+  width: 63px;
+  height: 63px;
+
+  font-size: 1.85rem;
+}
+
+.tg-action-card h2 {
+  margin-top: 18px;
+
+  font-size: 1.42rem;
+}
+
+.tg-action-card p {
+  max-width: 265px;
+
+  font-size: 0.76rem;
+  line-height: 1.65;
+}
+
+.tg-action-card button {
+  padding-top: 17px;
+
+  font-size: 0.78rem;
+}
+
+/* Tarjeta central un poco destacada */
+
+.tg-route-stop.is-stop-2 {
+  transform: translateY(18px);
+}
+
+.tg-route-stop.is-stop-2
+  .tg-action-card {
+  box-shadow:
+    0 28px 70px
+    rgba(255, 91, 10, 0.2);
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .tg-transactions-hero {
+    min-height: 640px;
+
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .tg-transactions-route {
+    gap: 16px;
+  }
+
+  .tg-action-card {
+    min-height: 276px;
+
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .tg-action-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .tg-action-card p {
+    font-size: 0.68rem;
+  }
+}
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 760px) {
+  html:has(.tg-transactions-page),
+  body:has(.tg-transactions-page) {
+    overflow-y: auto !important;
+  }
+
+  .tg-transactions-hero {
+    min-height: auto;
+
+    padding:
+      23px
+      16px
+      25px;
+
+    background-position: center;
+  }
+
+  .tg-transactions-hero__heading h1 {
+    font-size: 2.25rem;
+  }
+
+  .tg-transactions-hero__heading p {
+    font-size: 0.76rem;
+  }
+
+  .tg-transactions-route {
+    min-height: auto;
+
+    padding-top: 0;
+  }
+
+  .tg-action-card {
+    min-height: 205px;
+
+    padding:
+      23px
+      21px;
+  }
+
+  .tg-action-card h2 {
+    font-size: 1.2rem;
+  }
+
+  .tg-action-card p {
+    font-size: 0.72rem;
+  }
+}
+/* =========================================================
+   RUTA FINANCIERA SVG DEFINITIVA
+   ========================================================= */
+
+.tg-transactions-route {
+  position: relative;
+  isolation: isolate;
+}
+
+.tg-transactions-route__line,
+.tg-transactions-route__plane {
+  display: none !important;
+}
+
+.tg-transactions-route__map {
+  position: absolute;
+  top: 53px;
+  left: 5%;
+  z-index: 2;
+
+  display: block;
+
+  width: 90%;
+  height: 155px;
+
+  overflow: visible;
+
+  pointer-events: none;
+}
+
+.tg-transactions-route__path,
+.tg-transactions-route__path-accent {
+  fill: none;
+
+  vector-effect:
+    non-scaling-stroke;
+}
+
+.tg-transactions-route__path {
+  stroke:
+    var(--tg-tx-cyan);
+
+  stroke-width: 2.5;
+  stroke-linecap: round;
+
+  stroke-dasharray: 5 9;
+
+  opacity: 0.78;
+
+  filter:
+    drop-shadow(
+      0 0 5px
+      rgba(0, 193, 223, 0.4)
+    );
+}
+
+.tg-transactions-route__path-accent {
+  stroke:
+    var(--tg-tx-orange);
+
+  stroke-width: 3;
+  stroke-linecap: round;
+
+  stroke-dasharray: 28 72;
+  stroke-dashoffset: -34;
+
+  opacity: 0.95;
+
+  filter:
+    drop-shadow(
+      0 0 6px
+      rgba(255, 100, 23, 0.5)
+    );
+}
+
+.tg-transactions-route__moving-plane {
+  color:
+    var(--tg-tx-orange);
+
+  fill: currentColor;
+
+  filter:
+    drop-shadow(
+      0 4px 6px
+      rgba(255, 91, 10, 0.46)
+    );
+}
+
+.tg-route-stop {
+  position: relative;
+  z-index: 4;
+}
+
+/* Tema claro */
+
+:root[data-theme="light"]
+  .tg-transactions-route__path {
+  stroke: #008ca8;
+
+  opacity: 0.86;
+}
+
+:root[data-theme="light"]
+  .tg-transactions-route__path-accent {
+  stroke: #ed5208;
+}
+
+:root[data-theme="light"]
+  .tg-transactions-route__moving-plane {
+  color: #ed5208;
+}
+
+/* Tema oscuro */
+
+:root[data-theme="dark"]
+  .tg-transactions-route__path {
+  stroke:
+    var(--tg-tx-cyan-bright);
+
+  opacity: 0.9;
+}
+
+:root[data-theme="dark"]
+  .tg-transactions-route__path-accent {
+  stroke:
+    var(--tg-tx-orange-bright);
+}
+
+:root[data-theme="dark"]
+  .tg-transactions-route__moving-plane {
+  color:
+    var(--tg-tx-orange-bright);
+}
+
+/* Tablet */
+
+@media (max-width: 1000px) {
+  .tg-transactions-route__map {
+    top: 61px;
+    left: 4%;
+
+    width: 92%;
+    height: 142px;
+  }
+}
+
+/* MÃ³vil */
+
+@media (max-width: 760px) {
+  .tg-transactions-route__map {
+    display: none;
+  }
+}
+
+/* Accesibilidad */
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-transactions-route__moving-plane {
+    display: none;
+  }
+}
