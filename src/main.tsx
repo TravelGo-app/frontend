@@ -12,6 +12,7 @@ import "./styles/transactions-route.css";
 import "flag-icons/css/flag-icons.min.css";
 import "./styles/operation-flow.css";
 import "./styles/history-page.css";
+import "./styles/private-background.css";
 
 import App from "./App.tsx";
 

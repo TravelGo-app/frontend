@@ -1,5 +1,4 @@
 import { GoogleLoginButton } from "../GoogleLoginButton";
-
 import type { GoogleAuthResponse } from "../../services/auth.service";
 
 interface GoogleAuthButtonProps {
@@ -23,7 +22,11 @@ export function GoogleAuthButton({
         aria-hidden="true"
       >
         <span />
-        <small>o continuá con</small>
+
+        <small>
+          o continuá con
+        </small>
+
         <span />
       </div>
 

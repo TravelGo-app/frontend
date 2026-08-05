@@ -1,0 +1,455 @@
+/* =========================================================
+   TRAVELGO — FONDO FOTOGRÁFICO PRIVADO
+   Usa únicamente src/assets/PlayaPrincipal.png
+   ========================================================= */
+
+:root {
+  --tg-private-photo:
+    url("../assets/PlayaPrincipal.png");
+}
+
+/* =========================================================
+   FONDO GENERAL
+   Dashboard, Transferir, Depositar e Intercambiar
+   ========================================================= */
+
+.tg-private-shell {
+  background-color: #001729;
+
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(0, 18, 33, 0.34),
+      rgba(0, 16, 30, 0.72)
+    ),
+    var(--tg-private-photo) !important;
+
+  background-position:
+    center center !important;
+
+  background-size:
+    cover !important;
+
+  background-repeat:
+    no-repeat !important;
+
+  background-attachment:
+    fixed !important;
+}
+
+/* Modo claro */
+
+:root[data-theme="light"]
+  .tg-private-shell {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(232, 247, 251, 0.34),
+      rgba(226, 244, 249, 0.68)
+    ),
+    var(--tg-private-photo) !important;
+}
+
+/* Modo oscuro */
+
+:root[data-theme="dark"]
+  .tg-private-shell {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(0, 14, 27, 0.48),
+      rgba(0, 12, 24, 0.84)
+    ),
+    var(--tg-private-photo) !important;
+}
+
+/* =========================================================
+   TRANSACCIONES
+   Mantiene la interfaz real sobre la fotografía
+   ========================================================= */
+
+.tg-transactions-hero {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(0, 17, 31, 0.22),
+      rgba(0, 17, 31, 0.84)
+    ),
+    var(--tg-private-photo) !important;
+
+  background-position:
+    center center !important;
+
+  background-size:
+    cover !important;
+
+  background-repeat:
+    no-repeat !important;
+}
+
+:root[data-theme="light"]
+  .tg-transactions-hero {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(237, 249, 252, 0.25),
+      rgba(236, 248, 251, 0.86)
+    ),
+    var(--tg-private-photo) !important;
+}
+
+:root[data-theme="dark"]
+  .tg-transactions-hero {
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(0, 13, 25, 0.29),
+      rgba(0, 14, 27, 0.91)
+    ),
+    var(--tg-private-photo) !important;
+}
+
+/* =========================================================
+   HISTORIAL
+   Reemplaza cualquier fondo anterior con la foto limpia
+   ========================================================= */
+
+.tg-history-page {
+  background-color: #001729;
+
+  background-image:
+    var(--tg-private-photo) !important;
+
+  background-position:
+    center center !important;
+
+  background-size:
+    cover !important;
+
+  background-repeat:
+    no-repeat !important;
+
+  background-attachment:
+    fixed !important;
+}
+
+:root[data-theme="light"]
+  .tg-history-overlay {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(234, 248, 251, 0.26),
+      rgba(226, 244, 249, 0.7)
+    ) !important;
+}
+
+:root[data-theme="dark"]
+  .tg-history-overlay {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 13, 25, 0.46),
+      rgba(0, 12, 24, 0.84)
+    ) !important;
+}
+
+/* =========================================================
+   PÁGINAS INTERNAS
+   Evita que agreguen otro fondo encima
+   ========================================================= */
+
+.tg-transactions-page,
+.tg-operation-page {
+  background:
+    transparent !important;
+}
+
+/* Mantiene las tarjetas legibles sobre la foto */
+
+.tg-history-header,
+.tg-history-stat,
+.tg-history-filter-panel,
+.tg-history-panel,
+.tg-operation-shell,
+.tg-operation-benefits,
+.tg-transactions-stats,
+.tg-transactions-journey,
+.tg-transactions-trust {
+  backdrop-filter:
+    blur(20px)
+    saturate(1.08);
+}
+
+/* En teléfonos evita problemas con el fondo fijo */
+
+@media (max-width: 760px) {
+  .tg-private-shell,
+  .tg-history-page {
+    background-attachment:
+      scroll !important;
+
+    background-position:
+      center center !important;
+  }
+}
+/* =========================================================
+   PERFIL
+   Deja visible PlayaPrincipal.png del contenedor privado
+   ========================================================= */
+
+.tg-profile-page {
+  width: 100%;
+  min-height: 100vh;
+
+  padding:
+    32px
+    clamp(16px, 4vw, 42px);
+
+  background:
+    transparent !important;
+}
+
+.tg-profile-content {
+  position: relative;
+  z-index: 2;
+}
+
+.tg-profile-page--state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+
+  text-align: center;
+}
+
+/* Tarjetas ligeramente translúcidas sobre la fotografía */
+
+.tg-profile-page
+  .bg-white {
+  background:
+    rgba(255, 255, 255, 0.94) !important;
+
+  backdrop-filter:
+    blur(20px)
+    saturate(1.08);
+}
+
+/* Modo oscuro */
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  .bg-white {
+  background:
+    rgba(4, 35, 58, 0.94) !important;
+
+  border:
+    1px solid
+    rgba(111, 198, 227, 0.16);
+}
+
+/*
+ * Corrige los textos antiguos de Tailwind
+ * dentro de las tarjetas oscuras.
+ */
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  .text-grafito {
+  color:
+    #f4fbff !important;
+}
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  .text-grafito\/60 {
+  color:
+    rgba(191, 209, 223, 0.76) !important;
+}
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  .text-grafito\/50 {
+  color:
+    rgba(191, 209, 223, 0.65) !important;
+}
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  .bg-gray-50 {
+  background:
+    rgba(7, 44, 70, 0.78) !important;
+}
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  input,
+:root[data-theme="dark"]
+  .tg-profile-page
+  select {
+  color:
+    #f4fbff !important;
+
+  background:
+    rgba(7, 44, 70, 0.9) !important;
+
+  border-color:
+    rgba(0, 192, 223, 0.4) !important;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  select
+  option {
+  color: #ffffff;
+  background: #05253e;
+}
+
+/* Mobile */
+
+@media (max-width: 760px) {
+  .tg-profile-page {
+    padding:
+      20px
+      12px
+      28px;
+  }
+}
+/* =========================================================
+   PERFIL — SIN RECTÁNGULO EXTERIOR
+   ========================================================= /
+
+.tg-profile-page {
+  width: 100%;
+  min-height: calc(100vh - 82px);
+
+  padding:
+    6px
+    0
+    42px;
+
+  background:
+    transparent !important;
+}
+
+.tg-profile-page--state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+  text-align: center;
+}
+
+/ Tarjetas semitransparentes /
+
+:root[data-theme="light"]
+  .tg-profile-page
+  .bg-white {
+  background:
+    rgba(255, 255, 255, 0.84) !important;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.42);
+
+  backdrop-filter:
+    blur(18px)
+    saturate(1.08);
+}
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  .bg-white {
+  background:
+    rgba(3, 31, 52, 0.76) !important;
+
+  border:
+    1px solid
+    rgba(80, 196, 225, 0.17);
+
+  backdrop-filter:
+    blur(18px)
+    saturate(1.08);
+
+  box-shadow:
+    0 18px 45px
+    rgba(0, 8, 18, 0.25);
+}
+
+/ El bloque gris del CVU también queda translúcido */
+
+:root[data-theme="light"]
+  .tg-profile-page
+  .bg-gray-50 {
+  background:
+    rgba(241, 248, 251, 0.76) !important;
+}
+
+:root[data-theme="dark"]
+  .tg-profile-page
+  .bg-gray-50 {
+  background:
+    rgba(7, 44, 70, 0.68) !important;
+}
+
+@media (max-width: 760px) {
+  .tg-profile-page {
+    padding:
+      4px
+      0
+      28px;
+  }
+}
+/* =========================================================
+   PERFIL — MOSTRAR COMPLETAMENTE LA FOTO DE FONDO
+   ========================================================= /
+
+.tg-profile-page,
+.tg-profile-content {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/
+Reduce solamente en Perfil la capa oscura general
+que está por encima de PlayaPrincipal.png.*/
+
+.tg-private-shell:has(.tg-profile-page)
+  .tg-private-shellbackdrop {
+  background:
+    rgba(0, 12, 24, 0.18) !important;
+
+  backdrop-filter:
+    none !important;
+}
+
+/* Perfil en modo oscuro */
+
+:root[data-theme="dark"]
+  .tg-private-shell:has(.tg-profile-page)
+  .tg-private-shellbackdrop {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 12, 24, 0.18),
+      rgba(0, 12, 24, 0.3)
+    ) !important;
+}
+
+/* Perfil en modo claro */
+
+:root[data-theme="light"]
+  .tg-private-shell:has(.tg-profile-page)
+  .tg-private-shell__backdrop {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(235, 248, 251, 0.08),
+      rgba(235, 248, 251, 0.2)
+    ) !important;
+}

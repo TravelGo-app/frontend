@@ -4,6 +4,8 @@ import {
   useState,
 } from "react";
 
+import { useTheme } from "../context/ThemeContext";
+
 import {
   loginWithGoogle,
   type GoogleAuthResponse,
@@ -96,11 +98,6 @@ declare global {
   }
 }
 
-/*
- * Google Identity debe inicializarse una sola vez.
- * El callback estable utiliza los handlers de la
- * instancia actualmente visible.
- */
 let googleInitialized = false;
 let googleProcessing = false;
 
@@ -129,9 +126,10 @@ async function processGoogleCredential(
       );
     }
 
-    const result = await loginWithGoogle(
-      response.credential,
-    );
+    const result =
+      await loginWithGoogle(
+        response.credential,
+      );
 
     handlers?.onAuthenticated(result);
   } catch (error) {
@@ -151,6 +149,8 @@ export function GoogleLoginButton({
   onAuthenticated,
   onLoadingChange,
 }: GoogleLoginButtonProps) {
+  const { isDark } = useTheme();
+
   const wrapperRef =
     useRef<HTMLDivElement>(null);
 
@@ -163,10 +163,6 @@ export function GoogleLoginButton({
   const [error, setError] =
     useState<string | null>(null);
 
-  /*
-   * Mantiene actualizados los callbacks usados
-   * por el callback global de Google.
-   */
   useEffect(() => {
     activeHandlers = {
       onAuthenticated,
@@ -187,10 +183,6 @@ export function GoogleLoginButton({
     onLoadingChange,
   ]);
 
-  /*
-   * Calcula el ancho disponible para que el
-   * botón se adapte al formulario.
-   */
   useEffect(() => {
     const updateButtonWidth = () => {
       const measuredWidth =
@@ -205,8 +197,11 @@ export function GoogleLoginButton({
 
       const nextWidth = Math.floor(
         Math.min(
-          400,
-          Math.max(200, measuredWidth),
+          480,
+          Math.max(
+            200,
+            measuredWidth,
+          ),
         ),
       );
 
@@ -264,10 +259,6 @@ export function GoogleLoginButton({
     };
   }, []);
 
-  /*
-   * Inicializa Google y vuelve a dibujar el botón
-   * cuando cambia el ancho disponible.
-   */
   useEffect(() => {
     const clientId =
       import.meta.env
@@ -307,11 +298,9 @@ export function GoogleLoginButton({
         {
           type: "standard",
 
-          /*
-           * Outline conserva el botón blanco y
-           * evita el bloque gris/negro de la captura.
-           */
-          theme: "outline",
+          theme: isDark
+            ? "filled_black"
+            : "outline",
 
           size: "large",
           text: "continue_with",
@@ -356,7 +345,10 @@ export function GoogleLoginButton({
       window.clearInterval(intervalId);
       window.clearTimeout(timeoutId);
     };
-  }, [buttonWidth]);
+  }, [
+    buttonWidth,
+    isDark,
+  ]);
 
   return (
     <div

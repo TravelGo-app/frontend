@@ -460,7 +460,7 @@ export default function Exchange() {
           ←
         </span>
 
-        Volver a Transacciones
+        Volver a TBilletera
       </button>
 
       <section className="tg-operation-shell">

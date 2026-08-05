@@ -327,7 +327,7 @@ export default function Transfer() {
           ←
         </span>
 
-        Volver a Transacciones
+        Volver a Billetera
       </button>
 
       <section className="tg-operation-shell">

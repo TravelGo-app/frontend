@@ -1,4 +1,9 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import {
   NavLink,
   Outlet,
@@ -12,6 +17,8 @@ import beachBackground from "../../assets/PlayaPrincipal.png";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 
+import api from "../../services/api";
+
 import TravelIcon, {
   type TravelIconName,
 } from "../ui/TravelIcon";
@@ -20,6 +27,19 @@ interface NavigationItem {
   label: string;
   path: string;
   icon: TravelIconName;
+}
+
+interface RecentTransaction {
+  id: string;
+  type: "deposit" | "transfer" | "exchange";
+  direction: "in" | "out" | "exchange";
+  amount: string | null;
+  signedAmount: string | null;
+  currencyCode: string | null;
+  counterpartyEmail: string | null;
+  fromCurrency: string | null;
+  toCurrency: string | null;
+  createdAt: string;
 }
 
 const navigation: NavigationItem[] = [
@@ -55,53 +75,298 @@ const navigation: NavigationItem[] = [
   },
 ];
 
+function formatRelativeTime(value: string) {
+  const date = new Date(value);
+  const difference =
+    Date.now() - date.getTime();
+
+  const minutes = Math.floor(
+    difference / 60_000,
+  );
+
+  if (minutes < 1) {
+    return "Ahora";
+  }
+
+  if (minutes < 60) {
+    return `Hace ${minutes} min`;
+  }
+
+  const hours = Math.floor(
+    minutes / 60,
+  );
+
+  if (hours < 24) {
+    return `Hace ${hours} h`;
+  }
+
+  return date.toLocaleDateString(
+    "es-AR",
+    {
+      day: "2-digit",
+      month: "short",
+    },
+  );
+}
+
+function getNotificationPresentation(
+  transaction: RecentTransaction,
+): {
+  title: string;
+  description: string;
+  icon: TravelIconName;
+  tone: "cyan" | "orange" | "green";
+} {
+  if (transaction.type === "exchange") {
+    return {
+      title: "Intercambio realizado",
+      description:
+        transaction.fromCurrency &&
+        transaction.toCurrency
+          ? `${transaction.fromCurrency} → ${transaction.toCurrency}`
+          : "Conversión de monedas",
+      icon: "exchange",
+      tone: "cyan",
+    };
+  }
+
+  if (transaction.type === "deposit") {
+    return {
+      title: "Depósito recibido",
+      description:
+        transaction.currencyCode
+          ? `Saldo en ${transaction.currencyCode}`
+          : "Saldo actualizado",
+      icon: "plus",
+      tone: "green",
+    };
+  }
+
+  if (transaction.direction === "out") {
+    return {
+      title: "Transferencia enviada",
+      description:
+        transaction.counterpartyEmail ??
+        "Transferencia realizada",
+      icon: "arrow-up",
+      tone: "orange",
+    };
+  }
+
+  return {
+    title: "Transferencia recibida",
+    description:
+      transaction.counterpartyEmail ??
+      "Transferencia acreditada",
+    icon: "arrow-down",
+    tone: "green",
+  };
+}
+
 export default function PrivateLayout() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] =
+    useState(false);
+
+  const [
+    notificationsOpen,
+    setNotificationsOpen,
+  ] = useState(false);
+
+  const [
+    profileMenuOpen,
+    setProfileMenuOpen,
+  ] = useState(false);
+
+  const [
+    notificationsSeen,
+    setNotificationsSeen,
+  ] = useState(false);
+
+  const [
+    notifications,
+    setNotifications,
+  ] = useState<RecentTransaction[]>([]);
+
+  const [
+    notificationsError,
+    setNotificationsError,
+  ] = useState(false);
+
+  const notificationsRef =
+    useRef<HTMLDivElement>(null);
+
+  const profileMenuRef =
+    useRef<HTMLDivElement>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme } =
+    useTheme();
 
   const firstName =
-    user?.name?.trim().split(/\s+/)[0] || "Viajero";
+    user?.name
+      ?.trim()
+      .split(/\s+/)[0] ||
+    "Viajero";
 
   const initials =
     user?.name
       ?.trim()
       .split(/\s+/)
       .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
+      .map((part) =>
+        part.charAt(0).toUpperCase(),
+      )
       .join("") || "TG";
+
+  const notificationCount =
+    notificationsSeen
+      ? 0
+      : notifications.length;
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setNotificationsOpen(false);
+    setProfileMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!mobileMenuOpen) {
+    let mounted = true;
+
+    api
+      .get(
+        "/transactions/recent?limit=5",
+      )
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
+
+        setNotifications(
+          response.data.transactions ?? [],
+        );
+
+        setNotificationsError(false);
+      })
+      .catch(() => {
+        if (!mounted) {
+          return;
+        }
+
+        setNotifications([]);
+        setNotificationsError(true);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      !mobileMenuOpen &&
+      !notificationsOpen &&
+      !profileMenuOpen
+    ) {
       return;
     }
 
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMobileMenuOpen(false);
+    const handleEscape = (
+      event: KeyboardEvent,
+    ) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      setMobileMenuOpen(false);
+      setNotificationsOpen(false);
+      setProfileMenuOpen(false);
+    };
+
+    const handleOutsideClick = (
+      event: MouseEvent,
+    ) => {
+      const target =
+        event.target as Node;
+
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(
+          target,
+        )
+      ) {
+        setNotificationsOpen(false);
+      }
+
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(
+          target,
+        )
+      ) {
+        setProfileMenuOpen(false);
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
-    document.body.style.overflow = "hidden";
+    document.addEventListener(
+      "keydown",
+      handleEscape,
+    );
+
+    document.addEventListener(
+      "mousedown",
+      handleOutsideClick,
+    );
+
+    if (mobileMenuOpen) {
+      document.body.style.overflow =
+        "hidden";
+    }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener(
+        "keydown",
+        handleEscape,
+      );
+
+      document.removeEventListener(
+        "mousedown",
+        handleOutsideClick,
+      );
+
       document.body.style.overflow = "";
     };
-  }, [mobileMenuOpen]);
+  }, [
+    mobileMenuOpen,
+    notificationsOpen,
+    profileMenuOpen,
+  ]);
 
   const handleLogout = () => {
     logout();
-    navigate("/", { replace: true });
+
+    navigate("/", {
+      replace: true,
+    });
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsOpen(
+      (current) => !current,
+    );
+
+    setProfileMenuOpen(false);
+    setNotificationsSeen(true);
+  };
+
+  const toggleProfileMenu = () => {
+    setProfileMenuOpen(
+      (current) => !current,
+    );
+
+    setNotificationsOpen(false);
   };
 
   return (
@@ -116,16 +381,24 @@ export default function PrivateLayout() {
       <button
         type="button"
         className={`tg-mobile-overlay ${
-          mobileMenuOpen ? "is-visible" : ""
+          mobileMenuOpen
+            ? "is-visible"
+            : ""
         }`}
         aria-label="Cerrar menú"
-        tabIndex={mobileMenuOpen ? 0 : -1}
-        onClick={() => setMobileMenuOpen(false)}
+        tabIndex={
+          mobileMenuOpen ? 0 : -1
+        }
+        onClick={() =>
+          setMobileMenuOpen(false)
+        }
       />
 
       <aside
         className={`tg-sidebar ${
-          mobileMenuOpen ? "is-open" : ""
+          mobileMenuOpen
+            ? "is-open"
+            : ""
         }`}
         aria-label="Navegación principal"
       >
@@ -133,7 +406,9 @@ export default function PrivateLayout() {
           <button
             type="button"
             className="tg-sidebar__mobile-close"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() =>
+              setMobileMenuOpen(false)
+            }
             aria-label="Cerrar menú"
           >
             <TravelIcon name="close" />
@@ -156,17 +431,23 @@ export default function PrivateLayout() {
             <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) =>
+              className={({
+                isActive,
+              }) =>
                 [
                   "tg-sidebar__link",
-                  isActive ? "is-active" : "",
+                  isActive
+                    ? "is-active"
+                    : "",
                 ]
                   .filter(Boolean)
                   .join(" ")
               }
             >
               <span className="tg-sidebar__link-icon">
-                <TravelIcon name={item.icon} />
+                <TravelIcon
+                  name={item.icon}
+                />
               </span>
 
               <span>{item.label}</span>
@@ -186,7 +467,9 @@ export default function PrivateLayout() {
             </span>
           </div>
 
-          <strong>Viajá por el mundo,</strong>
+          <strong>
+            Viajá por el mundo,
+          </strong>
 
           <span>
             nosotros cuidamos tu dinero.
@@ -207,15 +490,20 @@ export default function PrivateLayout() {
             />
           </span>
 
-          <strong>¿Necesitás ayuda?</strong>
+          <strong>
+            ¿Necesitás ayuda?
+          </strong>
 
           <p>
-            Nuestro equipo está disponible las 24 horas.
+            Nuestro equipo está disponible
+            las 24 horas.
           </p>
 
           <button
             type="button"
-            onClick={() => navigate("/contacto")}
+            onClick={() =>
+              navigate("/contacto")
+            }
           >
             Contactar soporte
           </button>
@@ -240,7 +528,9 @@ export default function PrivateLayout() {
           <button
             type="button"
             className="tg-topbar__menu"
-            onClick={() => setMobileMenuOpen(true)}
+            onClick={() =>
+              setMobileMenuOpen(true)
+            }
             aria-label="Abrir menú"
           >
             <TravelIcon
@@ -251,36 +541,128 @@ export default function PrivateLayout() {
 
           <div className="tg-topbar__spacer" />
 
-          <button
-            type="button"
-            className="tg-topbar__currency"
-            aria-label="Moneda principal: dólar estadounidense"
+          <div
+            className="tg-topbar__dropdown-wrap"
+            ref={notificationsRef}
           >
-            <span
-              className="fi fi-us"
-              aria-hidden="true"
-            />
+            <button
+              type="button"
+              className="tg-topbar__notification"
+              aria-label="Abrir actividad reciente"
+              aria-haspopup="menu"
+              aria-expanded={
+                notificationsOpen
+              }
+              onClick={toggleNotifications}
+            >
+              <TravelIcon
+                name="bell"
+                size={22}
+              />
 
-            <strong>USD</strong>
+              {notificationCount > 0 && (
+                <span>
+                  {notificationCount}
+                </span>
+              )}
+            </button>
 
-            <TravelIcon
-              name="chevron"
-              size={16}
-            />
-          </button>
+            {notificationsOpen && (
+              <div
+                className="tg-topbar__dropdown tg-notifications-menu"
+                role="menu"
+              >
+                <header className="tg-notifications-menu__header">
+                  <div>
+                    <strong>
+                      Actividad reciente
+                    </strong>
 
-          <button
-            type="button"
-            className="tg-topbar__notification"
-            aria-label="Notificaciones"
-          >
-            <TravelIcon
-              name="bell"
-              size={22}
-            />
+                    <small>
+                      Últimos movimientos
+                    </small>
+                  </div>
 
-            <span>3</span>
-          </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate("/history")
+                    }
+                  >
+                    Ver historial
+                  </button>
+                </header>
+
+                <div className="tg-notifications-menu__list">
+                  {notificationsError ? (
+                    <p className="tg-topbar__dropdown-state">
+                      No se pudo consultar la
+                      actividad.
+                    </p>
+                  ) : notifications.length ===
+                    0 ? (
+                    <p className="tg-topbar__dropdown-state">
+                      No hay movimientos
+                      recientes.
+                    </p>
+                  ) : (
+                    notifications.map(
+                      (transaction) => {
+                        const presentation =
+                          getNotificationPresentation(
+                            transaction,
+                          );
+
+                        return (
+                          <button
+                            type="button"
+                            key={transaction.id}
+                            className="tg-notification-item"
+                            onClick={() =>
+                              navigate(
+                                "/history",
+                              )
+                            }
+                          >
+                            <span
+                              className={`tg-notification-item__icon is-${presentation.tone}`}
+                            >
+                              <TravelIcon
+                                name={
+                                  presentation.icon
+                                }
+                                size={17}
+                              />
+                            </span>
+
+                            <span className="tg-notification-item__copy">
+                              <strong>
+                                {
+                                  presentation.title
+                                }
+                              </strong>
+
+                              <small>
+                                {
+                                  presentation.description
+                                }
+                              </small>
+                            </span>
+
+                            <time>
+                              {formatRelativeTime(
+                                transaction.createdAt,
+                              )}
+                            </time>
+                          </button>
+                        );
+                      },
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
@@ -298,31 +680,102 @@ export default function PrivateLayout() {
             }
           >
             <TravelIcon
-              name={isDark ? "sun" : "moon"}
+              name={
+                isDark
+                  ? "sun"
+                  : "moon"
+              }
               size={21}
             />
           </button>
 
-          <button
-            type="button"
-            className="tg-topbar__profile"
-            onClick={() => navigate("/perfil")}
-            aria-label="Abrir perfil"
+          <div
+            className="tg-topbar__dropdown-wrap"
+            ref={profileMenuRef}
           >
-            <span className="tg-topbar__avatar">
-              {initials}
-            </span>
+            <button
+              type="button"
+              className="tg-topbar__profile"
+              onClick={toggleProfileMenu}
+              aria-label="Abrir menú de usuario"
+              aria-haspopup="menu"
+              aria-expanded={
+                profileMenuOpen
+              }
+            >
+              <span className="tg-topbar__avatar">
+                {initials}
+              </span>
 
-            <span className="tg-topbar__user">
-              <strong>{firstName}</strong>
-              <small>En línea</small>
-            </span>
+              <span className="tg-topbar__user">
+                <strong>
+                  {firstName}
+                </strong>
 
-            <TravelIcon
-              name="chevron"
-              size={16}
-            />
-          </button>
+                <small>En línea</small>
+              </span>
+
+              <TravelIcon
+                name="chevron"
+                size={16}
+              />
+            </button>
+
+            {profileMenuOpen && (
+              <div
+                className="tg-topbar__dropdown tg-profile-menu"
+                role="menu"
+              >
+                <div className="tg-profile-menu__identity">
+                  <span className="tg-topbar__avatar">
+                    {initials}
+                  </span>
+
+                  <div>
+                    <strong>
+                      {user?.name ??
+                        firstName}
+                    </strong>
+
+                    <small>
+                      {user?.email}
+                    </small>
+                  </div>
+                </div>
+
+                <div className="tg-profile-menu__separator" />
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() =>
+                    navigate("/perfil")
+                  }
+                >
+                  <TravelIcon
+                    name="users"
+                    size={18}
+                  />
+
+                  Editar perfil
+                </button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="is-danger"
+                  onClick={handleLogout}
+                >
+                  <TravelIcon
+                    name="logout"
+                    size={18}
+                  />
+
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
         <main className="tg-private-content">

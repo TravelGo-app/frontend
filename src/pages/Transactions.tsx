@@ -292,7 +292,7 @@ export default function Transactions() {
           }
         >
           <span aria-hidden="true">←</span>
-          Ir a Billetera
+          Ir a Inicio
         </button>
 
         <div className="tg-transactions-hero__heading">

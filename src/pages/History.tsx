@@ -1160,7 +1160,7 @@ export default function History() {
             ←
           </span>
 
-          Ir a Billetera
+          Ir a Inicio
         </button>
 
         <header className="tg-history-header">
