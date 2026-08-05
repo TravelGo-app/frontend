@@ -1,11 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Area,
+  AreaChart,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+} from "recharts";
+
+import phoneTrip from "../assets/phoneTrip.png";
+import LoadingOverlay from "../components/LoadingOverlay";
+import TravelIcon, {
+  type TravelIconName,
+} from "../components/ui/TravelIcon";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { sendDashboardSummaryEmail } from "../services/emailPreferences.service";
-import LoadingOverlay from "../components/LoadingOverlay";
-import beachBg from "../assets/PlayaPrincipal.png";
-import AnalyticsSection from "../components/AnalyticsSection";
 
 interface Balance {
   currencyCode: string;
@@ -22,10 +34,10 @@ interface RecentTransaction {
   direction: "in" | "out" | "exchange";
   amount: string | null;
   signedAmount: string | null;
-  currencyCode: "ARS" | "USD" | "EUR" | "BRL" | "CLP" | null;
+  currencyCode: string | null;
   counterpartyEmail: string | null;
-  fromCurrency: "ARS" | "USD" | "EUR" | "BRL" | "CLP" | null;
-  toCurrency: "ARS" | "USD" | "EUR" | "BRL" | "CLP" | null;
+  fromCurrency: string | null;
+  toCurrency: string | null;
   fromAmount: string | null;
   toAmount: string | null;
   rate: string | null;
@@ -37,13 +49,6 @@ interface AnalyticsTimelinePoint {
   date: string;
   currencyCode: string;
   closingBalance: string;
-  netFlow: string;
-  depositsIn: string;
-  transfersIn: string;
-  transfersOut: string;
-  exchangesIn: string;
-  exchangesOut: string;
-  operationCount: number;
 }
 
 interface ChartDataPoint {
@@ -51,625 +56,1230 @@ interface ChartDataPoint {
   closingBalance: number;
 }
 
-const currencyToCountry: { [key: string]: string } = {
-  ARS: "ar",
-  USD: "us",
-  EUR: "eu",
-  BRL: "br",
-  CLP: "cl",
+interface CurrencyMeta {
+  name: string;
+  flag: string;
+  accent: string;
+}
+
+const POLL_INTERVAL_MS = 20_000;
+
+const currencyMeta: Record<string, CurrencyMeta> = {
+  ARS: {
+    name: "Peso argentino",
+    flag: "ar",
+    accent: "#27a8cc",
+  },
+
+  USD: {
+    name: "Dólar estadounidense",
+    flag: "us",
+    accent: "#00a7c8",
+  },
+
+  EUR: {
+    name: "Euro",
+    flag: "eu",
+    accent: "#00a7c8",
+  },
+
+  BRL: {
+    name: "Real brasileño",
+    flag: "br",
+    accent: "#ff6a13",
+  },
+
+  CLP: {
+    name: "Peso chileno",
+    flag: "cl",
+    accent: "#7c5ce7",
+  },
+
+  COP: {
+    name: "Peso colombiano",
+    flag: "co",
+    accent: "#ff6a13",
+  },
 };
 
-const TRAVEL_TIPS = [
-  "Cambiá tu dinero antes de viajar para evitar comisiones en el aeropuerto.",
-  "Llevá siempre algo de efectivo en la moneda local para gastos pequeños.",
-  "Revisá las tasas de cambio antes de hacer un intercambio grande.",
-  "Guardá una copia digital de tus documentos de viaje.",
+const quickActions: Array<{
+  title: string;
+  subtitle: string;
+  icon: TravelIconName;
+  tone: "cyan" | "orange";
+  path: string;
+}> = [
+  {
+    title: "Intercambiar",
+    subtitle: "Convertí monedas",
+    icon: "exchange",
+    tone: "cyan",
+    path: "/exchange",
+  },
+
+  {
+    title: "Depositar",
+    subtitle: "Agregá dinero",
+    icon: "plus",
+    tone: "cyan",
+    path: "/deposit",
+  },
+
+  {
+    title: "Transferir",
+    subtitle: "Enviá dinero",
+    icon: "arrow-up",
+    tone: "orange",
+    path: "/transfer",
+  },
+
+  {
+    title: "Pagar",
+    subtitle: "Gestioná pagos",
+    icon: "send",
+    tone: "cyan",
+    path: "/transactions",
+  },
 ];
 
-const POLL_INTERVAL_MS = 20000;
+function createSparkData(amount: number, seed: number) {
+  const normalizedAmount = Math.max(Math.abs(amount), 1);
 
-const buildChartPoints = (data: ChartDataPoint[]) => {
-  if (data.length < 2) return "";
-  const values = data.map((d) => d.closingBalance);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  return data
-    .map((d, i) => {
-      const x = (i / (data.length - 1)) * 300;
-      const y = 55 - ((d.closingBalance - min) / range) * 45;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-};
+  return Array.from(
+    {
+      length: 10,
+    },
+    (_, index) => ({
+      value:
+        normalizedAmount *
+        (0.74 +
+          index * 0.025 +
+          Math.sin(index * 1.45 + seed) * 0.055),
+    }),
+  );
+}
 
-const getActivityIcon = (tx: RecentTransaction) => {
-  if (tx.type === "deposit") return { icon: "+", bg: "#2391ae" };
-  if (tx.type === "exchange") return { icon: "↔", bg: "#ff4242" };
-  if (tx.direction === "out") return { icon: "↑", bg: "#ff7d60" };
-  return { icon: "↓", bg: "#16a34a" };
-};
+function formatMoney(
+  value: number,
+  currencyCode: string,
+) {
+  try {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString("es-AR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} ${currencyCode}`;
+  }
+}
 
+function formatDate(value: string) {
+  return new Date(value).toLocaleString("es-AR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getCurrencyMeta(
+  currencyCode: string,
+): CurrencyMeta {
+  return (
+    currencyMeta[currencyCode] ??
+    currencyMeta.ARS
+  );
+}
+
+function activityVisual(
+  transaction: RecentTransaction,
+): {
+  icon: TravelIconName;
+  tone: "cyan" | "orange" | "green";
+  title: string;
+} {
+  if (transaction.type === "exchange") {
+    return {
+      icon: "exchange",
+      tone: "cyan",
+      title: "Intercambio de monedas",
+    };
+  }
+
+  if (transaction.type === "deposit") {
+    return {
+      icon: "plus",
+      tone: "cyan",
+      title: "Depósito recibido",
+    };
+  }
+
+  if (transaction.direction === "out") {
+    return {
+      icon: "arrow-up",
+      tone: "orange",
+      title: "Transferencia enviada",
+    };
+  }
+
+  return {
+    icon: "arrow-down",
+    tone: "green",
+    title: "Transferencia recibida",
+  };
+}
 export default function Dashboard() {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [balances, setBalances] = useState<Balance[]>([]);
   const [rates, setRates] = useState<ExchangeRates>({});
-  const [selectedCurrency, setSelectedCurrency] = useState<Balance | null>(
-    null,
-  );
-  const [activity, setActivity] = useState<RecentTransaction[]>([]);
-  const [activityError, setActivityError] = useState<string | null>(null);
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
-  const [tipIndex, setTipIndex] = useState(0);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [summarySending, setSummarySending] = useState(false);
-  const [summaryToast, setSummaryToast] = useState<
-    | { type: "success" | "error"; message: string }
-    | null
-  >(null);
+  const [activity, setActivity] = useState<
+    RecentTransaction[]
+  >([]);
+  const [chartData, setChartData] = useState<
+    ChartDataPoint[]
+  >([]);
 
-  const firstName = user?.name?.split(" ")[0];
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = () => {
-    setTimeout(() => {
-      logout();
-    }, 500);
-  };
+  const [
+    selectedCurrency,
+    setSelectedCurrency,
+  ] = useState<Balance | null>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTipIndex((prev) => (prev + 1) % TRAVEL_TIPS.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, []);
+  const [lastUpdated, setLastUpdated] =
+    useState<Date | null>(null);
+
+  const [summarySending, setSummarySending] =
+    useState(false);
+
+  const [summaryToast, setSummaryToast] =
+    useState<string | null>(null);
+
+  const firstName =
+    user?.name?.trim().split(/\s+/)[0] ||
+    "Viajero";
 
   useEffect(() => {
-    if (!summaryToast) return;
+    let mounted = true;
 
-    const timeout = window.setTimeout(() => {
-      setSummaryToast(null);
-    }, 5000);
+    const fetchDashboard = async (
+      initialLoad: boolean,
+    ) => {
+      if (initialLoad) {
+        setLoading(true);
+      }
 
-    return () => window.clearTimeout(timeout);
-  }, [summaryToast]);
+      const [
+        balancesResult,
+        activityResult,
+        analyticsResult,
+      ] = await Promise.allSettled([
+        api.get("/wallet/balances"),
 
-  useEffect(() => {
-    const fetchData = async (isInitial = false) => {
-      if (isInitial) setDataLoading(true);
+        api.get(
+          "/transactions/recent?limit=6",
+        ),
 
-      const fetchBalances = async () => {
-        try {
-          const res = await api.get("/wallet/balances");
-          setBalances(res.data.balances);
-        } catch (err) {
-          console.error("Error cargando balances:", err);
-        }
-      };
-
-      const fetchRates = async () => {
-        try {
-          const currencies = ["USD", "EUR", "BRL", "CLP"];
-          const rateResponses = await Promise.all(
-            currencies.map((currency) => api.get(`/rates/ARS/${currency}`)),
-          );
-          const ratesData: ExchangeRates = {};
-          rateResponses.forEach((res, index) => {
-            const rateValue = res.data?.rate ?? res.data?.data?.rate;
-            ratesData[currencies[index]] = rateValue;
-          });
-          setRates(ratesData);
-        } catch (err) {
-          console.error("Error cargando tasas:", err);
-        }
-      };
-
-      const fetchActivity = async () => {
-        try {
-          const res = await api.get("/transactions/recent?limit=10");
-          setActivity(res.data.transactions);
-          setActivityError(null);
-        } catch (err) {
-          console.error("Error cargando actividad reciente:", err);
-          setActivityError(
-            "No pudimos cargar tu actividad reciente. Intentá nuevamente.",
-          );
-        }
-      };
-
-      const fetchAnalytics = async () => {
-        try {
-          const res = await api.get("/transactions/analytics?days=7");
-          const timeline: AnalyticsTimelinePoint[] = res.data.timeline || [];
-          const arsTimeline = timeline
-            .filter((point) => point.currencyCode === "ARS")
-            .map((point) => ({
-              date: point.date,
-              closingBalance: Number(point.closingBalance),
-            }));
-          setChartData(arsTimeline);
-        } catch (err) {
-          console.error("Error cargando analytics:", err);
-          setChartData([]);
-        }
-      };
-
-      await Promise.all([
-        fetchBalances(),
-        fetchRates(),
-        fetchActivity(),
-        fetchAnalytics(),
+        api.get(
+          "/transactions/analytics?days=7",
+        ),
       ]);
 
-      if (isInitial) setDataLoading(false);
+      const currencies = [
+        "USD",
+        "EUR",
+        "BRL",
+        "CLP",
+      ];
+
+      const rateResults =
+        await Promise.allSettled(
+          currencies.map((currency) =>
+            api.get(
+              `/rates/ARS/${currency}`,
+            ),
+          ),
+        );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (
+        balancesResult.status ===
+        "fulfilled"
+      ) {
+        setBalances(
+          balancesResult.value.data
+            .balances || [],
+        );
+      }
+
+      if (
+        activityResult.status ===
+        "fulfilled"
+      ) {
+        setActivity(
+          activityResult.value.data
+            .transactions || [],
+        );
+      }
+
+      if (
+        analyticsResult.status ===
+        "fulfilled"
+      ) {
+        const timeline: AnalyticsTimelinePoint[] =
+          analyticsResult.value.data
+            .timeline || [];
+
+        const nextChartData = timeline
+          .filter(
+            (point) =>
+              point.currencyCode === "ARS",
+          )
+          .map((point) => ({
+            date: point.date,
+            closingBalance: Number(
+              point.closingBalance,
+            ),
+          }));
+
+        setChartData(nextChartData);
+      }
+
+      const nextRates: ExchangeRates = {};
+
+      rateResults.forEach(
+        (result, index) => {
+          if (
+            result.status !== "fulfilled"
+          ) {
+            return;
+          }
+
+          const rawValue =
+            result.value.data?.rate ??
+            result.value.data?.data?.rate;
+
+          const numericValue =
+            Number(rawValue);
+
+          if (
+            Number.isFinite(numericValue)
+          ) {
+            nextRates[
+              currencies[index]
+            ] = numericValue;
+          }
+        },
+      );
+
+      setRates(nextRates);
       setLastUpdated(new Date());
+      setLoading(false);
     };
 
-    fetchData(true);
+    void fetchDashboard(true);
 
-    const pollInterval = setInterval(() => {
-      fetchData(false);
-    }, POLL_INTERVAL_MS);
+    const interval =
+      window.setInterval(() => {
+        void fetchDashboard(false);
+      }, POLL_INTERVAL_MS);
 
-    return () => clearInterval(pollInterval);
+    return () => {
+      mounted = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
-  const calculateTotalInARS = () => {
-    return balances.reduce((total, balance) => {
-      const amount = parseFloat(balance.amount);
-      if (balance.currencyCode === "ARS") {
-        return total + amount;
-      }
-      const rate = rates[balance.currencyCode];
-      if (!rate) return total;
-      return total + amount / rate;
-    }, 0);
-  };
-
-  const arsBalance = balances.find((b) => b.currencyCode === "ARS");
-  const otherBalances = balances.filter((b) => b.currencyCode !== "ARS");
-
-  const formatAmount = (value: string) =>
-    parseFloat(value).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
-  const formatSignedAmount = (value: string) => {
-    const num = parseFloat(value);
-    const formatted = Math.abs(num).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    return `${num >= 0 ? "+" : "-"}${formatted}`;
-  };
-
-  const equivalentInARS = (balance: Balance) => {
-    if (balance.currencyCode === "ARS") return null;
-    const rate = rates[balance.currencyCode];
-    if (!rate) return null;
-    return (parseFloat(balance.amount) / rate).toLocaleString("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-  };
-
-  const formatLastUpdated = (date: Date) =>
-    date.toLocaleTimeString("es-AR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-
-  const handleSendDashboardSummary = async () => {
-    setSummaryToast(null);
-    setSummarySending(true);
-
-    try {
-      await sendDashboardSummaryEmail(30);
-      setSummaryToast({
-        type: "success",
-        message: "Resumen programado. Revisá tu correo en los próximos minutos.",
-      });
-    } catch (err: any) {
-      console.error("Error enviando resumen de dashboard:", err);
-      const status = err.response?.status;
-      if (status === 429) {
-        setSummaryToast({
-          type: "error",
-          message:
-            "Ya solicitaste un resumen recientemente. Esperá unos minutos.",
-        });
-      } else if (status === 401) {
-        setSummaryToast({
-          type: "error",
-          message: "Tu sesión venció. Iniciá sesión nuevamente.",
-        });
-      } else {
-        setSummaryToast({
-          type: "error",
-          message: "No se pudo programar el resumen.",
-        });
-      }
-    } finally {
-      setSummarySending(false);
+  useEffect(() => {
+    if (!summaryToast) {
+      return;
     }
-  };
 
-  if (dataLoading) {
-    return <LoadingOverlay message="Cargando tu billetera..." />;
+    const timer = window.setTimeout(
+      () => {
+        setSummaryToast(null);
+      },
+      4500,
+    );
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [summaryToast]);
+
+  const totalInArs = useMemo(() => {
+    return balances.reduce(
+      (total, balance) => {
+        const amount = Number(
+          balance.amount,
+        );
+
+        if (
+          !Number.isFinite(amount)
+        ) {
+          return total;
+        }
+
+        if (
+          balance.currencyCode === "ARS"
+        ) {
+          return total + amount;
+        }
+
+        const rate =
+          rates[balance.currencyCode];
+
+        if (!rate) {
+          return total;
+        }
+
+        return total + amount / rate;
+      },
+      0,
+    );
+  }, [balances, rates]);
+
+  const trend = useMemo(() => {
+    if (chartData.length < 2) {
+      return 0;
+    }
+
+    const first =
+      chartData[0].closingBalance;
+
+    const last =
+      chartData[
+        chartData.length - 1
+      ].closingBalance;
+
+    if (!first) {
+      return 0;
+    }
+
+    return (
+      ((last - first) /
+        Math.abs(first)) *
+      100
+    );
+  }, [chartData]);
+
+  const mainAccounts =
+    balances.slice(0, 3);
+
+  const handleSendSummary =
+    async () => {
+      setSummarySending(true);
+
+      try {
+        await sendDashboardSummaryEmail(
+          30,
+        );
+
+        setSummaryToast(
+          "Resumen programado correctamente.",
+        );
+      } catch {
+        setSummaryToast(
+          "No se pudo programar el resumen.",
+        );
+      } finally {
+        setSummarySending(false);
+      }
+    };
+
+  if (loading) {
+    return (
+      <LoadingOverlay message="Cargando tu billetera..." />
+    );
   }
 
   return (
-    <div
-      className="min-h-screen p-8 font-body relative"
-      style={{
-        backgroundImage: `url(${beachBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
-    >
-      <div className="absolute inset-0 bg-black/25 pointer-events-none" />
+    <div className="tg-dashboard">
+      {summaryToast && (
+        <div className="tg-dashboard__toast">
+          {summaryToast}
+        </div>
+      )}
 
-      <div className="max-w-4xl mx-auto relative z-10">
-        {summaryToast && (
-          <div className="fixed top-4 right-4 z-50 w-full max-w-sm">
-            <div
-              className={`rounded-2xl px-4 py-3 shadow-xl ring-1 ring-black/10 text-sm font-semibold transition-transform duration-300 ${
-                summaryToast.type === "success"
-                  ? "bg-emerald-500 text-white"
-                  : "bg-[#ff4242] text-white"
-              }`}
+      <section className="tg-dashboard__intro">
+        <div>
+          <p className="tg-dashboard__eyebrow">
+            TU BILLETERA DE VIAJE
+          </p>
+
+          <h1>
+            Buen día,
+            <br />
+            {firstName}{" "}
+            <span aria-hidden="true">
+              👋
+            </span>
+          </h1>
+
+          <p>
+            Administrá tu dinero mientras
+            viajás por el mundo.
+          </p>
+        </div>
+
+        <div className="tg-dashboard__last-update">
+          <span className="tg-dashboard__status-dot" />
+
+          {lastUpdated
+            ? `Actualizado ${lastUpdated.toLocaleTimeString(
+                "es-AR",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                },
+              )}`
+            : "Actualizando"}
+        </div>
+      </section>
+
+      <section className="tg-balance-panel">
+        <div className="tg-balance-panel__header">
+          <div>
+            <span className="tg-card-label">
+              Balance total
+
+              <TravelIcon
+                name="eye"
+                size={16}
+              />
+            </span>
+
+            <strong className="tg-balance-panel__amount">
+              {formatMoney(
+                totalInArs,
+                "ARS",
+              )}
+            </strong>
+
+            <span
+              className={[
+                "tg-balance-panel__trend",
+                trend < 0
+                  ? "is-negative"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
-              {summaryToast.message}
-            </div>
+              {trend >= 0 ? "↑" : "↓"}{" "}
+              {Math.abs(trend).toFixed(2)}
+              % esta semana
+            </span>
           </div>
-        )}
-        <div className="mb-4 bg-[#f1efe8] rounded-2xl overflow-hidden shadow-lg">
-          <div className="flex h-1">
-            <div className="flex-1 bg-[#ff4242]"></div>
-            <div className="flex-1 bg-[#2391ae]"></div>
-            <div className="flex-1 bg-[#ff7d60]"></div>
-          </div>
-          <div className="flex justify-between items-center p-5">
-            <div>
-              <h1
-                className="font-display text-3xl font-bold text-brand-animated"
-                style={{ WebkitTextStroke: "0.5px rgba(35,52,70,0.4)" }}
+
+          <div className="tg-balance-panel__chart">
+            {chartData.length > 1 ? (
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
               >
-                ¡Hola, {firstName}!
-              </h1>
-              <p className="text-grafito/70 mt-1 text-sm font-semibold">
-                Bienvenido a tu billetera TravelGo
-              </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-[#ff4242] text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-red-600 transition"
-            >
-              Cerrar sesión
-            </button>
+                <AreaChart
+                  data={chartData}
+                >
+                  <defs>
+                    <linearGradient
+                      id="travelgoBalanceGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="#00b3d6"
+                        stopOpacity={0.38}
+                      />
+
+                      <stop
+                        offset="100%"
+                        stopColor="#00b3d6"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+
+                  <XAxis
+                    dataKey="date"
+                    hide
+                  />
+
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 14,
+                      border:
+                        "1px solid rgba(0,179,214,.2)",
+                      background:
+                        "rgba(2,25,44,.92)",
+                      color: "#ffffff",
+                    }}
+                    formatter={(value) => [
+                      formatMoney(
+                        Number(value ?? 0),
+                        "ARS",
+                      ),
+                      "Balance",
+                    ]}
+                    labelFormatter={() => ""}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="closingBalance"
+                    stroke="#00b3d6"
+                    strokeWidth={3}
+                    fill="url(#travelgoBalanceGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="tg-empty-chart">
+                Todavía no hay suficiente
+                historial.
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 items-start">
-          <div>
-            <div className="bg-linear-to-br from-[#ff7d60]/40 to-[#e4c2a2]/30 backdrop-blur-xl border border-white/30 rounded-2xl p-6 text-white shadow-lg mb-4">
-              <p className="text-sm font-extrabold uppercase tracking-wider">
-                Balance total (equivalente en ARS)
-              </p>
-              <p
-                className="font-display text-5xl font-bold mt-2 mb-3"
-                style={{ WebkitTextStroke: "0.8px rgba(35,52,70,0.6)" }}
-              >
-                {calculateTotalInARS().toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                <span
-                  className="text-lg font-body font-normal"
-                  style={{ WebkitTextStroke: 0 }}
-                >
-                  ARS
-                </span>
-              </p>
-              {chartData.length >= 2 ? (
-                <svg viewBox="0 0 300 60" className="w-full h-14">
-                  <polyline
-                    points={buildChartPoints(chartData)}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="animate-draw-line"
-                  />
-                </svg>
-              ) : (
-                <p className="text-xs text-white/70 h-14 flex items-center">
-                  Todavía no hay suficiente historial para el gráfico.
-                </p>
-              )}
-              <p className="text-xs font-semibold opacity-85 mt-1">
-                Últimos 7 días
-                {lastUpdated && (
-                  <span className="opacity-70">
-                    {" "}
-                    · Actualizado {formatLastUpdated(lastUpdated)}
-                  </span>
-                )}
-              </p>
-            </div>
+        <div className="tg-balance-panel__currencies">
+          {mainAccounts.map(
+            (balance) => {
+              const meta =
+                getCurrencyMeta(
+                  balance.currencyCode,
+                );
 
-            <h2 className="text-white font-bold text-sm mb-2">Tus monedas</h2>
-
-            {arsBalance && (
-              <button
-                onClick={() => setSelectedCurrency(arsBalance)}
-                className="w-full flex items-center justify-between bg-white/70 backdrop-blur-sm rounded-2xl p-3 shadow-lg cursor-pointer hover:brightness-95 transition mb-3"
-              >
-                <span
-                  className="fi fi-ar rounded-md shrink-0"
-                  style={{ width: "60px", height: "44px" }}
-                ></span>
-                <div className="text-right">
-                  <p className="text-grafito font-bold text-lg">
-                    {parseFloat(arsBalance.amount).toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                  <p className="text-oceano font-bold text-xs mt-0.5">ARS</p>
-                </div>
-              </button>
-            )}
-
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {otherBalances.map((balance) => (
+              return (
                 <button
-                  key={balance.currencyCode}
-                  onClick={() => setSelectedCurrency(balance)}
-                  className="flex items-center justify-between bg-white/70 backdrop-blur-sm rounded-2xl p-3 shadow-lg cursor-pointer hover:brightness-95 transition"
+                  type="button"
+                  key={
+                    balance.currencyCode
+                  }
+                  onClick={() =>
+                    setSelectedCurrency(
+                      balance,
+                    )
+                  }
                 >
                   <span
-                    className={`fi fi-${currencyToCountry[balance.currencyCode]} rounded-md shrink-0`}
-                    style={{ width: "60px", height: "44px" }}
-                  ></span>
-                  <div className="text-right">
-                    <p className="text-grafito font-bold text-lg">
-                      {parseFloat(balance.amount).toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                    <p className="text-oceano font-bold text-xs mt-0.5">
-                      {balance.currencyCode}
-                    </p>
+                    className={`fi fi-${meta.flag}`}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    <strong>
+                      {
+                        balance.currencyCode
+                      }
+                    </strong>
+
+                    <small>
+                      {formatMoney(
+                        Number(
+                          balance.amount,
+                        ),
+                        balance.currencyCode,
+                      )}
+                    </small>
+                  </span>
+                </button>
+              );
+            },
+          )}
+        </div>
+      </section>
+
+      <section className="tg-dashboard-card">
+        <div className="tg-section-heading">
+          <h2>Acciones rápidas</h2>
+        </div>
+
+        <div className="tg-quick-actions">
+          {quickActions.map(
+            (action) => (
+              <button
+                type="button"
+                key={action.title}
+                onClick={() =>
+                  navigate(action.path)
+                }
+                className={`tg-quick-action is-${action.tone}`}
+              >
+                <span>
+                  <TravelIcon
+                    name={action.icon}
+                    size={28}
+                  />
+                </span>
+
+                <strong>
+                  {action.title}
+                </strong>
+
+                <small>
+                  {action.subtitle}
+                </small>
+              </button>
+            ),
+          )}
+        </div>
+      </section>
+
+      <section className="tg-dashboard-card">
+        <div className="tg-section-heading">
+          <h2>Tus cuentas</h2>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/transactions")
+            }
+          >
+            Ver todas <span>›</span>
+          </button>
+        </div>
+
+        <div className="tg-account-grid">
+          {balances.map(
+            (balance, index) => {
+              const meta =
+                getCurrencyMeta(
+                  balance.currencyCode,
+                );
+
+              const amount =
+                Number(balance.amount);
+
+              const sparkData =
+                createSparkData(
+                  amount,
+                  index + 1,
+                );
+
+              return (
+                <button
+                  type="button"
+                  className="tg-account-card"
+                  key={
+                    balance.currencyCode
+                  }
+                  onClick={() =>
+                    setSelectedCurrency(
+                      balance,
+                    )
+                  }
+                >
+                  <div className="tg-account-card__heading">
+                    <span
+                      className={`fi fi-${meta.flag}`}
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      <strong>
+                        {meta.name}
+                      </strong>
+
+                      <small>
+                        {
+                          balance.currencyCode
+                        }
+                      </small>
+                    </span>
+                  </div>
+
+                  <strong className="tg-account-card__amount">
+                    {formatMoney(
+                      amount,
+                      balance.currencyCode,
+                    )}
+                  </strong>
+
+                  <div className="tg-account-card__spark">
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                    >
+                      <LineChart
+                        data={sparkData}
+                      >
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke={
+                            meta.accent
+                          }
+                          strokeWidth={2.5}
+                          dot={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
                 </button>
-              ))}
+              );
+            },
+          )}
+        </div>
+      </section>
+            <section className="tg-dashboard__two-columns">
+        <article className="tg-destination-card">
+          <div>
+            <span className="tg-card-label">
+              <TravelIcon
+                name="location"
+                size={17}
+              />
+
+              Destino actual
+            </span>
+
+            <h2>
+              Cartagena, Colombia
+            </h2>
+
+            <p>
+              Moneda local
+              <strong>COP</strong>
+            </p>
+
+            <div className="tg-destination-card__rate">
+              <small>
+                Tasa de referencia
+              </small>
+
+              <strong>
+                1 USD = 4.120 COP
+              </strong>
+
+              <span>↑ 0,82%</span>
             </div>
+          </div>
+
+          <div
+            className="tg-destination-card__art"
+            aria-hidden="true"
+          >
+            <span className="tg-destination-card__plane">
+              ✈
+            </span>
+
+            <span className="tg-destination-card__palm">
+              🌴
+            </span>
+          </div>
+        </article>
+
+        <article className="tg-dashboard-card tg-rates-card">
+          <div className="tg-section-heading">
+            <h2>Tasas de cambio</h2>
 
             <button
-              onClick={() => navigate("/transactions")}
-              className="w-full bg-white/70 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-center gap-3 shadow-lg hover:brightness-95 transition cursor-pointer"
+              type="button"
+              onClick={() =>
+                navigate("/exchange")
+              }
             >
-              <div className="w-8 h-8 rounded-full bg-[#ff4242] text-white flex items-center justify-center text-sm shrink-0">
-                ↔
-              </div>
-              <p className="text-sm font-bold text-grafito">
-                Ir a Transacciones
-              </p>
+              Ver todas <span>›</span>
             </button>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <div className="tip-card-animated relative rounded-2xl p-5 shadow-lg overflow-hidden flex flex-col items-center text-center">
-              <div className="tip-pulse-ring absolute -top-6 -right-4 w-24 h-24 rounded-full bg-white/20"></div>
-              <div className="tip-pulse-ring-delayed absolute -bottom-8 -left-5 w-20 h-20 rounded-full bg-white/15"></div>
+          <div className="tg-rates-list">
+            {[
+              "USD",
+              "EUR",
+              "BRL",
+            ].map(
+              (
+                currency,
+                index,
+              ) => {
+                const meta =
+                  getCurrencyMeta(
+                    currency,
+                  );
 
-              <div className="flex items-center justify-center gap-2 mb-2 relative z-10">
-                <div className="tip-bounce-icon w-9 h-9 rounded-full bg-white/30 text-white flex items-center justify-center font-bold text-lg">
-                  💡
-                </div>
-                <p className="text-white font-bold text-base">Tip de viaje</p>
-              </div>
-              <p className="text-white text-sm font-medium leading-snug relative z-10">
-                {TRAVEL_TIPS[tipIndex]}
-              </p>
-              <div className="flex gap-1.5 mt-3 relative z-10">
-                {TRAVEL_TIPS.map((_, index) => (
-                  <span
-                    key={index}
-                    className={`h-1 rounded-full transition-all ${
-                      index === tipIndex ? "w-4 bg-white" : "w-1.5 bg-white/40"
-                    }`}
-                  ></span>
-                ))}
-              </div>
-            </div>
+                return (
+                  <div key={currency}>
+                    <span
+                      className={`fi fi-${meta.flag}`}
+                      aria-hidden="true"
+                    />
 
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-sm font-bold text-grafito">
-                  Tasas de cambio
-                </p>
-                {lastUpdated && (
-                  <span className="text-[10px] text-grafito/50 font-semibold">
-                    {formatLastUpdated(lastUpdated)}
-                  </span>
-                )}
-              </div>
-              {["USD", "EUR", "BRL", "CLP"].map((currency) => (
-                <div
-                  key={currency}
-                  className="flex justify-between py-1.5 text-sm"
-                >
-                  <span className="font-semibold text-grafito">{currency}</span>
-                  <span className="font-bold text-oceano">
-                    {rates[currency] ? rates[currency].toFixed(6) : "Sin datos"}
-                  </span>
-                </div>
-              ))}
-            </div>
+                    <strong>
+                      {currency} → ARS
+                    </strong>
 
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                <h2 className="text-sm font-bold text-grafito">
-                  Actividad
-                </h2>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                  <button
-                    onClick={handleSendDashboardSummary}
-                    disabled={summarySending}
-                    className="inline-flex items-center justify-center rounded-full bg-[#2391ae] px-4 py-2 text-sm font-bold text-white hover:bg-[#1c7a98] transition disabled:cursor-not-allowed disabled:bg-slate-400"
-                  >
-                    {summarySending ? "Preparando resumen..." : "Enviar resumen ✉️"}
-                  </button>
-                </div>
-              </div>
-              {activityError ? (
-                <p className="text-sm text-[#ff4242] font-semibold">
-                  {activityError}
-                </p>
-              ) : activity.length === 0 ? (
-                <p className="text-sm text-grafito/60">
-                  Todavía no tenés movimientos.
-                </p>
-              ) : (
-                <div className="max-h-[168px] overflow-y-auto pr-1">
-                  {activity.map((tx, index) => {
-                    const { icon, bg } = getActivityIcon(tx);
-                    return (
-                      <div
-                        key={tx.id}
-                        className={`flex items-center gap-3 py-2 ${
-                          index < activity.length - 1
-                            ? "border-b border-grafito/15"
-                            : ""
-                        }`}
-                      >
-                        <div
-                          className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm font-bold shrink-0"
-                          style={{ backgroundColor: bg }}
-                        >
-                          {icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          {tx.type === "exchange" ? (
-                            <>
-                              <span className="text-sm font-semibold text-grafito">
-                                Intercambio
-                              </span>
-                              <p className="text-sm font-bold text-oceano mt-0.5">
-                                {formatAmount(tx.fromAmount!)} {tx.fromCurrency}{" "}
-                                → {formatAmount(tx.toAmount!)} {tx.toCurrency}
-                              </p>
-                            </>
-                          ) : (
-                            <>
-                              <div className="flex justify-between items-center gap-2">
-                                <span className="text-sm font-semibold text-grafito">
-                                  {tx.type === "deposit"
-                                    ? "Depósito"
-                                    : tx.direction === "out"
-                                      ? "Transferencia enviada"
-                                      : "Transferencia recibida"}
-                                </span>
-                                <span
-                                  className={`text-sm font-bold shrink-0 ${
-                                    tx.direction === "out"
-                                      ? "text-[#ff4242]"
-                                      : "text-green-700"
-                                  }`}
-                                >
-                                  {formatSignedAmount(tx.signedAmount!)}{" "}
-                                  {tx.currencyCode}
-                                </span>
-                              </div>
-                              {tx.counterpartyEmail && (
-                                <p className="text-xs text-grafito/60 mt-0.5 truncate">
-                                  {tx.direction === "out" ? "A" : "De"}:{" "}
-                                  {tx.counterpartyEmail}
-                                </p>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                    <span>
+                      {rates[currency]
+                        ? rates[
+                            currency
+                          ].toLocaleString(
+                            "es-AR",
+                            {
+                              maximumFractionDigits: 4,
+                            },
+                          )
+                        : "—"}
+                    </span>
+
+                    <small
+                      className={
+                        index === 1
+                          ? "is-down"
+                          : ""
+                      }
+                    >
+                      {index === 1
+                        ? "↓ 0,34%"
+                        : "↑ 0,82%"}
+                    </small>
+                  </div>
+                );
+              },
+            )}
+          </div>
+        </article>
+      </section>
+
+      <section className="tg-dashboard__lower-grid">
+        <article className="tg-dashboard-card tg-transactions-card">
+          <div className="tg-section-heading">
+            <h2>
+              Movimientos recientes
+            </h2>
+
+            <div className="tg-section-heading__actions">
+              <button
+                type="button"
+                onClick={
+                  handleSendSummary
+                }
+                disabled={
+                  summarySending
+                }
+              >
+                <TravelIcon
+                  name="mail"
+                  size={15}
+                />
+
+                {summarySending
+                  ? "Enviando..."
+                  : "Resumen"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/history")
+                }
+              >
+                Ver todos
+                <span>›</span>
+              </button>
             </div>
           </div>
+
+          <div className="tg-transaction-list">
+            {activity.length === 0 ? (
+              <p className="tg-empty-state">
+                Todavía no tenés
+                movimientos.
+              </p>
+            ) : (
+              activity
+                .slice(0, 5)
+                .map(
+                  (transaction) => {
+                    const visual =
+                      activityVisual(
+                        transaction,
+                      );
+
+                    const signedAmount =
+                      Number(
+                        transaction.signedAmount ??
+                          transaction.amount ??
+                          0,
+                      );
+
+                    return (
+                      <button
+                        type="button"
+                        key={
+                          transaction.id
+                        }
+                        onClick={() =>
+                          navigate(
+                            "/history",
+                          )
+                        }
+                      >
+                        <span
+                          className={`tg-transaction-list__icon is-${visual.tone}`}
+                        >
+                          <TravelIcon
+                            name={
+                              visual.icon
+                            }
+                            size={18}
+                          />
+                        </span>
+
+                        <span className="tg-transaction-list__description">
+                          <strong>
+                            {
+                              visual.title
+                            }
+                          </strong>
+
+                          <small>
+                            {formatDate(
+                              transaction.createdAt,
+                            )}
+                          </small>
+                        </span>
+
+                        <span
+                          className={[
+                            "tg-transaction-list__amount",
+                            signedAmount >
+                            0
+                              ? "is-positive"
+                              : "",
+                          ]
+                            .filter(
+                              Boolean,
+                            )
+                            .join(" ")}
+                        >
+                          <strong>
+                            {signedAmount >
+                            0
+                              ? "+"
+                              : ""}
+
+                            {formatMoney(
+                              signedAmount,
+                              transaction.currencyCode ||
+                                "ARS",
+                            )}
+                          </strong>
+
+                          <small>
+                            {transaction.counterpartyEmail ||
+                              "TravelGo"}
+                          </small>
+                        </span>
+
+                        <span className="tg-transaction-list__chevron">
+                          ›
+                        </span>
+                      </button>
+                    );
+                  },
+                )
+            )}
+          </div>
+        </article>
+
+        <article className="tg-promo-card">
+          <div>
+            <span>VIAJÁ MEJOR</span>
+
+            <h2>
+              Más claridad,
+              <br />
+              mejores decisiones.
+            </h2>
+
+            <p>
+              Consultá saldos, tipos
+              de cambio y movimientos
+              desde un único lugar.
+            </p>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/ayuda")
+              }
+            >
+              Explorar consejos
+              <span>›</span>
+            </button>
+          </div>
+
+          <img
+            src={phoneTrip}
+            alt=""
+            aria-hidden="true"
+          />
+        </article>
+      </section>
+
+      <section className="tg-trust-strip">
+        <div>
+          <TravelIcon
+            name="shield"
+            size={32}
+          />
+
+          <span>
+            <strong>
+              100% SEGURO
+            </strong>
+
+            <small>
+              Protegemos tus
+              operaciones.
+            </small>
+          </span>
         </div>
 
-        <AnalyticsSection />
-      </div>
+        <div>
+          <TravelIcon
+            name="globe"
+            size={32}
+          />
+
+          <span>
+            <strong>
+              MULTIMONEDA
+            </strong>
+
+            <small>
+              Administrá diferentes
+              monedas.
+            </small>
+          </span>
+        </div>
+
+        <div>
+          <TravelIcon
+            name="percent"
+            size={32}
+          />
+
+          <span>
+            <strong>
+              SIN COSTOS OCULTOS
+            </strong>
+
+            <small>
+              Transparencia en cada
+              operación.
+            </small>
+          </span>
+        </div>
+
+        <div>
+          <TravelIcon
+            name="headset"
+            size={32}
+          />
+
+          <span>
+            <strong>
+              SOPORTE 24/7
+            </strong>
+
+            <small>
+              Estamos para ayudarte.
+            </small>
+          </span>
+        </div>
+      </section>
 
       {selectedCurrency && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedCurrency(null)}
+          className="tg-currency-modal"
+          role="presentation"
+          onMouseDown={() =>
+            setSelectedCurrency(null)
+          }
         >
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl border border-[#155a70]"
+            className="tg-currency-modal__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="currency-dialog-title"
+            onMouseDown={(event) =>
+              event.stopPropagation()
+            }
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center gap-3">
-                <span
-                  className={`fi fi-${currencyToCountry[selectedCurrency.currencyCode]} rounded`}
-                  style={{ width: "32px", height: "22px" }}
-                ></span>
-                <h3 className="text-lg font-bold text-grafito">
-                  {selectedCurrency.currencyCode}
-                </h3>
-              </div>
-              <button
-                onClick={() => setSelectedCurrency(null)}
-                className="text-grafito/50 hover:text-grafito text-xl font-bold leading-none"
-              >
-                ×
-              </button>
-            </div>
+            <button
+              type="button"
+              className="tg-currency-modal__close"
+              onClick={() =>
+                setSelectedCurrency(
+                  null,
+                )
+              }
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
 
-            <p className="text-sm text-grafito/70 mb-1">Balance disponible</p>
-            <p className="text-3xl font-bold text-grafito mb-4">
-              {parseFloat(selectedCurrency.amount).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
-              <span className="text-lg">{selectedCurrency.currencyCode}</span>
+            <span
+              className={`fi fi-${
+                getCurrencyMeta(
+                  selectedCurrency.currencyCode,
+                ).flag
+              } tg-currency-modal__flag`}
+              aria-hidden="true"
+            />
+
+            <p>
+              Balance disponible
             </p>
 
-            {equivalentInARS(selectedCurrency) && (
-              <p className="text-sm text-grafito/70 mb-4">
-                Equivalente aprox.:{" "}
-                <span className="font-bold text-oceano">
-                  {equivalentInARS(selectedCurrency)} ARS
-                </span>
-              </p>
-            )}
-
-            <div className="flex gap-3">
-              {selectedCurrency.currencyCode !== "ARS" && (
-                <button
-                  onClick={() => {
-                    setSelectedCurrency(null);
-                    navigate("/exchange");
-                  }}
-                  className="flex-1 bg-[#ff4242] text-white py-2 rounded-full font-bold hover:bg-red-600 transition"
-                >
-                  Intercambiar
-                </button>
+            <h2 id="currency-dialog-title">
+              {formatMoney(
+                Number(
+                  selectedCurrency.amount,
+                ),
+                selectedCurrency.currencyCode,
               )}
+            </h2>
+
+            <div className="tg-currency-modal__actions">
               <button
-                onClick={() => setSelectedCurrency(null)}
-                className="flex-1 bg-gray-200 text-grafito py-2 rounded-full font-bold hover:bg-gray-300 transition"
+                type="button"
+                onClick={() => {
+                  setSelectedCurrency(
+                    null,
+                  );
+
+                  navigate(
+                    "/exchange",
+                  );
+                }}
+              >
+                Intercambiar
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedCurrency(
+                    null,
+                  )
+                }
               >
                 Cerrar
               </button>
