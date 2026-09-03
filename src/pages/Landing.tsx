@@ -299,7 +299,7 @@ export default function Landing() {
       <header className="landing-header">
         <button
           type="button"
-          onClick={() => navigate('/register')}
+          onClick={() => navigate('/en-construccion')}
           className="floating-cta-button"
           aria-describedby="cta-announcement"
         >
@@ -651,8 +651,8 @@ export default function Landing() {
               <nav className="footer-col footer-links" aria-label="Navegación">
                 <h4>NAVEGACIÓN</h4>
                 <ul>
-                  <li><Link to="/login">Iniciar sesión</Link></li>
-                  <li><Link to="/register">Crear cuenta</Link></li>
+                  <li><Link to="/en-construccion">Iniciar sesión</Link></li>
+                  <li><Link to="/en-construccion">Crear cuenta</Link></li>
                 </ul>
               </nav>
 

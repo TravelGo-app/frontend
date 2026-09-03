@@ -24,6 +24,7 @@ import SetPassword from "./pages/SetPassword";
 import Terms from "./pages/Terms";
 import Transactions from "./pages/Transactions";
 import Transfer from "./pages/Transfer";
+import UnderConstruction from "./pages/UnderConstruction";
 
 import {
   ChatVisibilityProvider,
@@ -42,6 +43,7 @@ const NO_CHATBOT_PATHS = [
   "/politica de privacidad",
   "/terminos y condiciones",
   "/ayuda",
+  "/en-construccion",
 ];
 
 const AUTH_CARD_PATHS = [
@@ -90,6 +92,11 @@ function AppContent() {
         <Route
           path="/register"
           element={<Login />}
+        />
+
+        <Route
+          path="/en-construccion"
+          element={<UnderConstruction />}
         />
 
         <Route
